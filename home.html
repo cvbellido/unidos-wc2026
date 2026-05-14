@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Slalom · Unidos — World Cup 2026 Bracket Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ── Brand tokens ──────────────────────────────────────────── */
+  :root {
+    --blue-primary: #0064FF;
+    --blue-dark:    #0030B6;
+    --cyan:         #1BE1F2;
+    --red:          #FF4D5F;
+    --lime:         #DEFF4D;
+    --lavender:     #C7B9FF;
+    --white:        #ffffff;
+    --surface:      rgba(0, 30, 100, 0.55);
+    --card-bg:      rgba(0, 48, 182, 0.72);
+    --card-border:  rgba(199, 185, 255, 0.18);
+    --text:         #ffffff;
+    --muted:        rgba(199, 185, 255, 0.75);
+    --border:       rgba(199, 185, 255, 0.2);
+    --shadow:       0 4px 24px rgba(0,0,0,0.3);
+    --shadow-lg:    0 12px 40px rgba(0,0,0,0.45);
+    --radius:       14px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Raleway', 'Segoe UI', system-ui, sans-serif;
+    background: url('assets/bg.svg') center center / cover no-repeat fixed;
+    background-color: var(--blue-dark);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Site header ───────────────────────────────────────────── */
+  header.site {
+    background: rgba(0, 20, 90, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--card-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-row {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .brand-wc-logo {
+    height: 44px;
+    width: auto;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+  }
+  .brand-slalom-logo {
+    height: 28px;
+    width: auto;
+    opacity: 0.9;
+  }
+  .user-pill {
+    background: rgba(199, 185, 255, 0.12);
+    border: 1px solid var(--card-border);
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--lavender);
+    font-weight: 600;
+  }
+  .user-pill button {
+    background: transparent;
+    border: none;
+    color: rgba(199,185,255,0.6);
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-family: inherit;
+    text-decoration: underline;
+  }
+  .user-pill button:hover { color: var(--lavender); }
+
+  /* ── Tabs ──────────────────────────────────────────────────── */
+  nav.tabs {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem 0.5rem;
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+  nav.tabs button {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid transparent;
+    color: rgba(255,255,255,0.7);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  nav.tabs button:hover { background: rgba(255,255,255,0.14); color: var(--white); }
+  nav.tabs button.active {
+    background: var(--blue-primary);
+    color: var(--white);
+    border-color: transparent;
+    box-shadow: 0 2px 12px rgba(0,100,255,0.35);
+  }
+
+  /* ── Main layout ───────────────────────────────────────────── */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    flex: 1;
+  }
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn 0.2s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* ── Cards ─────────────────────────────────────────────────── */
+  .card {
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+  }
+  .card h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--white); }
+  .card h3 { font-size: 1rem; margin-bottom: 0.75rem; color: var(--lavender); }
+  .muted { color: var(--muted); font-size: 0.88rem; }
+
+  /* ── Welcome hero ──────────────────────────────────────────── */
+  .welcome-hero {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow);
+  }
+  .welcome-hero h2 { font-size: 1.9rem; margin-bottom: 0.5rem; color: var(--white); }
+  .welcome-hero p { color: var(--muted); margin: 0 0 1.5rem; }
+  .welcome-form {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    max-width: 400px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+
+  /* ── Stat tiles ────────────────────────────────────────────── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .stat-tile {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .stat-tile .num { font-size: 1.75rem; font-weight: 800; color: var(--lime); }
+  .stat-tile .label { font-size: 0.7rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.08em; margin-top: 0.2rem; }
+
+  /* ── Buttons ───────────────────────────────────────────────── */
+  button.btn {
+    background: var(--blue-primary);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, box-shadow 0.15s;
+    box-shadow: 0 3px 12px rgba(0,100,255,0.3);
+  }
+  button.btn:hover { background: #004ee0; }
+  button.btn.secondary {
+    background: rgba(255,255,255,0.1);
+    color: var(--white);
+    border: 1px solid var(--card-border);
+    box-shadow: none;
+  }
+  button.btn.secondary:hover { background: rgba(255,255,255,0.18); }
+  button.btn.gold { background: var(--lime); color: var(--blue-dark); box-shadow: 0 3px 12px rgba(222,255,77,0.3); }
+  button.btn.gold:hover { background: #c8e800; }
+  button.btn.danger { background: var(--red); box-shadow: none; }
+  button.btn.danger:hover { background: #e0283c; }
+  button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* ── Inputs ────────────────────────────────────────────────── */
+  input[type=text], input[type=date], input[type=time], select, textarea {
+    padding: 0.6rem 0.9rem;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--white);
+    flex: 1;
+    min-width: 0;
+  }
+  input::placeholder { color: var(--muted); }
+  input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--blue-primary);
+    outline-offset: -1px;
+    border-color: var(--blue-primary);
+  }
+  textarea { width: 100%; min-height: 100px; resize: vertical; font-family: monospace; font-size: 0.78rem; }
+  select option { background: var(--blue-dark); color: var(--white); }
+
+  /* ── Progress pill ─────────────────────────────────────────── */
+  .progress-pill {
+    background: rgba(222,255,77,0.15);
+    color: var(--lime);
+    font-size: 0.8rem;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    font-weight: 700;
+    border: 1px solid rgba(222,255,77,0.3);
+  }
+  .stage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .stage-header h2 { font-size: 1.3rem; }
+  .actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+
+  /* ── Group cards ───────────────────────────────────────────── */
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.85rem;
+  }
+  .group-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    border-top: 3px solid var(--blue-primary);
+  }
+  .group-title {
+    font-weight: 800;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: var(--lavender);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+  }
+  .team-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.65rem;
+    border-radius: 6px;
+    margin-bottom: 3px;
+    cursor: pointer;
+    transition: background 0.1s;
+    user-select: none;
+    border-left: 3px solid transparent;
+  }
+  .team-row:hover { background: rgba(199,185,255,0.1); }
+  .team-flag { font-size: 1.2rem; width: 26px; text-align: center; line-height: 1; }
+  .team-name { flex: 1; font-size: 0.85rem; color: var(--white); }
+  .team-tag {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    background: transparent;
+    color: transparent;
+  }
+  .team-row.pick-1st {
+    background: rgba(222,255,77,0.1);
+    border-left-color: var(--lime);
+  }
+  .team-row.pick-1st .team-tag { background: var(--lime); color: var(--blue-dark); }
+  .team-row.pick-2nd {
+    background: rgba(0,100,255,0.15);
+    border-left-color: var(--blue-primary);
+  }
+  .team-row.pick-2nd .team-tag { background: var(--blue-primary); color: var(--white); }
+
+  /* ── Bracket ───────────────────────────────────────────────── */
+  .bracket-wrap { overflow-x: auto; padding-bottom: 0.5rem; }
+  .bracket { display: flex; gap: 1rem; min-width: max-content; }
+  .bracket-round {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 0.5rem;
+    min-width: 170px;
+  }
+  .round-label {
+    font-weight: 700;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  .match {
+    background: rgba(0,30,100,0.6);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .match-slot {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--card-border);
+    transition: background 0.1s;
+  }
+  .match-slot:last-child { border-bottom: none; }
+  .match-slot:hover { background: rgba(199,185,255,0.1); }
+  .match-slot.disabled { cursor: not-allowed; opacity: 0.45; }
+  .match-slot.disabled:hover { background: transparent; }
+  .match-slot.picked { background: rgba(0,100,255,0.2); font-weight: 700; }
+  .match-slot .team-flag { font-size: 0.95rem; width: 20px; }
+  .match-slot .team-name { font-size: 0.78rem; }
+  .champion-card {
+    background: linear-gradient(135deg, rgba(222,255,77,0.2), rgba(222,255,77,0.05));
+    border: 2px solid var(--lime);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-align: center;
+    box-shadow: 0 0 32px rgba(222,255,77,0.15);
+  }
+  .champion-card h3 { font-size: 0.75rem; margin: 0 0 0.4rem; letter-spacing: 0.15em; color: var(--lime); }
+  .champion-team { font-size: 1.25rem; font-weight: 800; color: var(--white); }
+
+  /* ── Schedule ──────────────────────────────────────────────── */
+  .schedule-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .filter-chip {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid var(--card-border);
+    color: rgba(255,255,255,0.7);
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .filter-chip.active { background: var(--blue-primary); color: var(--white); border-color: var(--blue-primary); }
+  .match-row {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    display: grid;
+    grid-template-columns: 86px 1fr auto 1fr 100px;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .match-row .date-cell { font-size: 0.75rem; color: var(--muted); border-right: 1px solid var(--border); padding-right: 0.75rem; }
+  .match-row .date-cell .day { font-weight: 700; color: var(--white); font-size: 0.85rem; }
+  .match-row .home-team, .match-row .away-team { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+  .match-row .away-team { justify-content: flex-end; flex-direction: row-reverse; }
+  .match-row .score { font-weight: 800; font-size: 1rem; color: var(--lime); text-align: center; min-width: 40px; }
+  .match-row .vs { color: var(--muted); font-size: 0.75rem; text-align: center; }
+  .match-row .venue { font-size: 0.7rem; color: var(--muted); text-align: right; border-left: 1px solid var(--border); padding-left: 0.75rem; }
+  .stage-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    background: rgba(0,100,255,0.25);
+    color: var(--lavender);
+    border-radius: 3px;
+    margin-bottom: 3px;
+  }
+  @media (max-width: 700px) {
+    .match-row { grid-template-columns: 1fr; gap: 0.35rem; }
+    .match-row .date-cell, .match-row .venue { border: none; padding: 0; text-align: left; }
+  }
+
+  /* ── Leaderboard ───────────────────────────────────────────── */
+  .leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--card-border);
+  }
+  .leaderboard-table th {
+    background: rgba(0,20,90,0.8);
+    color: var(--lavender);
+    text-align: left;
+    padding: 0.65rem 1rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border);
+  }
+  .leaderboard-table td { padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.88rem; color: var(--white); }
+  .leaderboard-table tbody tr:last-child td { border-bottom: none; }
+  .leaderboard-table .rank { width: 50px; font-weight: 800; font-size: 1rem; }
+  .leaderboard-table .rank-1 { color: var(--lime); }
+  .leaderboard-table .rank-2 { color: var(--lavender); }
+  .leaderboard-table .rank-3 { color: var(--cyan); }
+  .leaderboard-table .pts { font-weight: 800; color: var(--lime); text-align: right; }
+  .leaderboard-table tbody tr:hover { background: rgba(199,185,255,0.06); cursor: pointer; }
+  .leaderboard-table tbody tr.me { background: rgba(0,100,255,0.15); }
+  .champion-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(222,255,77,0.12);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    border: 1px solid rgba(222,255,77,0.2);
+  }
+
+  /* ── Admin ─────────────────────────────────────────────────── */
+  .admin-warning {
+    background: rgba(255,77,95,0.12);
+    border: 1px solid rgba(255,77,95,0.3);
+    color: #ffb3bb;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  /* ── Help accordion ────────────────────────────────────────── */
+  details.help {
+    background: rgba(27,225,242,0.06);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(27,225,242,0.2);
+  }
+  details.help summary { cursor: pointer; font-weight: 700; color: var(--cyan); font-size: 0.88rem; }
+  details.help p, details.help ul { margin: 0.5rem 0 0; font-size: 0.83rem; color: rgba(199,185,255,0.85); }
+  details.help ul { padding-left: 1.25rem; }
+  details.help li { margin-bottom: 0.3rem; }
+  details.help code { background: rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem; }
+
+  /* ── Scoring table ─────────────────────────────────────────── */
+  .scoring-table-inline {
+    width: 100%;
+    font-size: 0.85rem;
+    border-collapse: collapse;
+    color: var(--white);
+  }
+  .scoring-table-inline tr { border-bottom: 1px solid var(--border); }
+  .scoring-table-inline tr:last-child { border-bottom: none; }
+  .scoring-table-inline td { padding: 0.4rem 0; }
+  .scoring-table-inline td:last-child { text-align: right; font-weight: 700; color: var(--lime); }
+
+  /* ── Toast ─────────────────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(0,20,90,0.95);
+    border: 1px solid var(--card-border);
+    color: var(--white);
+    padding: 0.75rem 1.25rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transition: all 0.25s;
+    z-index: 1000;
+    font-size: 0.88rem;
+    font-weight: 600;
+    backdrop-filter: blur(12px);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── Modal ─────────────────────────────────────────────────── */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 1.25rem;
+    backdrop-filter: blur(4px);
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: rgb(0, 30, 100);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    max-width: 540px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: var(--shadow-lg);
+    color: var(--white);
+  }
+  .modal h2 { margin-top: 0; margin-bottom: 1rem; }
+  .share-code {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: monospace;
+    font-size: 0.72rem;
+    word-break: break-all;
+    margin: 0.75rem 0;
+    max-height: 180px;
+    overflow: auto;
+    color: var(--cyan);
+  }
+
+  /* ── Empty state ───────────────────────────────────────────── */
+  .empty {
+    text-align: center;
+    padding: 2.5rem 1.25rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── Accent bar ────────────────────────────────────────────── */
+  .accent-bar { display: flex; height: 5px; flex-shrink: 0; }
+  .accent-bar span { flex: 1; }
+  .ab-1 { background: var(--blue-primary); }
+  .ab-2 { background: var(--cyan); }
+  .ab-3 { background: var(--red); }
+  .ab-4 { background: var(--lime); }
+  .ab-5 { background: var(--lavender); }
+
+  /* ── Responsive ────────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    main { padding: 1rem; }
+    .header-row { padding: 0.6rem 1rem; }
+    nav.tabs { padding: 0 1rem 0.5rem; }
+    .brand-wc-logo { height: 34px; }
+    .brand-slalom-logo { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="header-row">
+    <div class="brand">
+      <img src="assets/wc-identity.svg" alt="World Cup 2026" class="brand-wc-logo" id="adminUnlock" />
+      <img src="assets/slalom-unidos-logo.svg" alt="Slalom Unidos" class="brand-slalom-logo" />
+    </div>
+    <div id="userArea"></div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button data-tab="home" class="active">Home</button>
+    <button data-tab="picks">My Picks</button>
+    <button data-tab="schedule">Schedule</button>
+    <button data-tab="leaderboard">Leaderboard</button>
+    <button data-tab="admin" style="display:none">Admin</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ── HOME ─────────────────────────────────────────────────── -->
+<section id="home" class="panel active">
+  <div class="welcome-hero">
+    <h2>🏆 Make Your Picks. Beat Your Teammates.</h2>
+    <p>Pick your group-stage finishers and knockout-round winners. Earn points as the tournament plays out.<br>Highest score at the final whistle wins bragging rights. 🎉🏆</p>
+    <div id="welcomeBox"></div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-tile"><div class="num" id="statTeams">48</div><div class="label">Teams</div></div>
+    <div class="stat-tile"><div class="num" id="statGroups">12</div><div class="label">Groups</div></div>
+    <div class="stat-tile"><div class="num" id="statMatches">104</div><div class="label">Matches</div></div>
+    <div class="stat-tile"><div class="num" id="statMaxPts">184</div><div class="label">Max Points</div></div>
+    <div class="stat-tile"><div class="num" id="statPlayers">0</div><div class="label">Players</div></div>
+  </div>
+
+  <div class="card">
+    <h3>How scoring works</h3>
+    <p class="muted" style="margin-bottom:0.75rem">You earn points whenever a team you picked advances correctly. Later rounds are worth more.</p>
+    <table class="scoring-table-inline">
+      <tr><td>Group stage finishers (1st &amp; 2nd per group)</td><td>1 pt each</td></tr>
+      <tr><td>Round of 32 winners</td><td>2 pts each</td></tr>
+      <tr><td>Round of 16 winners</td><td>4 pts each</td></tr>
+      <tr><td>Quarterfinal winners</td><td>8 pts each</td></tr>
+      <tr><td>Semifinal winners</td><td>16 pts each</td></tr>
+      <tr><td>Champion</td><td>32 pts</td></tr>
+      <tr style="border-top:1px solid rgba(199,185,255,0.3)"><td style="font-weight:700">Maximum possible</td><td style="color:var(--cyan)">184 pts</td></tr>
+    </table>
+  </div>
+
+  <details class="help">
+    <summary>How to run this with your team</summary>
+    <ul>
+      <li>Share this page with your Slalom teammates — they register at the landing page with their <code>@slalom.com</code> email.</li>
+      <li>Everyone makes their picks and clicks <b>Save &amp; Share Picks</b> — they'll get a short code to send you.</li>
+      <li>You (the commissioner) paste those codes into <b>Admin → Add Player Picks</b> to build the leaderboard.</li>
+      <li>As games finish, open <b>Admin → Enter Results</b> to mark winners. The leaderboard updates automatically.</li>
+      <li>To unlock the Admin tab, click the World Cup logo in the header three times — or add <code>#admin</code> to the URL.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ── MY PICKS ──────────────────────────────────────────────── -->
+<section id="picks" class="panel">
+  <div class="stage-header">
+    <div>
+      <h2>Make Your Picks</h2>
+      <p class="muted">Click a team to mark your prediction. Group stage first, then the bracket fills in from your picks.</p>
+    </div>
+    <div class="progress-pill" id="picksProgress">0 / 55 picks made</div>
+  </div>
+
+  <div class="actions-row">
+    <button class="btn gold" onclick="sharePicks()">📋 Save &amp; Share Picks</button>
+    <button class="btn secondary" onclick="clearPicks()">Clear all</button>
+    <button class="btn secondary" onclick="autoPick()">🎲 Random picks</button>
+  </div>
+
+  <h3 style="margin-top:1.25rem;color:var(--lavender)">Group Stage — pick 1st &amp; 2nd in each group</h3>
+  <p class="muted" style="margin-top:0;margin-bottom:1rem">Click once for 1st, click again for 2nd, click again to clear.</p>
+  <div class="groups-grid" id="groupsGrid"></div>
+
+  <h3 style="margin-top:2rem;color:var(--lavender)">Knockout Bracket</h3>
+  <p class="muted" style="margin-top:0;margin-bottom:1rem">Matchups populate from your group picks. Click a team to advance them.</p>
+  <div class="bracket-wrap">
+    <div class="bracket" id="bracketWrap"></div>
+  </div>
+
+  <div style="max-width:280px; margin:1.5rem auto 0">
+    <div class="round-label">Your Champion</div>
+    <div class="champion-card">
+      <h3>🏆 WORLD CHAMPIONS 🏆</h3>
+      <div class="champion-team" id="championDisplay">— pick the final winner above —</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SCHEDULE ──────────────────────────────────────────────── -->
+<section id="schedule" class="panel">
+  <h2>Match Schedule</h2>
+  <p class="muted" style="margin-top:0;margin-bottom:1rem">All times Eastern. Use Admin → Edit Teams &amp; Schedule to update with the official draw.</p>
+  <div class="schedule-filters" id="scheduleFilters"></div>
+  <div id="scheduleList"></div>
+</section>
+
+<!-- ── LEADERBOARD ───────────────────────────────────────────── -->
+<section id="leaderboard" class="panel">
+  <h2>Leaderboard</h2>
+  <p class="muted" style="margin-top:0;margin-bottom:1rem">Live standings updated as results come in.</p>
+  <div class="actions-row">
+    <button class="btn secondary" onclick="renderLeaderboard()">🔄 Refresh</button>
+    <button class="btn gold" onclick="sharePicks()">Submit my picks</button>
+  </div>
+  <div id="leaderboardWrap"></div>
+</section>
+
+<!-- ── ADMIN ─────────────────────────────────────────────────── -->
+<section id="admin" class="panel">
+  <h2>Admin Panel</h2>
+  <div class="admin-warning">⚠️ Admin actions affect the leaderboard for everyone. There's no undo beyond editing again.</div>
+
+  <div class="card">
+    <h3>Add Player Picks</h3>
+    <p class="muted" style="margin-bottom:0.75rem">Paste a share-code from a teammate to add their picks to the leaderboard.</p>
+    <textarea id="importCode" placeholder="Paste a share-code here..."></textarea>
+    <div style="margin-top:0.5rem"><button class="btn" onclick="importPicks()">Add Player</button></div>
+    <div id="playersList" style="margin-top:1rem"></div>
+  </div>
+
+  <div class="card">
+    <h3>Enter Group Stage Results</h3>
+    <p class="muted" style="margin-bottom:0.75rem">Select the 1st and 2nd place finisher in each group as it becomes official.</p>
+    <div id="adminGroups"></div>
+  </div>
+
+  <div class="card">
+    <h3>Enter Knockout Results</h3>
+    <p class="muted" style="margin-bottom:0.75rem">As each knockout match finishes, click the winning team.</p>
+    <div id="adminBracket"></div>
+  </div>
+
+  <div class="card">
+    <h3>Edit Teams &amp; Schedule</h3>
+    <p class="muted" style="margin-bottom:0.75rem">Paste a JSON object with <code style="background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:3px">{ groups: {...}, schedule: [...] }</code> to swap in the real draw. <button class="btn secondary" style="padding:0.3rem 0.75rem;font-size:0.8rem" onclick="exportData()">Export current</button></p>
+    <textarea id="dataEditor" placeholder='{"groups": {...}, "schedule": [...]}'></textarea>
+    <div style="margin-top:0.5rem"><button class="btn" onclick="importData()">Save Changes</button></div>
+  </div>
+
+  <div class="card">
+    <h3>Danger Zone</h3>
+    <button class="btn danger" onclick="resetAll()">Reset everything</button>
+  </div>
+</section>
+
+</main>
+
+<div class="accent-bar">
+  <span class="ab-1"></span>
+  <span class="ab-2"></span>
+  <span class="ab-3"></span>
+  <span class="ab-4"></span>
+  <span class="ab-5"></span>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+/* =====================================================
+   DATA — 48 teams
+===================================================== */
+const TEAMS = {
+  USA: { name: 'United States', flag: '🇺🇸' },
+  MEX: { name: 'Mexico', flag: '🇲🇽' },
+  CAN: { name: 'Canada', flag: '🇨🇦' },
+  ARG: { name: 'Argentina', flag: '🇦🇷' },
+  BRA: { name: 'Brazil', flag: '🇧🇷' },
+  URU: { name: 'Uruguay', flag: '🇺🇾' },
+  COL: { name: 'Colombia', flag: '🇨🇴' },
+  ECU: { name: 'Ecuador', flag: '🇪🇨' },
+  PAR: { name: 'Paraguay', flag: '🇵🇾' },
+  FRA: { name: 'France', flag: '🇫🇷' },
+  ENG: { name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  ESP: { name: 'Spain', flag: '🇪🇸' },
+  GER: { name: 'Germany', flag: '🇩🇪' },
+  POR: { name: 'Portugal', flag: '🇵🇹' },
+  NED: { name: 'Netherlands', flag: '🇳🇱' },
+  BEL: { name: 'Belgium', flag: '🇧🇪' },
+  ITA: { name: 'Italy', flag: '🇮🇹' },
+  CRO: { name: 'Croatia', flag: '🇭🇷' },
+  SUI: { name: 'Switzerland', flag: '🇨🇭' },
+  DEN: { name: 'Denmark', flag: '🇩🇰' },
+  AUT: { name: 'Austria', flag: '🇦🇹' },
+  POL: { name: 'Poland', flag: '🇵🇱' },
+  SRB: { name: 'Serbia', flag: '🇷🇸' },
+  NOR: { name: 'Norway', flag: '🇳🇴' },
+  TUR: { name: 'Türkiye', flag: '🇹🇷' },
+  MAR: { name: 'Morocco', flag: '🇲🇦' },
+  SEN: { name: 'Senegal', flag: '🇸🇳' },
+  EGY: { name: 'Egypt', flag: '🇪🇬' },
+  NGA: { name: 'Nigeria', flag: '🇳🇬' },
+  ALG: { name: 'Algeria', flag: '🇩🇿' },
+  TUN: { name: 'Tunisia', flag: '🇹🇳' },
+  GHA: { name: 'Ghana', flag: '🇬🇭' },
+  CMR: { name: 'Cameroon', flag: '🇨🇲' },
+  CIV: { name: "Côte d'Ivoire", flag: '🇨🇮' },
+  JPN: { name: 'Japan', flag: '🇯🇵' },
+  KOR: { name: 'South Korea', flag: '🇰🇷' },
+  IRN: { name: 'Iran', flag: '🇮🇷' },
+  KSA: { name: 'Saudi Arabia', flag: '🇸🇦' },
+  AUS: { name: 'Australia', flag: '🇦🇺' },
+  IRQ: { name: 'Iraq', flag: '🇮🇶' },
+  UZB: { name: 'Uzbekistan', flag: '🇺🇿' },
+  QAT: { name: 'Qatar', flag: '🇶🇦' },
+  CRC: { name: 'Costa Rica', flag: '🇨🇷' },
+  JAM: { name: 'Jamaica', flag: '🇯🇲' },
+  PAN: { name: 'Panama', flag: '🇵🇦' },
+  NZL: { name: 'New Zealand', flag: '🇳🇿' },
+  UKR: { name: 'Ukraine', flag: '🇺🇦' },
+  SCO: { name: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+};
+
+let DEFAULT_GROUPS = {
+  A: ['MEX','JPN','BEL','JAM'],
+  B: ['CAN','CRO','SUI','NGA'],
+  C: ['USA','POR','SCO','IRN'],
+  D: ['ARG','NOR','KOR','TUN'],
+  E: ['ESP','AUT','PAR','CIV'],
+  F: ['BRA','URU','IRQ','PAN'],
+  G: ['ENG','SRB','ECU','UZB'],
+  H: ['FRA','DEN','KSA','NZL'],
+  I: ['GER','TUR','EGY','CRC'],
+  J: ['NED','COL','SEN','QAT'],
+  K: ['MAR','POL','AUS','CMR'],
+  L: ['ITA','UKR','GHA','ALG'],
+};
+
+const VENUES = {
+  ATL:'Atlanta', BOS:'Boston', DAL:'Dallas', GDL:'Guadalajara',
+  HOU:'Houston', KC:'Kansas City', LA:'Los Angeles', MIA:'Miami',
+  MEX:'Mexico City', MTY:'Monterrey', NY:'New York/New Jersey',
+  PHI:'Philadelphia', SF:'San Francisco', SEA:'Seattle',
+  TOR:'Toronto', VAN:'Vancouver',
+};
+
+function buildSchedule(groups) {
+  const sched = []; let id = 1;
+  const groupDates = [
+    ['2026-06-11','MEX'],['2026-06-12','TOR'],['2026-06-12','LA'],
+    ['2026-06-13','PHI'],['2026-06-13','BOS'],['2026-06-13','GDL'],
+    ['2026-06-14','SEA'],['2026-06-14','NY'],['2026-06-14','VAN'],
+    ['2026-06-15','HOU'],['2026-06-15','KC'],['2026-06-16','MIA'],
+    ['2026-06-17','MTY'],['2026-06-17','ATL'],['2026-06-18','PHI'],
+    ['2026-06-18','DAL'],['2026-06-19','LA'],['2026-06-19','SF'],
+    ['2026-06-20','NY'],['2026-06-20','KC'],['2026-06-21','TOR'],
+    ['2026-06-21','BOS'],['2026-06-22','VAN'],['2026-06-22','SEA'],
+    ['2026-06-23','ATL'],['2026-06-23','MIA'],['2026-06-24','PHI'],
+    ['2026-06-24','BOS'],['2026-06-25','HOU'],['2026-06-25','GDL'],
+    ['2026-06-25','MEX'],['2026-06-26','NY'],['2026-06-26','TOR'],
+    ['2026-06-27','KC'],['2026-06-27','LA'],['2026-06-27','SEA'],
+  ];
+  const letters = Object.keys(groups);
+  for (let g=0;g<letters.length;g++) {
+    const L=letters[g],T=groups[L],[d1,v1]=groupDates[g]||['2026-06-11','TBD'];
+    sched.push({id:id++,stage:'Group '+L,date:d1,time:'15:00',home:T[0],away:T[1],venue:VENUES[v1]||v1});
+    sched.push({id:id++,stage:'Group '+L,date:d1,time:'18:00',home:T[2],away:T[3],venue:VENUES[v1]||v1});
+  }
+  for (let g=0;g<letters.length;g++) {
+    const L=letters[g],T=groups[L],[d2,v2]=groupDates[12+g]||['2026-06-17','TBD'];
+    sched.push({id:id++,stage:'Group '+L,date:d2,time:'15:00',home:T[0],away:T[2],venue:VENUES[v2]||v2});
+    sched.push({id:id++,stage:'Group '+L,date:d2,time:'18:00',home:T[1],away:T[3],venue:VENUES[v2]||v2});
+  }
+  for (let g=0;g<letters.length;g++) {
+    const L=letters[g],T=groups[L],[d3,v3]=groupDates[24+g]||['2026-06-27','TBD'];
+    sched.push({id:id++,stage:'Group '+L,date:d3,time:'16:00',home:T[0],away:T[3],venue:VENUES[v3]||v3});
+    sched.push({id:id++,stage:'Group '+L,date:d3,time:'16:00',home:T[1],away:T[2],venue:VENUES[v3]||v3});
+  }
+  const koRounds=[
+    {stage:'Round of 32',start:'2026-06-29',n:16},
+    {stage:'Round of 16',start:'2026-07-04',n:8},
+    {stage:'Quarterfinal',start:'2026-07-09',n:4},
+    {stage:'Semifinal',start:'2026-07-14',n:2},
+    {stage:'3rd Place',start:'2026-07-18',n:1},
+    {stage:'Final',start:'2026-07-19',n:1},
+  ];
+  for (const r of koRounds) {
+    for (let i=0;i<r.n;i++) sched.push({id:id++,stage:r.stage,date:r.start,time:'TBD',home:'TBD',away:'TBD',venue:'TBD'});
+  }
+  return sched;
+}
+
+/* =====================================================
+   STATE
+===================================================== */
+const STORAGE_KEY = 'wc2026-bracket-v1';
+const state = {
+  user: null, groups: null, schedule: null,
+  myPicks: { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null },
+  results: { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null },
+  players: [],
+};
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) Object.assign(state, JSON.parse(raw));
+  } catch(e) {}
+  if (!state.groups) state.groups = DEFAULT_GROUPS;
+  if (!state.schedule) state.schedule = buildSchedule(state.groups);
+  if (!state.myPicks) state.myPicks = { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null };
+  if (!state.results) state.results = { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null };
+  if (!state.players) state.players = [];
+}
+
+/* =====================================================
+   HELPERS
+===================================================== */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+function showModal(html) {
+  document.getElementById('modal').innerHTML = html;
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal() { document.getElementById('modalBg').classList.remove('show'); }
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+function teamTag(code) {
+  const t = TEAMS[code];
+  if (!t) return `<span class="team-flag">⚪</span><span class="team-name muted">${code||'TBD'}</span>`;
+  return `<span class="team-flag">${t.flag}</span><span class="team-name">${t.name}</span>`;
+}
+
+/* =====================================================
+   TABS
+===================================================== */
+document.querySelectorAll('#tabs button').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+function switchTab(name) {
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab===name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id===name));
+  if (name==='leaderboard') renderLeaderboard();
+  if (name==='schedule') renderSchedule();
+  if (name==='admin') renderAdmin();
+  if (name==='picks') renderPicks();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* =====================================================
+   WELCOME
+===================================================== */
+function renderWelcome() {
+  const userArea = document.getElementById('userArea');
+  const welcomeBox = document.getElementById('welcomeBox');
+  if (state.user) {
+    userArea.innerHTML = `<div class="user-pill">👋 ${escapeHtml(state.user)} <button onclick="changeUser()">change</button></div>`;
+    welcomeBox.innerHTML = `
+      <p style="font-size:1.1rem;margin-bottom:1rem"><b>Welcome back, ${escapeHtml(state.user)}!</b></p>
+      <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap">
+        <button class="btn" onclick="switchTab('picks')">Make my picks →</button>
+        <button class="btn secondary" onclick="switchTab('leaderboard')">See leaderboard</button>
+      </div>`;
+  } else {
+    userArea.innerHTML = '';
+    welcomeBox.innerHTML = `
+      <div class="welcome-form">
+        <input type="text" id="userInput" placeholder="Your name (e.g. Carla)" />
+        <button class="btn" onclick="setUser()">Let's go</button>
+      </div>`;
+    setTimeout(() => document.getElementById('userInput')?.focus(), 100);
+    document.getElementById('userInput')?.addEventListener('keydown', e => { if (e.key==='Enter') setUser(); });
+  }
+  document.getElementById('statPlayers').textContent = state.players.length;
+}
+function setUser() {
+  const v = document.getElementById('userInput').value.trim();
+  if (!v) { showToast('Enter a name first'); return; }
+  state.user = v; save(); renderWelcome(); switchTab('picks');
+}
+function changeUser() { state.user=null; save(); renderWelcome(); switchTab('home'); }
+
+/* =====================================================
+   GROUP PICKS
+===================================================== */
+function renderPicks() { renderGroupPicks(); renderBracket(); updatePicksProgress(); }
+function renderGroupPicks() {
+  const wrap = document.getElementById('groupsGrid');
+  wrap.innerHTML = '';
+  for (const [L, teams] of Object.entries(state.groups)) {
+    const picks = state.myPicks.group[L] || [];
+    wrap.insertAdjacentHTML('beforeend', `
+      <div class="group-card">
+        <div class="group-title">Group ${L}</div>
+        ${teams.map(code => {
+          const idx=picks.indexOf(code);
+          const cls=idx===0?'pick-1st':idx===1?'pick-2nd':'';
+          const tag=idx===0?'1st':idx===1?'2nd':'';
+          return `<div class="team-row ${cls}" onclick="cycleGroupPick('${L}','${code}')">
+            ${teamTag(code)}<span class="team-tag">${tag}</span>
+          </div>`;
+        }).join('')}
+      </div>`);
+  }
+}
+function cycleGroupPick(L, code) {
+  let picks = state.myPicks.group[L] || [];
+  const idx = picks.indexOf(code);
+  if (idx===0) {
+    picks = picks.filter(c=>c!==code); picks.push(code);
+    if (picks.length>2) picks=picks.slice(-2);
+    if (picks.length===2&&picks[0]===code) picks=[picks[1],picks[0]];
+  } else if (idx===1) {
+    picks = picks.filter(c=>c!==code);
+  } else {
+    picks = picks.filter(c=>c!==code);
+    if (picks.length===0) picks=[code];
+    else if (picks.length===1) picks=[code,picks[0]];
+    else picks=[code,picks[1]];
+  }
+  state.myPicks.group[L]=picks;
+  invalidateBracketPicks(); save(); renderPicks();
+}
+function invalidateBracketPicks() {
+  state.myPicks.r32={}; state.myPicks.r16={}; state.myPicks.qf={}; state.myPicks.sf={}; state.myPicks.final=null;
+}
+
+/* =====================================================
+   BRACKET
+===================================================== */
+function getAdvancers() {
+  const adv=[], letters=Object.keys(state.groups).sort();
+  for (const L of letters) { const p=state.myPicks.group[L]; adv.push({L,place:1,code:p&&p[0]?p[0]:null}); }
+  for (const L of letters) { const p=state.myPicks.group[L]; adv.push({L,place:2,code:p&&p[1]?p[1]:null}); }
+  return adv;
+}
+function getR32Matchups() {
+  const adv=getAdvancers(), slots=[];
+  for (let i=0;i<24;i++) slots.push(adv[i]?.code||null);
+  for (let i=0;i<8;i++) slots.push(null);
+  const matches=[];
+  for (let i=0;i<16;i++) matches.push({a:slots[i*2],b:slots[i*2+1]});
+  return matches;
+}
+function getR16Matchups() {
+  const r32=getR32Matchups(), winners=r32.map((_,i)=>state.myPicks.r32[i]||null), matches=[];
+  for (let i=0;i<8;i++) matches.push({a:winners[i*2],b:winners[i*2+1]});
+  return matches;
+}
+function getQFMatchups() {
+  const r16=getR16Matchups(), winners=r16.map((_,i)=>state.myPicks.r16[i]||null), matches=[];
+  for (let i=0;i<4;i++) matches.push({a:winners[i*2],b:winners[i*2+1]});
+  return matches;
+}
+function getSFMatchups() {
+  const qf=getQFMatchups(), winners=qf.map((_,i)=>state.myPicks.qf[i]||null), matches=[];
+  for (let i=0;i<2;i++) matches.push({a:winners[i*2],b:winners[i*2+1]});
+  return matches;
+}
+function getFinalMatchup() {
+  const sf=getSFMatchups(), winners=sf.map((_,i)=>state.myPicks.sf[i]||null);
+  return {a:winners[0],b:winners[1]};
+}
+function renderBracket() {
+  const wrap=document.getElementById('bracketWrap'); wrap.innerHTML='';
+  const rounds=[
+    {key:'r32',label:'Round of 32',matches:getR32Matchups()},
+    {key:'r16',label:'Round of 16',matches:getR16Matchups()},
+    {key:'qf', label:'Quarterfinals',matches:getQFMatchups()},
+    {key:'sf', label:'Semifinals',matches:getSFMatchups()},
+    {key:'f',  label:'Final',matches:[getFinalMatchup()]},
+  ];
+  for (const r of rounds) {
+    const col=document.createElement('div'); col.className='bracket-round';
+    let html=`<div class="round-label">${r.label}</div>`;
+    r.matches.forEach((m,idx) => {
+      const picked=r.key==='f'?state.myPicks.final:(state.myPicks[r.key]||{})[idx];
+      html+=`<div class="match">${slotHtml(m.a,picked,r.key,idx)}${slotHtml(m.b,picked,r.key,idx)}</div>`;
+    });
+    col.innerHTML=html; wrap.appendChild(col);
+  }
+  const final=state.myPicks.final;
+  document.getElementById('championDisplay').innerHTML=final
+    ?`${TEAMS[final]?.flag||'⚪'} ${TEAMS[final]?.name||final}`
+    :'— pick the final winner above —';
+}
+function slotHtml(code,pickedCode,roundKey,matchIdx) {
+  const disabled=!code, picked=code&&pickedCode===code;
+  const onclick=disabled?'':`onclick="pickBracket('${roundKey}',${matchIdx},'${code}')"`;
+  return `<div class="match-slot ${disabled?'disabled':''} ${picked?'picked':''}" ${onclick}>${teamTag(code)}</div>`;
+}
+function pickBracket(roundKey,matchIdx,code) {
+  if (roundKey==='f') {
+    state.myPicks.final=(state.myPicks.final===code)?null:code;
+  } else {
+    const cur=state.myPicks[roundKey]||{};
+    if (cur[matchIdx]===code) delete cur[matchIdx]; else cur[matchIdx]=code;
+    state.myPicks[roundKey]=cur;
+    const order=['r32','r16','qf','sf'], i=order.indexOf(roundKey);
+    if (i>=0) { for (let j=i+1;j<order.length;j++) state.myPicks[order[j]={}]; state.myPicks.final=null; }
+  }
+  save(); renderBracket(); updatePicksProgress();
+}
+function updatePicksProgress() {
+  const gp=Object.values(state.myPicks.group).reduce((n,a)=>n+(a?.length||0),0);
+  const r32=Object.keys(state.myPicks.r32||{}).length;
+  const r16=Object.keys(state.myPicks.r16||{}).length;
+  const qf=Object.keys(state.myPicks.qf||{}).length;
+  const sf=Object.keys(state.myPicks.sf||{}).length;
+  const f=state.myPicks.final?1:0;
+  document.getElementById('picksProgress').textContent=`${gp+r32+r16+qf+sf+f} / 55 picks made`;
+}
+function clearPicks() {
+  if (!confirm('Clear all your picks?')) return;
+  state.myPicks={group:{},r32:{},r16:{},qf:{},sf:{},final:null};
+  save(); renderPicks(); showToast('All picks cleared');
+}
+function autoPick() {
+  state.myPicks={group:{},r32:{},r16:{},qf:{},sf:{},final:null};
+  for (const [L,teams] of Object.entries(state.groups)) {
+    const shuf=[...teams].sort(()=>Math.random()-0.5);
+    state.myPicks.group[L]=[shuf[0],shuf[1]];
+  }
+  for (const round of ['r32','r16','qf','sf']) {
+    const fn={r32:getR32Matchups,r16:getR16Matchups,qf:getQFMatchups,sf:getSFMatchups}[round];
+    fn().forEach((m,i)=>{const c=[m.a,m.b].filter(Boolean);if(c.length)state.myPicks[round][i]=c[Math.floor(Math.random()*c.length)];});
+  }
+  const fin=getFinalMatchup(), c=[fin.a,fin.b].filter(Boolean);
+  if (c.length) state.myPicks.final=c[Math.floor(Math.random()*c.length)];
+  save(); renderPicks(); showToast('Random picks generated 🎲');
+}
+
+/* =====================================================
+   SHARE / IMPORT
+===================================================== */
+function sharePicks() {
+  if (!state.user) { showToast('Enter your name first'); switchTab('home'); return; }
+  const code=btoa(unescape(encodeURIComponent(JSON.stringify({v:1,name:state.user,picks:state.myPicks}))));
+  showModal(`
+    <h2>📋 Your share-code</h2>
+    <p style="color:var(--muted);font-size:0.88rem">Copy this code and send it to your commissioner. They'll paste it into the admin panel.</p>
+    <div class="share-code">${code}</div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+      <button class="btn" onclick="navigator.clipboard.writeText('${code}').then(()=>showToast('Copied!'))">Copy to clipboard</button>
+      <button class="btn secondary" onclick="closeModal()">Close</button>
+    </div>
+    <p style="margin-top:1rem;font-size:0.8rem;color:var(--muted)">Your picks are saved in this browser — come back anytime before kickoff to revise them.</p>
+  `);
+}
+function importPicks() {
+  const code=document.getElementById('importCode').value.trim();
+  if (!code) { showToast('Paste a code first'); return; }
+  try {
+    const data=JSON.parse(decodeURIComponent(escape(atob(code))));
+    if (!data.name||!data.picks) throw new Error('bad');
+    const i=state.players.findIndex(p=>p.name.toLowerCase()===data.name.toLowerCase());
+    if (i>=0) state.players[i]={name:data.name,picks:data.picks};
+    else state.players.push({name:data.name,picks:data.picks});
+    save(); document.getElementById('importCode').value='';
+    showToast(`Added ${data.name}`); renderAdmin(); renderLeaderboard();
+  } catch(e) { showToast('Invalid code — check you pasted the full code'); }
+}
+
+/* =====================================================
+   SCORING
+===================================================== */
+function scorePicks(picks) {
+  const r=state.results; let pts=0;
+  for (const [L,actual] of Object.entries(r.group||{})) {
+    const mine=picks.group[L]||[], actualSet=new Set(actual||[]);
+    mine.forEach(c=>{ if(actualSet.has(c)) pts+=1; });
+  }
+  const weights={r32:2,r16:4,qf:8,sf:16};
+  for (const [round,w] of Object.entries(weights)) {
+    const actuals=new Set(Object.values(r[round]||{}));
+    Object.values(picks[round]||{}).forEach(c=>{ if(actuals.has(c)) pts+=w; });
+  }
+  if (r.final&&picks.final===r.final) pts+=32;
+  return pts;
+}
+
+/* =====================================================
+   LEADERBOARD
+===================================================== */
+function renderLeaderboard() {
+  const wrap=document.getElementById('leaderboardWrap');
+  const everyone=[...state.players];
+  if (state.user) {
+    const mine=everyone.find(p=>p.name.toLowerCase()===state.user.toLowerCase());
+    if (!mine) everyone.push({name:state.user,picks:state.myPicks,isMe:true});
+    else mine.isMe=true;
+  }
+  document.getElementById('statPlayers').textContent=everyone.length;
+  if (everyone.length===0) {
+    wrap.innerHTML='<div class="empty">No players yet. Teammates submit picks and you import them in Admin — then they\'ll show here.</div>'; return;
+  }
+  everyone.forEach(p=>p.score=scorePicks(p.picks));
+  everyone.sort((a,b)=>b.score-a.score);
+  wrap.innerHTML=`
+    <table class="leaderboard-table">
+      <thead><tr><th>#</th><th>Player</th><th>Champion Pick</th><th style="text-align:right">Points</th></tr></thead>
+      <tbody>${everyone.map((p,i)=>{
+        const champ=p.picks.final;
+        const champHtml=champ
+          ?`<span class="champion-pill">${TEAMS[champ]?.flag||'⚪'} ${TEAMS[champ]?.name||champ}</span>`
+          :'<span class="muted">—</span>';
+        return `<tr class="${p.isMe?'me':''}">
+          <td class="rank rank-${i+1}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</td>
+          <td><b>${escapeHtml(p.name)}</b>${p.isMe?' <span class="muted">(you)</span>':''}</td>
+          <td>${champHtml}</td>
+          <td class="pts">${p.score}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+}
+
+/* =====================================================
+   SCHEDULE
+===================================================== */
+const SCHED_FILTERS=[
+  {id:'all',label:'All'},{id:'group',label:'Group Stage'},
+  {id:'r32',label:'R32'},{id:'r16',label:'R16'},
+  {id:'qf',label:'QF'},{id:'sf',label:'SF'},{id:'final',label:'3rd / Final'},
+];
+let scheduleFilter='all';
+function renderSchedule() {
+  document.getElementById('scheduleFilters').innerHTML=SCHED_FILTERS.map(f=>
+    `<button class="filter-chip ${scheduleFilter===f.id?'active':''}" onclick="setSchedFilter('${f.id}')">${f.label}</button>`
+  ).join('');
+  const list=document.getElementById('scheduleList');
+  const matches=state.schedule.filter(m=>{
+    if (scheduleFilter==='all') return true;
+    if (scheduleFilter==='group') return m.stage.startsWith('Group');
+    if (scheduleFilter==='r32') return m.stage==='Round of 32';
+    if (scheduleFilter==='r16') return m.stage==='Round of 16';
+    if (scheduleFilter==='qf') return m.stage==='Quarterfinal';
+    if (scheduleFilter==='sf') return m.stage==='Semifinal';
+    if (scheduleFilter==='final') return m.stage==='Final'||m.stage==='3rd Place';
+    return true;
+  });
+  if (!matches.length) { list.innerHTML='<div class="empty">No matches.</div>'; return; }
+  list.innerHTML=matches.map(m=>{
+    const d=new Date(m.date+'T12:00:00');
+    const day=d.toLocaleDateString('en-US',{weekday:'short'});
+    const dateStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    return `<div class="match-row">
+      <div class="date-cell"><div class="day">${day}</div><div>${dateStr}</div><div>${m.time}</div></div>
+      <div class="home-team">${teamTag(m.home)}</div>
+      <div class="vs">vs</div>
+      <div class="away-team">${teamTag(m.away)}</div>
+      <div class="venue"><div class="stage-tag">${m.stage}</div>${m.venue}</div>
+    </div>`;
+  }).join('');
+}
+function setSchedFilter(id) { scheduleFilter=id; renderSchedule(); }
+
+/* =====================================================
+   ADMIN
+===================================================== */
+function renderAdmin() {
+  // Players list
+  const pwrap=document.getElementById('playersList');
+  pwrap.innerHTML=state.players.length===0
+    ?'<p class="muted">No players added yet.</p>'
+    :'<h4 style="margin:0.5rem 0;color:var(--lavender)">Players ('+state.players.length+')</h4>'
+    +state.players.map((p,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border)">
+      <span>${escapeHtml(p.name)}</span>
+      <button class="btn secondary" style="padding:0.25rem 0.65rem;font-size:0.75rem" onclick="removePlayer(${i})">Remove</button>
+    </div>`).join('');
+
+  // Group results
+  document.getElementById('adminGroups').innerHTML=Object.entries(state.groups).map(([L,teams])=>{
+    const actual=state.results.group[L]||[];
+    return `<div style="margin-bottom:1rem">
+      <b style="color:var(--lavender)">Group ${L}</b><br>
+      ${teams.map(code=>{
+        const idx=actual.indexOf(code);
+        const cls=idx===0?'pick-1st':idx===1?'pick-2nd':'';
+        const tag=idx===0?'1st':idx===1?'2nd':'';
+        return `<div class="team-row ${cls}" style="margin-bottom:2px" onclick="cycleGroupResult('${L}','${code}')">
+          ${teamTag(code)}<span class="team-tag">${tag}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+
+  renderAdminBracket();
+}
+function cycleGroupResult(L, code) {
+  let arr=state.results.group[L]||[], idx=arr.indexOf(code);
+  if (idx===0) { arr=arr.filter(c=>c!==code); arr.push(code); if(arr.length===2&&arr[0]===code)arr=[arr[1],arr[0]]; }
+  else if (idx===1) { arr=arr.filter(c=>c!==code); }
+  else { arr=arr.filter(c=>c!==code); if(arr.length===0)arr=[code]; else if(arr.length===1)arr=[code,arr[0]]; else arr=[code,arr[1]]; }
+  state.results.group[L]=arr;
+  state.results.r32={}; state.results.r16={}; state.results.qf={}; state.results.sf={}; state.results.final=null;
+  save(); renderAdmin(); renderLeaderboard();
+}
+function renderAdminBracket() {
+  const wrap=document.getElementById('adminBracket');
+  const letters=Object.keys(state.groups).sort();
+  const adv=[];
+  for (const L of letters){const p=state.results.group[L];adv.push(p&&p[0]?p[0]:null);}
+  for (const L of letters){const p=state.results.group[L];adv.push(p&&p[1]?p[1]:null);}
+  const slots=[...adv]; while(slots.length<32)slots.push(null);
+  const r32=[];for(let i=0;i<16;i++)r32.push({a:slots[i*2],b:slots[i*2+1]});
+  const r32w=r32.map((_,i)=>state.results.r32[i]||null);
+  const r16=[];for(let i=0;i<8;i++)r16.push({a:r32w[i*2],b:r32w[i*2+1]});
+  const r16w=r16.map((_,i)=>state.results.r16[i]||null);
+  const qf=[];for(let i=0;i<4;i++)qf.push({a:r16w[i*2],b:r16w[i*2+1]});
+  const qfw=qf.map((_,i)=>state.results.qf[i]||null);
+  const sf=[];for(let i=0;i<2;i++)sf.push({a:qfw[i*2],b:qfw[i*2+1]});
+  const sfw=sf.map((_,i)=>state.results.sf[i]||null);
+  const rounds=[
+    {key:'r32',label:'Round of 32',matches:r32},
+    {key:'r16',label:'Round of 16',matches:r16},
+    {key:'qf',label:'Quarterfinals',matches:qf},
+    {key:'sf',label:'Semifinals',matches:sf},
+    {key:'f',label:'Final',matches:[{a:sfw[0],b:sfw[1]}]},
+  ];
+  let html='<div class="bracket-wrap"><div class="bracket">';
+  for (const r of rounds) {
+    html+=`<div class="bracket-round"><div class="round-label">${r.label}</div>`;
+    r.matches.forEach((m,idx)=>{
+      const winner=r.key==='f'?state.results.final:state.results[r.key]?.[idx];
+      html+=`<div class="match">${adminSlot(m.a,winner,r.key,idx)}${adminSlot(m.b,winner,r.key,idx)}</div>`;
+    });
+    html+='</div>';
+  }
+  wrap.innerHTML=html+'</div></div>';
+}
+function adminSlot(code,winnerCode,roundKey,matchIdx) {
+  const disabled=!code, picked=code&&winnerCode===code;
+  const onclick=disabled?'':`onclick="setResult('${roundKey}',${matchIdx},'${code}')"`;
+  return `<div class="match-slot ${disabled?'disabled':''} ${picked?'picked':''}" ${onclick}>${teamTag(code)}</div>`;
+}
+function setResult(roundKey,matchIdx,code) {
+  if (roundKey==='f') {
+    state.results.final=(state.results.final===code)?null:code;
+  } else {
+    const cur=state.results[roundKey]||{};
+    if (cur[matchIdx]===code) delete cur[matchIdx]; else cur[matchIdx]=code;
+    state.results[roundKey]=cur;
+    const order=['r32','r16','qf','sf'], i=order.indexOf(roundKey);
+    if (i>=0) { for(let j=i+1;j<order.length;j++) state.results[order[j]]={}; state.results.final=null; }
+  }
+  save(); renderAdminBracket(); renderLeaderboard();
+}
+function removePlayer(i) {
+  if (!confirm('Remove '+state.players[i].name+'?')) return;
+  state.players.splice(i,1); save(); renderAdmin(); renderLeaderboard();
+}
+function exportData() {
+  document.getElementById('dataEditor').value=JSON.stringify({groups:state.groups,schedule:state.schedule},null,2);
+}
+function importData() {
+  try {
+    const d=JSON.parse(document.getElementById('dataEditor').value.trim());
+    if (d.groups) state.groups=d.groups;
+    if (d.schedule) state.schedule=d.schedule;
+    save(); showToast('Tournament data updated'); renderPicks();
+  } catch(e) { showToast('Invalid JSON'); }
+}
+function resetAll() {
+  if (!confirm('Erase all picks, results, and players?')) return;
+  if (!confirm('Really? This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY); location.reload();
+}
+
+/* =====================================================
+   ADMIN UNLOCK
+===================================================== */
+let adminClicks=0;
+document.getElementById('adminUnlock').addEventListener('click', ()=>{
+  adminClicks++;
+  if (adminClicks>=3) { document.querySelector('[data-tab="admin"]').style.display=''; showToast('Admin mode unlocked 🔓'); }
+});
+if (location.hash==='#admin') document.querySelector('[data-tab="admin"]').style.display='';
+
+/* =====================================================
+   INIT
+===================================================== */
+load();
+renderWelcome();
+renderPicks();
+renderSchedule();
+</script>
+</body>
+</html>

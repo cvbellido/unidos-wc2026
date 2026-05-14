@@ -334,17 +334,7 @@
             Join the Bracket Challenge &rarr;
           </button>
 
-          <!-- Success state -->
-          <div class="success-banner" id="success-banner" role="alert">
-            <div class="success-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
-                   stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </div>
-            <h3>You're registered!</h3>
-            <p>Check your inbox for next steps. Let's pick some winners.</p>
-          </div>
+
 
         </form>
 
@@ -432,12 +422,7 @@
           existing.user = nameEl.value.trim();
           localStorage.setItem('wc2026-bracket-v1', JSON.stringify(existing));
         } catch(e) {}
-        // Show success banner briefly, then redirect to the app homepage
-        document.querySelectorAll('#reg-form .form-group')
-          .forEach(el => el.style.display = 'none');
-        document.getElementById('btn-register').style.display = 'none';
-        document.getElementById('success-banner').classList.add('show');
-        setTimeout(() => { window.location.href = 'home.html'; }, 1500);
+        window.location.href = 'home.html';
       }
     }
 

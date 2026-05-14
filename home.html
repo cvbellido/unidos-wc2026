@@ -88,16 +88,6 @@
     color: var(--lavender);
     font-weight: 600;
   }
-  .user-pill button {
-    background: transparent;
-    border: none;
-    color: rgba(199,185,255,0.6);
-    cursor: pointer;
-    font-size: 0.75rem;
-    font-family: inherit;
-    text-decoration: underline;
-  }
-  .user-pill button:hover { color: var(--lavender); }
 
   /* ── Tabs ──────────────────────────────────────────────────── */
   nav.tabs {
@@ -593,7 +583,7 @@
 <header class="site">
   <div class="header-row">
     <div class="brand">
-      <img src="assets/wc-identity.svg" alt="World Cup 2026" class="brand-wc-logo" id="adminUnlock" />
+      <img src="assets/wc-logo.svg" alt="World Cup 2026" class="brand-wc-logo" id="adminUnlock" />
       <img src="assets/slalom-unidos-logo.svg" alt="Slalom Unidos" class="brand-slalom-logo" />
     </div>
     <div id="userArea"></div>
@@ -639,16 +629,6 @@
     </table>
   </div>
 
-  <details class="help">
-    <summary>How to run this with your team</summary>
-    <ul>
-      <li>Share this page with your Slalom teammates — they register at the landing page with their <code>@slalom.com</code> email.</li>
-      <li>Everyone makes their picks and clicks <b>Save &amp; Share Picks</b> — they'll get a short code to send you.</li>
-      <li>You (the commissioner) paste those codes into <b>Admin → Add Player Picks</b> to build the leaderboard.</li>
-      <li>As games finish, open <b>Admin → Enter Results</b> to mark winners. The leaderboard updates automatically.</li>
-      <li>To unlock the Admin tab, click the World Cup logo in the header three times — or add <code>#admin</code> to the URL.</li>
-    </ul>
-  </details>
 </section>
 
 <!-- ── MY PICKS ──────────────────────────────────────────────── -->
@@ -658,7 +638,6 @@
       <h2>Make Your Picks</h2>
       <p class="muted">Click a team to mark your prediction. Group stage first, then the bracket fills in from your picks.</p>
     </div>
-    <div class="progress-pill" id="picksProgress">0 / 55 picks made</div>
   </div>
 
   <div class="actions-row">
@@ -952,9 +931,8 @@ function renderWelcome() {
   const userArea = document.getElementById('userArea');
   const welcomeBox = document.getElementById('welcomeBox');
   if (state.user) {
-    userArea.innerHTML = `<div class="user-pill">👋 ${escapeHtml(state.user)} <button onclick="changeUser()">change</button></div>`;
+    userArea.innerHTML = `<div class="user-pill">👋 Welcome back, ${escapeHtml(state.user)}!</div>`;
     welcomeBox.innerHTML = `
-      <p style="font-size:1.1rem;margin-bottom:1rem"><b>Welcome back, ${escapeHtml(state.user)}!</b></p>
       <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap">
         <button class="btn" onclick="switchTab('picks')">Make my picks →</button>
         <button class="btn secondary" onclick="switchTab('leaderboard')">See leaderboard</button>
@@ -976,7 +954,6 @@ function setUser() {
   if (!v) { showToast('Enter a name first'); return; }
   state.user = v; save(); renderWelcome(); switchTab('picks');
 }
-function changeUser() { state.user=null; save(); renderWelcome(); switchTab('home'); }
 
 /* =====================================================
    GROUP PICKS
@@ -1106,7 +1083,7 @@ function updatePicksProgress() {
   const qf=Object.keys(state.myPicks.qf||{}).length;
   const sf=Object.keys(state.myPicks.sf||{}).length;
   const f=state.myPicks.final?1:0;
-  document.getElementById('picksProgress').textContent=`${gp+r32+r16+qf+sf+f} / 55 picks made`;
+
 }
 function clearPicks() {
   if (!confirm('Clear all your picks?')) return;

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Slalom · Unidos — World Cup 2026 Bracket Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ── Brand tokens ──────────────────────────────────────────── */
+  :root {
+    --blue-primary: #0064FF;
+    --blue-dark:    #0030B6;
+    --cyan:         #1BE1F2;
+    --red:          #FF4D5F;
+    --lime:         #DEFF4D;
+    --lavender:     #C7B9FF;
+    --white:        #ffffff;
+    --text-dark:    #0d1a40;
+    --text-mid:     #4a5568;
+    --border:       #d0daf5;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Raleway', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: url('bg.svg') center center / cover no-repeat fixed;
+    background-color: var(--blue-dark);
+  }
+
+  /* ── Accent bar ────────────────────────────────────────────── */
+  .accent-bar { display: flex; height: 5px; flex-shrink: 0; }
+  .accent-bar span { flex: 1; }
+  .ab-1 { background: var(--blue-primary); }
+  .ab-2 { background: var(--cyan); }
+  .ab-3 { background: var(--red); }
+  .ab-4 { background: var(--lime); }
+  .ab-5 { background: var(--lavender); }
+
+  /* ── Page shell ────────────────────────────────────────────── */
+  .page-shell {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.25rem 3rem;
+  }
+
+  /* ── Card ──────────────────────────────────────────────────── */
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: rgba(0, 48, 182, 0.80);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 20px;
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+    border: 1px solid rgba(199, 185, 255, 0.18);
+  }
+
+  .card-body {
+    padding: 2.25rem 2.25rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  /* ── Logo header ────────────────────────────────────────────── */
+  .logo-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 2.5rem 0.75rem;
+    gap: 0.75rem;
+    position: relative;
+  }
+  .logo-identity {
+    width: auto;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.32));
+  }
+  .logo-secondary {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.75rem;
+    height: 44px;
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.25));
+    z-index: 10;
+  }
+
+  /* ── Copy ──────────────────────────────────────────────────── */
+  .copy { text-align: center; }
+  .copy h2 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .copy h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--lavender);
+    line-height: 1.3;
+    margin-top: 0.4rem;
+  }
+  .copy p {
+    margin-top: 0.55rem;
+    font-size: 0.9rem;
+    color: rgba(199, 185, 255, 0.85);
+    line-height: 1.6;
+  }
+
+  /* ── Form ──────────────────────────────────────────────────── */
+  .reg-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    width: 100%;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+
+  label { font-size: 0.8rem; font-weight: 600; color: var(--lavender); }
+
+  input[type="text"],
+  input[type="email"] {
+    padding: 0.72rem 1rem;
+    border: 1.5px solid rgba(199, 185, 255, 0.3);
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-family: 'Raleway', 'Segoe UI', system-ui, sans-serif;
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+  input::placeholder { color: rgba(199, 185, 255, 0.5); }
+  input:focus {
+    border-color: var(--lavender);
+    box-shadow: 0 0 0 3px rgba(199, 185, 255, 0.18);
+  }
+  input.input-error { border-color: var(--red); }
+  input.input-error:focus { box-shadow: 0 0 0 3px rgba(255, 77, 95, 0.2); }
+
+  .field-error {
+    font-size: 0.75rem;
+    color: var(--red);
+    font-weight: 500;
+    display: none;
+  }
+  .field-error.show { display: block; }
+
+  /* ── Register button ───────────────────────────────────────── */
+  .btn-register {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--blue-primary);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(0, 100, 255, 0.3);
+  }
+  .btn-register:hover {
+    background: var(--blue-dark);
+    box-shadow: 0 6px 20px rgba(0, 48, 182, 0.35);
+  }
+  .btn-register:active { transform: scale(0.98); }
+  .btn-register:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  /* ── Success banner ────────────────────────────────────────── */
+  .success-banner {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    border-radius: 12px;
+    color: #166534;
+    width: 100%;
+  }
+  .success-banner.show { display: flex; }
+  .success-icon {
+    width: 48px; height: 48px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .success-icon svg { width: 24px; height: 24px; }
+  .success-banner h3 { font-size: 1.05rem; font-weight: 700; }
+  .success-banner p  { font-size: 0.84rem; color: #166534cc; }
+
+  /* ── Scoring accordion ─────────────────────────────────────── */
+  .scoring-accordion {
+    width: 100%;
+    border-top: 1px solid rgba(199, 185, 255, 0.2);
+  }
+  .accordion-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: transparent;
+    border: none;
+    color: var(--white);
+    font-family: 'Raleway', 'Segoe UI', system-ui, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.95rem 2.25rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: left;
+  }
+  .accordion-trigger:hover { background: rgba(255, 255, 255, 0.06); }
+  .accordion-trigger .chevron {
+    flex-shrink: 0;
+    transition: transform 0.25s;
+    color: var(--lavender);
+  }
+  .accordion-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+  .accordion-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.28s ease;
+  }
+  .accordion-body.open { grid-template-rows: 1fr; }
+  .accordion-body-inner { overflow: hidden; }
+  .scoring-intro {
+    display: block;
+    font-size: 0.8rem;
+    color: rgba(199, 185, 255, 0.75);
+    padding: 0 2.25rem 0.5rem;
+  }
+  .scoring-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.9);
+    display: block;
+    padding: 0 2.25rem 1.25rem;
+  }
+  .scoring-table tr { border-bottom: 1px solid rgba(199, 185, 255, 0.15); }
+  .scoring-table tr:last-child { border-bottom: none; }
+  .scoring-table td { padding: 0.42rem 0; }
+  .scoring-table td:last-child {
+    text-align: right;
+    font-weight: 700;
+    color: var(--lime);
+    white-space: nowrap;
+  }
+  .scoring-table .total-row td {
+    padding-top: 0.6rem;
+    font-weight: 800;
+    border-top: 1.5px solid rgba(199, 185, 255, 0.25);
+  }
+  .scoring-table .total-row td:last-child { color: var(--cyan); }
+
+  /* ── Card footer ───────────────────────────────────────────── */
+  .card-footer {
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    font-size: 0.73rem;
+    color: rgba(199, 185, 255, 0.6);
+    background: rgba(0, 0, 0, 0.15);
+    border-top: 1px solid rgba(199, 185, 255, 0.15);
+  }
+
+  /* ── Responsive ────────────────────────────────────────────── */
+  @media (max-width: 540px) {
+    .card-body { padding: 1.75rem 1.25rem 1.25rem; }
+    .accordion-trigger { padding: 0.85rem 1.25rem; }
+    .scoring-intro,
+    .scoring-table { padding-left: 1.25rem; padding-right: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="logo-header">
+    <img src="wc-identity.svg" alt="FIFA World Cup 2026" class="logo-identity" />
+    <img src="slalom-unidos-logo.svg" alt="Slalom Unidos" class="logo-secondary" />
+  </header>
+
+  <main class="page-shell">
+    <div class="card" role="main">
+
+      <div class="card-body">
+
+        <!-- Copy -->
+        <div class="copy">
+          <h2>Register to play.</h2>
+          <p>Earn points as the tournament plays out. Highest score at the final whistle wins bragging rights. 🎉🏆</p>
+        </div>
+
+        <!-- Registration form -->
+        <form class="reg-form" id="reg-form" novalidate onsubmit="handleRegister(event)">
+
+          <div class="form-group">
+            <label for="field-name">Full Name</label>
+            <input type="text" id="field-name" placeholder="Your full name"
+                   autocomplete="name" required />
+            <span class="field-error" id="err-name">Please enter your full name.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="field-email">Email Address</label>
+            <input type="email" id="field-email" placeholder="you@slalom.com"
+                   autocomplete="email" required />
+            <span class="field-error" id="err-email">
+              A valid @slalom.com email address is required.
+            </span>
+          </div>
+
+          <button type="submit" class="btn-register" id="btn-register">
+            Join the Bracket Challenge &rarr;
+          </button>
+
+          <!-- Success state -->
+          <div class="success-banner" id="success-banner" role="alert">
+            <div class="success-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <h3>You're registered!</h3>
+            <p>Check your inbox for next steps. Let's pick some winners.</p>
+          </div>
+
+        </form>
+
+      </div><!-- /.card-body -->
+
+      <!-- Scoring accordion -->
+      <div class="scoring-accordion">
+        <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this)">
+          <span>How scoring works</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="accordion-body" id="scoring-body">
+          <div class="accordion-body-inner">
+            <span class="scoring-intro">You earn points whenever a team you picked advances correctly. Later rounds are worth more.</span>
+            <table class="scoring-table">
+              <tbody>
+                <tr><td>Group stage finishers (1st &amp; 2nd per group)</td><td>1 pt each</td></tr>
+                <tr><td>Round of 32 winners</td><td>2 pts each</td></tr>
+                <tr><td>Round of 16 winners</td><td>4 pts each</td></tr>
+                <tr><td>Quarterfinal winners</td><td>8 pts each</td></tr>
+                <tr><td>Semifinal winners</td><td>16 pts each</td></tr>
+                <tr><td>Champion</td><td>32 pts</td></tr>
+                <tr class="total-row"><td>Maximum possible</td><td>184 pts</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        &copy; 2026 Slalom &middot; Unidos &bull; For Slalom employees only
+      </div>
+
+    </div><!-- /.card -->
+  </main>
+
+  <div class="accent-bar">
+    <span class="ab-1"></span>
+    <span class="ab-2"></span>
+    <span class="ab-3"></span>
+    <span class="ab-4"></span>
+    <span class="ab-5"></span>
+  </div>
+
+  <script>
+    /* ── @slalom.com validation ─────────────────────────────── */
+    function isSlalomEmail(value) {
+      return /^[^\s@]+@slalom\.com$/i.test(value.trim());
+    }
+
+    /* ── Register handler ───────────────────────────────────── */
+    function handleRegister(e) {
+      e.preventDefault();
+
+      const nameEl  = document.getElementById('field-name');
+      const emailEl = document.getElementById('field-email');
+      const errName  = document.getElementById('err-name');
+      const errEmail = document.getElementById('err-email');
+
+      // Reset error states
+      [nameEl, emailEl].forEach(el => el.classList.remove('input-error'));
+      [errName, errEmail].forEach(el => el.classList.remove('show'));
+
+      let valid = true;
+
+      if (!nameEl.value.trim()) {
+        nameEl.classList.add('input-error');
+        errName.classList.add('show');
+        valid = false;
+      }
+
+      if (!isSlalomEmail(emailEl.value)) {
+        emailEl.classList.add('input-error');
+        errEmail.classList.add('show');
+        valid = false;
+      }
+
+      if (valid) {
+        // Persist user name so home.html picks it up automatically
+        try {
+          const existing = JSON.parse(localStorage.getItem('wc2026-bracket-v1') || '{}');
+          existing.user = nameEl.value.trim();
+          localStorage.setItem('wc2026-bracket-v1', JSON.stringify(existing));
+        } catch(e) {}
+        // Show success banner briefly, then redirect to the app homepage
+        document.querySelectorAll('#reg-form .form-group')
+          .forEach(el => el.style.display = 'none');
+        document.getElementById('btn-register').style.display = 'none';
+        document.getElementById('success-banner').classList.add('show');
+        setTimeout(() => { window.location.href = 'home.html'; }, 1500);
+      }
+    }
+
+    /* ── Scoring accordion ──────────────────────────────────── */
+    function toggleAccordion(btn) {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      document.getElementById('scoring-body').classList.toggle('open', !expanded);
+    }
+  </script>
+
+</body>
+</html>

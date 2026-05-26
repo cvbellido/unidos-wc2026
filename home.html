@@ -526,6 +526,19 @@
     margin-bottom: 1rem;
   }
 
+  /* ── Picks locked banner ───────────────────────────────────── */
+  .picks-locked-banner {
+    background: linear-gradient(90deg, rgba(222,255,77,0.18), rgba(27,225,242,0.12));
+    border: 1px solid rgba(222,255,77,0.4);
+    color: var(--lime);
+    padding: 0.85rem 1.1rem;
+    border-radius: var(--radius);
+    font-weight: 800;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
   /* ── Help accordion ────────────────────────────────────────── */
   details.help {
     background: rgba(27,225,242,0.06);
@@ -698,12 +711,14 @@
   <div class="stage-header">
     <div>
       <h2>Make Your Picks</h2>
-      <p class="muted">Click a team to mark your prediction. Group stage first, then the bracket fills in from your picks.</p>
+      <p class="muted">Click a team to mark your prediction. Group stage first, then the bracket fills in from your picks. Once you submit, your picks are locked — so choose carefully!</p>
     </div>
   </div>
 
+  <div id="picksLockBanner"></div>
+
   <div class="actions-row">
-    <button class="btn gold" onclick="sharePicks()">� Submit my picks</button>
+    <button class="btn gold" onclick="sharePicks()">💾 Submit my picks</button>
     <button class="btn secondary" onclick="clearPicks()">Clear all</button>
     <button class="btn secondary" onclick="autoPick()">🎲 Random picks</button>
   </div>
@@ -933,7 +948,19 @@ const state = {
   myPicks: { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   results: { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   players: [],
+  picksLocked: false,
 };
+function picksHaveContent(p) {
+  if (!p) return false;
+  const g = p.group || {}; if (Object.values(g).some(a => Array.isArray(a) && a.length)) return true;
+  for (const k of ['r32','r16','qf','sf']) if (p[k] && Object.keys(p[k]).length) return true;
+  if (p.final) return true;
+  return false;
+}
+function enforceLock() {
+  if (state.picksLocked) { showToast('\u{1F512} Picks are locked'); return true; }
+  return false;
+}
 function save() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
 }
@@ -960,6 +987,16 @@ async function refreshLeaderboard() {
         group: r2.group || {}, r32: r2.r32 || {}, r16: r2.r16 || {},
         qf: r2.qf || {}, sf: r2.sf || {}, final: r2.final || null,
       };
+    }
+    if (state.user) {
+      const mine = state.players.find(p => playerAlias(p).toLowerCase() === state.user.toLowerCase());
+      const serverLocked = mine && picksHaveContent(mine.picks);
+      if (serverLocked && !state.picksLocked) {
+        state.picksLocked = true;
+        state.myPicks = mine.picks;
+        save();
+        if (document.querySelector('.panel.active')?.id === 'picks') renderPicks();
+      }
     }
     renderLeaderboard();
     if (document.querySelector('.panel.active')?.id === 'admin') renderAdmin();
@@ -1088,7 +1125,20 @@ async function setUser() {
 /* =====================================================
    GROUP PICKS
 ===================================================== */
-function renderPicks() { renderGroupPicks(); renderBracket(); updatePicksProgress(); }
+function renderPicks() {
+  const banner = document.getElementById('picksLockBanner');
+  if (banner) {
+    banner.innerHTML = state.picksLocked
+      ? `<div class="picks-locked-banner">\u{1F512} Your picks are locked in. Good luck! \u26BD</div>`
+      : '';
+  }
+  document.querySelectorAll('#picks .actions-row .btn').forEach(b => {
+    b.disabled = state.picksLocked;
+    b.style.opacity = state.picksLocked ? '0.45' : '';
+    b.style.cursor = state.picksLocked ? 'not-allowed' : '';
+  });
+  renderGroupPicks(); renderBracket(); updatePicksProgress();
+}
 function renderGroupPicks() {
   const wrap = document.getElementById('groupsGrid');
   wrap.innerHTML = '';
@@ -1109,6 +1159,7 @@ function renderGroupPicks() {
   }
 }
 function cycleGroupPick(L, code) {
+  if (enforceLock()) return;
   let picks = state.myPicks.group[L] || [];
   const idx = picks.indexOf(code);
   if (idx===0) {
@@ -1195,6 +1246,7 @@ function slotHtml(code,pickedCode,roundKey,matchIdx) {
   return `<div class="match-slot ${disabled?'disabled':''} ${picked?'picked':''}" ${onclick}>${teamTag(code)}</div>`;
 }
 function pickBracket(roundKey,matchIdx,code) {
+  if (enforceLock()) return;
   if (roundKey==='f') {
     state.myPicks.final=(state.myPicks.final===code)?null:code;
   } else {
@@ -1216,11 +1268,13 @@ function updatePicksProgress() {
 
 }
 function clearPicks() {
+  if (enforceLock()) return;
   if (!confirm('Clear all your picks?')) return;
   state.myPicks={group:{},r32:{},r16:{},qf:{},sf:{},final:null};
   save(); renderPicks(); showToast('All picks cleared');
 }
 function autoPick() {
+  if (enforceLock()) return;
   state.myPicks={group:{},r32:{},r16:{},qf:{},sf:{},final:null};
   for (const [L,teams] of Object.entries(state.groups)) {
     const shuf=[...teams].sort(()=>Math.random()-0.5);
@@ -1240,18 +1294,25 @@ function autoPick() {
 ===================================================== */
 async function sharePicks() {
   if (!state.user) { showToast('Enter your alias first'); switchTab('home'); return; }
+  if (state.picksLocked) { showToast('\u{1F512} Picks already submitted'); return; }
+  if (!picksHaveContent(state.myPicks)) { showToast('Make at least one pick first'); return; }
+  if (!confirm('Submit your picks? Once submitted, they cannot be changed.')) return;
   try {
     const res = await fetch('/api/submit-picks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ alias: state.user, picks: state.myPicks }),
     });
+    const d = await res.json().catch(()=>({}));
     if (!res.ok) {
-      const d = await res.json().catch(()=>({}));
-      showToast(d.error || 'Could not save picks'); return;
+      if (d.locked) { state.picksLocked = true; renderPicks(); }
+      showToast(d.error || 'Could not save picks');
+      return;
     }
+    state.picksLocked = true;
     save();
-    showToast('Picks submitted! \u2705');
+    renderPicks();
+    showToast('Picks locked in! \u2705 Good luck!');
     refreshLeaderboard();
   } catch (e) { showToast('Network error \u2014 picks not saved'); }
 }

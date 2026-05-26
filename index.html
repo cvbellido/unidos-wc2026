@@ -186,43 +186,6 @@
   /* ── OTP two-step flow ─────────────────────────────────────── */
   .step { display: flex; flex-direction: column; gap: 0.9rem; width: 100%; }
   .step.hidden { display: none; }
-  .step-hint {
-    font-size: 0.84rem;
-    color: rgba(199, 185, 255, 0.8);
-    text-align: center;
-    line-height: 1.6;
-  }
-  .step-hint strong { color: var(--lavender); }
-  input.otp-input {
-    text-align: center;
-    font-size: 2rem;
-    font-weight: 800;
-    letter-spacing: 0.3em;
-    padding: 0.75rem 1rem;
-  }
-  .btn-back {
-    background: transparent;
-    border: none;
-    color: rgba(199, 185, 255, 0.6);
-    font-family: inherit;
-    font-size: 0.8rem;
-    cursor: pointer;
-    text-decoration: underline;
-    text-align: center;
-    padding: 0.15rem;
-  }
-  .btn-back:hover { color: var(--lavender); }
-  .api-error {
-    font-size: 0.78rem;
-    color: var(--red);
-    text-align: center;
-    display: none;
-  }
-  .api-error.show { display: block; }
-
-  /* ── Scoring accordion ─────────────────────────────────────── */
-  .scoring-accordion {
-    width: 100%;
     border-top: 1px solid rgba(199, 185, 255, 0.2);
   }
   .accordion-trigger {
@@ -326,42 +289,23 @@
         <!-- Registration form -->
         <form class="reg-form" id="reg-form" novalidate>
 
-          <!-- Step 1: Name + Email -->
-          <div class="step" id="step-1">
-            <div class="form-group">
-              <label for="field-name">Full Name</label>
-              <input type="text" id="field-name" placeholder="Your full name"
-                     autocomplete="name" required />
-              <span class="field-error" id="err-name">Please enter your full name.</span>
-            </div>
-            <div class="form-group">
-              <label for="field-email">Email Address</label>
-              <input type="email" id="field-email" placeholder="you@slalom.com"
-                     autocomplete="email" required />
-              <span class="field-error" id="err-email">A valid @slalom.com email address is required.</span>
-            </div>
-            <span class="api-error" id="err-api-send"></span>
-            <button type="button" class="btn-register" id="btn-send" onclick="handleSendCode()">
-              Send Code &rarr;
-            </button>
+          <div class="form-group">
+            <label for="field-name">Full Name</label>
+            <input type="text" id="field-name" placeholder="Your full name"
+                   autocomplete="name" required />
+            <span class="field-error" id="err-name">Please enter your full name.</span>
           </div>
 
-          <!-- Step 2: OTP code -->
-          <div class="step hidden" id="step-2">
-            <p class="step-hint">We sent a 6-digit code to<br /><strong id="email-display"></strong></p>
-            <div class="form-group">
-              <label for="field-code">Access Code</label>
-              <input type="text" inputmode="numeric" id="field-code"
-                     placeholder="000000" maxlength="6"
-                     autocomplete="one-time-code" class="otp-input" />
-              <span class="field-error" id="err-code"></span>
-            </div>
-            <span class="api-error" id="err-api-verify"></span>
-            <button type="button" class="btn-register" id="btn-verify" onclick="handleVerify()">
-              Enter &rarr;
-            </button>
-            <button type="button" class="btn-back" onclick="goBack()">&#8592; Use a different email</button>
+          <div class="form-group">
+            <label for="field-email">Email Address</label>
+            <input type="email" id="field-email" placeholder="you@slalom.com"
+                   autocomplete="email" required />
+            <span class="field-error" id="err-email">A valid @slalom.com email address is required.</span>
           </div>
+
+          <button type="submit" class="btn-register" id="btn-register" onclick="handleRegister(event)">
+            Join the Bracket Challenge &rarr;
+          </button>
 
         </form>
 
@@ -412,16 +356,16 @@
   <script>
     function isSlalomEmail(v) { return /^[^\s@]+@slalom\.com$/i.test(v.trim()); }
 
-    async function handleSendCode() {
+    function handleRegister(e) {
+      e.preventDefault();
+
       const nameEl  = document.getElementById('field-name');
       const emailEl = document.getElementById('field-email');
-      const errName = document.getElementById('err-name');
+      const errName  = document.getElementById('err-name');
       const errEmail = document.getElementById('err-email');
-      const errApi  = document.getElementById('err-api-send');
-      const btn     = document.getElementById('btn-send');
 
       [nameEl, emailEl].forEach(el => el.classList.remove('input-error'));
-      [errName, errEmail, errApi].forEach(el => el.classList.remove('show'));
+      [errName, errEmail].forEach(el => el.classList.remove('show'));
 
       let valid = true;
       if (!nameEl.value.trim()) {
@@ -430,89 +374,15 @@
       if (!isSlalomEmail(emailEl.value)) {
         emailEl.classList.add('input-error'); errEmail.classList.add('show'); valid = false;
       }
-      if (!valid) return;
 
-      btn.disabled = true; btn.textContent = 'Sending…';
-      try {
-        const res  = await fetch('/api/send-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: emailEl.value.trim(), name: nameEl.value.trim() }),
-        });
-        let data;
-        try { data = await res.json(); } catch (_) { throw new Error('Could not reach the server. Make sure the site is deployed to Vercel.'); }
-        if (!res.ok) throw new Error(data.error || 'Failed to send code.');
-        document.getElementById('email-display').textContent = emailEl.value.trim();
-        document.getElementById('step-1').classList.add('hidden');
-        document.getElementById('step-2').classList.remove('hidden');
-        document.getElementById('field-code').focus();
-      } catch (err) {
-        errApi.textContent = err.message; errApi.classList.add('show');
-      } finally {
-        btn.disabled = false; btn.textContent = 'Send Code \u2192';
-      }
-    }
-
-    async function handleVerify() {
-      const emailEl = document.getElementById('field-email');
-      const codeEl  = document.getElementById('field-code');
-      const errCode = document.getElementById('err-code');
-      const errApi  = document.getElementById('err-api-verify');
-      const btn     = document.getElementById('btn-verify');
-
-      [errCode, errApi].forEach(el => el.classList.remove('show'));
-      codeEl.classList.remove('input-error');
-
-      if (!/^\d{6}$/.test(codeEl.value.trim())) {
-        codeEl.classList.add('input-error');
-        errCode.textContent = 'Please enter the 6-digit code from your email.';
-        errCode.classList.add('show');
-        return;
-      }
-
-      btn.disabled = true; btn.textContent = 'Verifying…';
-      try {
-        const res  = await fetch('/api/verify-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: emailEl.value.trim(), code: codeEl.value.trim() }),
-        });
-        let data;
-        try { data = await res.json(); } catch (_) { throw new Error('Could not reach the server. Make sure the site is deployed to Vercel.'); }
-        if (!res.ok) throw new Error(data.error || 'Server error.');
-
-        if (!data.valid) {
-          codeEl.classList.add('input-error');
-          errCode.textContent = 'That code is incorrect or has expired. Try again.';
-          errCode.classList.add('show');
-          btn.disabled = false; btn.textContent = 'Enter \u2192';
-          return;
-        }
-
+      if (valid) {
         try {
-          const nameEl = document.getElementById('field-name');
           const existing = JSON.parse(localStorage.getItem('wc2026-bracket-v1') || '{}');
           existing.user = nameEl.value.trim();
           localStorage.setItem('wc2026-bracket-v1', JSON.stringify(existing));
-          localStorage.setItem('wc2026-session', JSON.stringify({
-            verified: true,
-            email: emailEl.value.trim(),
-            ts: Date.now(),
-          }));
-        } catch (_) {}
+        } catch(e) {}
         window.location.href = 'home.html';
-      } catch (err) {
-        errApi.textContent = err.message; errApi.classList.add('show');
-        btn.disabled = false; btn.textContent = 'Enter \u2192';
       }
-    }
-
-    function goBack() {
-      document.getElementById('step-2').classList.add('hidden');
-      document.getElementById('step-1').classList.remove('hidden');
-      document.getElementById('field-code').value = '';
-      ['err-code','err-api-verify'].forEach(id => document.getElementById(id).classList.remove('show'));
-      document.getElementById('field-code').classList.remove('input-error');
     }
 
     /* ── Scoring accordion ──────────────────────────────────── */

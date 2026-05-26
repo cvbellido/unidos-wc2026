@@ -1,0 +1,20 @@
+{
+  "players": [
+    {
+      "name": "Player One",
+      "email": "player1@slalom.com",
+      "score": 0,
+      "picks": {}
+    },
+    {
+      "name": "Player Two",
+      "email": "player2@slalom.com",
+      "score": 0,
+      "picks": {}
+    }
+  ],
+  "results": {
+    "groups": {},
+    "knockout": {}
+  }
+}

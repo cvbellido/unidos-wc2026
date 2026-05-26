@@ -738,18 +738,6 @@
 </div>
 
 <script>
-/* ── Auth guard ─────────────────────────────────────────────── */
-(function () {
-  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
-  try {
-    const session = JSON.parse(localStorage.getItem('wc2026-session') || 'null');
-    const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
-    if (!session || !session.verified || (Date.now() - session.ts) > SEVEN_DAYS) {
-      window.location.replace('index.html');
-    }
-  } catch (_) { window.location.replace('index.html'); }
-})();
-
 /* =====================================================
    DATA — 48 teams
 ===================================================== */
@@ -887,15 +875,18 @@ function save() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
 }
 function load() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) Object.assign(state, JSON.parse(raw));
-  } catch(e) {}
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) Object.assign(state, JSON.parse(raw)); } catch(e) {}
   if (!state.groups) state.groups = DEFAULT_GROUPS;
   if (!state.schedule) state.schedule = buildSchedule(state.groups);
   if (!state.myPicks) state.myPicks = { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null };
   if (!state.results) state.results = { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null };
   if (!state.players) state.players = [];
+  // Fetch data.json for leaderboard
+  fetch('data.json').then(r => r.json()).then(d => {
+    if (d.players) state.players = d.players;
+    if (d.results) state.results = d.results;
+    renderLeaderboard();
+  }).catch(() => {});
 }
 
 /* =====================================================

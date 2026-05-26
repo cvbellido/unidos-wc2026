@@ -454,6 +454,67 @@
     border: 1px solid rgba(222,255,77,0.2);
   }
 
+  /* ── Bonus awards ─────────────────────────────── */
+  .bonus-awards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .bonus-card {
+    background: linear-gradient(135deg, rgba(199,185,255,0.08), rgba(27,225,242,0.05));
+    border: 1px solid rgba(199,185,255,0.25);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .bonus-card.locked {
+    opacity: 0.55;
+    background: rgba(199,185,255,0.04);
+    border-style: dashed;
+  }
+  .bonus-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.25rem;
+    display: block;
+  }
+  .bonus-title {
+    font-weight: 800;
+    color: var(--lime);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .bonus-sub {
+    color: rgba(199,185,255,0.75);
+    font-size: 0.72rem;
+    margin: 0.15rem 0 0.5rem;
+  }
+  .bonus-winner {
+    color: var(--white);
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+  .bonus-count {
+    display: inline-block;
+    margin-left: 0.4rem;
+    background: rgba(222,255,77,0.18);
+    color: var(--lime);
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    vertical-align: middle;
+  }
+  .bonus-empty {
+    color: rgba(199,185,255,0.5);
+    font-size: 0.82rem;
+    font-style: italic;
+  }
+
   /* ── Admin ─────────────────────────────────────────────────── */
   .admin-warning {
     background: rgba(255,77,95,0.12);
@@ -683,6 +744,7 @@
     <button class="btn gold" onclick="sharePicks()">Submit my picks</button>
     <a class="btn secondary" href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer">Open registration sheet</a>
   </div>
+  <div id="bonusAwards" class="bonus-awards"></div>
   <div id="leaderboardWrap"></div>
 </section>
 
@@ -1216,6 +1278,7 @@ function scorePicks(picks) {
    LEADERBOARD
 ===================================================== */
 function renderLeaderboard() {
+  renderBonusAwards();
   const wrap=document.getElementById('leaderboardWrap');
   const everyone=[...state.players];
   if (state.user) {
@@ -1246,6 +1309,78 @@ function renderLeaderboard() {
         </tr>`;
       }).join('')}</tbody>
     </table>`;
+}
+
+/* =====================================================
+   BONUS AWARDS
+===================================================== */
+function computeAwardWinners(scoreFn, players) {
+  const scored = players.map(p => ({ alias: playerAlias(p), n: scoreFn(p) }))
+                        .filter(x => x.alias && x.n > 0);
+  if (!scored.length) return { winners: [], count: 0 };
+  const max = Math.max(...scored.map(x => x.n));
+  return { winners: scored.filter(x => x.n === max).map(x => x.alias), count: max };
+}
+function renderBonusAwards() {
+  const wrap = document.getElementById('bonusAwards');
+  if (!wrap) return;
+  const players = state.players || [];
+  const r = state.results || {};
+
+  // Group Stage Guru: most correct group finishers (position-agnostic, same as scoring)
+  const groupResultsExist = Object.values(r.group || {}).some(arr => arr && arr.length);
+  const guruScore = (p) => {
+    let n = 0;
+    for (const [L, actual] of Object.entries(r.group || {})) {
+      const mine = (p.picks?.group?.[L]) || [];
+      const actualSet = new Set(actual || []);
+      mine.forEach(c => { if (actualSet.has(c)) n++; });
+    }
+    return n;
+  };
+
+  // Final Four Oracle: most correct semifinalists (= QF winners)
+  const qfWinners = Object.values(r.qf || {}).filter(Boolean);
+  const oracleScore = (p) => {
+    const mine = new Set(Object.values(p.picks?.qf || {}).filter(Boolean));
+    let n = 0; qfWinners.forEach(t => { if (mine.has(t)) n++; });
+    return n;
+  };
+
+  // Champion's Champion: picked the actual final winner
+  const championScore = (p) => (r.final && p.picks?.final === r.final) ? 1 : 0;
+
+  const guru = computeAwardWinners(guruScore, players);
+  const oracle = computeAwardWinners(oracleScore, players);
+  const champ = computeAwardWinners(championScore, players);
+
+  const card = ({ icon, title, sub, unlocked, winners, count, countLabel }) => {
+    const locked = !unlocked;
+    let body;
+    if (locked) {
+      body = `<div class="bonus-empty">Unlocks once results are entered</div>`;
+    } else if (!winners.length) {
+      body = `<div class="bonus-empty">No correct picks yet</div>`;
+    } else {
+      const names = winners.slice(0, 3).map(escapeHtml).join(', ') + (winners.length > 3 ? ` +${winners.length-3}` : '');
+      body = `<div class="bonus-winner">${names}<span class="bonus-count">${count}${countLabel||''}</span></div>`;
+    }
+    return `<div class="bonus-card ${locked?'locked':''}">
+      <span class="bonus-icon">${icon}</span>
+      <div class="bonus-title">${title}</div>
+      <div class="bonus-sub">${sub}</div>
+      ${body}
+    </div>`;
+  };
+
+  wrap.innerHTML = [
+    card({ icon:'\ud83e\uddf1', title:"Group Stage Guru", sub:'Most correct group finishers',
+           unlocked: groupResultsExist, winners: guru.winners, count: guru.count }),
+    card({ icon:'\ud83d\udd2e', title:'Final Four Oracle', sub:'Most correct semifinalists (of 4)',
+           unlocked: qfWinners.length>0, winners: oracle.winners, count: oracle.count, countLabel:'/4' }),
+    card({ icon:'\ud83c\udfc6', title:"Champion's Champion", sub:'Picked the World Cup winner',
+           unlocked: !!r.final, winners: champ.winners, count: champ.winners.length, countLabel:champ.winners.length===1?' pick':' picks' }),
+  ].join('');
 }
 
 /* =====================================================

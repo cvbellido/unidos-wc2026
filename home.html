@@ -604,6 +604,7 @@
   <div class="welcome-hero">
     <h2>🏆 Make Your Picks. Beat Your Teammates.</h2>
     <p>Pick your group-stage finishers and knockout-round winners. Earn points as the tournament plays out.<br>Highest score at the final whistle wins bragging rights. 🎉🏆</p>
+    <p class="muted" style="margin-top:1rem">Need to submit your actual name, email, market, and alias for the commissioner list? <a href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer" style="color:var(--lime);font-weight:700;text-decoration:none">Open the registration spreadsheet</a>.</p>
     <div id="welcomeBox"></div>
   </div>
 
@@ -641,7 +642,7 @@
   </div>
 
   <div class="actions-row">
-    <button class="btn gold" onclick="sharePicks()">📋 Save &amp; Share Picks</button>
+    <button class="btn gold" onclick="sharePicks()">� Submit my picks</button>
     <button class="btn secondary" onclick="clearPicks()">Clear all</button>
     <button class="btn secondary" onclick="autoPick()">🎲 Random picks</button>
   </div>
@@ -676,10 +677,11 @@
 <!-- ── LEADERBOARD ───────────────────────────────────────────── -->
 <section id="leaderboard" class="panel">
   <h2>Leaderboard</h2>
-  <p class="muted" style="margin-top:0;margin-bottom:1rem">Live standings updated as results come in.</p>
+  <p class="muted" style="margin-top:0;margin-bottom:1rem">Live standings updated as results come in. Registration details are maintained separately in the private spreadsheet.</p>
   <div class="actions-row">
-    <button class="btn secondary" onclick="renderLeaderboard()">🔄 Refresh</button>
+    <button class="btn secondary" onclick="refreshLeaderboard()">🔄 Refresh</button>
     <button class="btn gold" onclick="sharePicks()">Submit my picks</button>
+    <a class="btn secondary" href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer">Open registration sheet</a>
   </div>
   <div id="leaderboardWrap"></div>
 </section>
@@ -690,11 +692,10 @@
   <div class="admin-warning">⚠️ Admin actions affect the leaderboard for everyone. There's no undo beyond editing again.</div>
 
   <div class="card">
-    <h3>Add Player Picks</h3>
-    <p class="muted" style="margin-bottom:0.75rem">Paste a share-code from a teammate to add their picks to the leaderboard.</p>
-    <textarea id="importCode" placeholder="Paste a share-code here..."></textarea>
-    <div style="margin-top:0.5rem"><button class="btn" onclick="importPicks()">Add Player</button></div>
-    <div id="playersList" style="margin-top:1rem"></div>
+    <h3>Players</h3>
+    <p class="muted" style="margin-bottom:0.75rem">Players are added automatically when they register on the landing page and submit their picks. Remove anyone who shouldn't be on the leaderboard here.</p>
+    <p class="muted" style="margin-bottom:0.75rem">The official private list of real names, emails, markets, and aliases lives in <a href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer" style="color:var(--lime);font-weight:700;text-decoration:none">this spreadsheet</a>.</p>
+    <div id="playersList"></div>
   </div>
 
   <div class="card">
@@ -881,12 +882,58 @@ function load() {
   if (!state.myPicks) state.myPicks = { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null };
   if (!state.results) state.results = { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null };
   if (!state.players) state.players = [];
-  // Fetch data.json for leaderboard
-  fetch('data.json').then(r => r.json()).then(d => {
-    if (d.players) state.players = d.players;
-    if (d.results) state.results = d.results;
+  refreshLeaderboard();
+}
+
+let _pollTimer = null;
+async function refreshLeaderboard() {
+  try {
+    const r = await fetch('/api/leaderboard', { cache: 'no-store' });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (Array.isArray(d.players)) state.players = d.players;
+    if (d.results && typeof d.results === 'object') {
+      const r2 = d.results;
+      state.results = {
+        group: r2.group || {}, r32: r2.r32 || {}, r16: r2.r16 || {},
+        qf: r2.qf || {}, sf: r2.sf || {}, final: r2.final || null,
+      };
+    }
     renderLeaderboard();
-  }).catch(() => {});
+    if (document.querySelector('.panel.active')?.id === 'admin') renderAdmin();
+  } catch (e) { /* offline / no backend */ }
+}
+function startLeaderboardPolling() {
+  if (_pollTimer) return;
+  _pollTimer = setInterval(refreshLeaderboard, 30000);
+}
+function stopLeaderboardPolling() {
+  if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+}
+
+/* =====================================================
+   ADMIN PASSWORD
+===================================================== */
+function getAdminPassword() {
+  let pw = sessionStorage.getItem('wc2026-admin-pw');
+  if (!pw) {
+    pw = prompt('Enter admin password:');
+    if (pw) sessionStorage.setItem('wc2026-admin-pw', pw);
+  }
+  return pw || '';
+}
+function clearAdminPassword() { sessionStorage.removeItem('wc2026-admin-pw'); }
+async function adminPost(url, body) {
+  const pw = getAdminPassword();
+  if (!pw) throw new Error('Password required');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-admin-password': pw },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) { clearAdminPassword(); throw new Error('Wrong admin password'); }
+  if (!res.ok) throw new Error((await res.json().catch(()=>({}))).error || 'Request failed');
+  return res.json();
 }
 
 /* =====================================================
@@ -905,6 +952,9 @@ function closeModal() { document.getElementById('modalBg').classList.remove('sho
 function escapeHtml(s) {
   return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 }
+function playerAlias(player) {
+  return String(player?.alias || player?.name || '').trim();
+}
 function teamTag(code) {
   const t = TEAMS[code];
   if (!t) return `<span class="team-flag">⚪</span><span class="team-name muted">${code||'TBD'}</span>`;
@@ -920,9 +970,10 @@ document.querySelectorAll('#tabs button').forEach(btn => {
 function switchTab(name) {
   document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab===name));
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id===name));
-  if (name==='leaderboard') renderLeaderboard();
+  if (name==='leaderboard') { refreshLeaderboard(); startLeaderboardPolling(); }
+  else { stopLeaderboardPolling(); }
   if (name==='schedule') renderSchedule();
-  if (name==='admin') renderAdmin();
+  if (name==='admin') { refreshLeaderboard(); renderAdmin(); }
   if (name==='picks') renderPicks();
   window.scrollTo({ top:0, behavior:'smooth' });
 }
@@ -944,7 +995,7 @@ function renderWelcome() {
     userArea.innerHTML = '';
     welcomeBox.innerHTML = `
       <div class="welcome-form">
-        <input type="text" id="userInput" placeholder="Your name (e.g. Carla)" />
+        <input type="text" id="userInput" placeholder="Your alias (e.g. Golden Boot)" />
         <button class="btn" onclick="setUser()">Let's go</button>
       </div>`;
     setTimeout(() => document.getElementById('userInput')?.focus(), 100);
@@ -952,10 +1003,24 @@ function renderWelcome() {
   }
   document.getElementById('statPlayers').textContent = state.players.length;
 }
-function setUser() {
+async function setUser() {
   const v = document.getElementById('userInput').value.trim();
-  if (!v) { showToast('Enter a name first'); return; }
-  state.user = v; save(); renderWelcome(); switchTab('picks');
+  if (!v || v.includes('@')) { showToast('Enter an alias, not an email'); return; }
+  try {
+    const r = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alias: v }),
+    });
+    if (!r.ok) {
+      const d = await r.json().catch(()=>({}));
+      showToast(d.error || 'Could not register'); return;
+    }
+    const d = await r.json();
+    state.user = d.alias || v; save(); renderWelcome();
+    refreshLeaderboard();
+    switchTab('picks');
+  } catch (e) { showToast('Network error'); }
 }
 
 /* =====================================================
@@ -1111,32 +1176,22 @@ function autoPick() {
 /* =====================================================
    SHARE / IMPORT
 ===================================================== */
-function sharePicks() {
-  if (!state.user) { showToast('Enter your name first'); switchTab('home'); return; }
-  const code=btoa(unescape(encodeURIComponent(JSON.stringify({v:1,name:state.user,picks:state.myPicks}))));
-  showModal(`
-    <h2>📋 Your share-code</h2>
-    <p style="color:var(--muted);font-size:0.88rem">Copy this code and send it to your commissioner. They'll paste it into the admin panel.</p>
-    <div class="share-code">${code}</div>
-    <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-      <button class="btn" onclick="navigator.clipboard.writeText('${code}').then(()=>showToast('Copied!'))">Copy to clipboard</button>
-      <button class="btn secondary" onclick="closeModal()">Close</button>
-    </div>
-    <p style="margin-top:1rem;font-size:0.8rem;color:var(--muted)">Your picks are saved in this browser — come back anytime before kickoff to revise them.</p>
-  `);
-}
-function importPicks() {
-  const code=document.getElementById('importCode').value.trim();
-  if (!code) { showToast('Paste a code first'); return; }
+async function sharePicks() {
+  if (!state.user) { showToast('Enter your alias first'); switchTab('home'); return; }
   try {
-    const data=JSON.parse(decodeURIComponent(escape(atob(code))));
-    if (!data.name||!data.picks) throw new Error('bad');
-    const i=state.players.findIndex(p=>p.name.toLowerCase()===data.name.toLowerCase());
-    if (i>=0) state.players[i]={name:data.name,picks:data.picks};
-    else state.players.push({name:data.name,picks:data.picks});
-    save(); document.getElementById('importCode').value='';
-    showToast(`Added ${data.name}`); renderAdmin(); renderLeaderboard();
-  } catch(e) { showToast('Invalid code — check you pasted the full code'); }
+    const res = await fetch('/api/submit-picks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alias: state.user, picks: state.myPicks }),
+    });
+    if (!res.ok) {
+      const d = await res.json().catch(()=>({}));
+      showToast(d.error || 'Could not save picks'); return;
+    }
+    save();
+    showToast('Picks submitted! \u2705');
+    refreshLeaderboard();
+  } catch (e) { showToast('Network error \u2014 picks not saved'); }
 }
 
 /* =====================================================
@@ -1164,8 +1219,8 @@ function renderLeaderboard() {
   const wrap=document.getElementById('leaderboardWrap');
   const everyone=[...state.players];
   if (state.user) {
-    const mine=everyone.find(p=>p.name.toLowerCase()===state.user.toLowerCase());
-    if (!mine) everyone.push({name:state.user,picks:state.myPicks,isMe:true});
+    const mine=everyone.find(p=>playerAlias(p).toLowerCase()===state.user.toLowerCase());
+    if (!mine) everyone.push({alias:state.user,picks:state.myPicks,isMe:true});
     else mine.isMe=true;
   }
   document.getElementById('statPlayers').textContent=everyone.length;
@@ -1176,15 +1231,16 @@ function renderLeaderboard() {
   everyone.sort((a,b)=>b.score-a.score);
   wrap.innerHTML=`
     <table class="leaderboard-table">
-      <thead><tr><th>#</th><th>Player</th><th>Champion Pick</th><th style="text-align:right">Points</th></tr></thead>
+      <thead><tr><th>#</th><th>Alias</th><th>Champion Pick</th><th style="text-align:right">Points</th></tr></thead>
       <tbody>${everyone.map((p,i)=>{
         const champ=p.picks.final;
+        const alias=playerAlias(p);
         const champHtml=champ
           ?`<span class="champion-pill">${TEAMS[champ]?.flag||'⚪'} ${TEAMS[champ]?.name||champ}</span>`
           :'<span class="muted">—</span>';
         return `<tr class="${p.isMe?'me':''}">
           <td class="rank rank-${i+1}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</td>
-          <td><b>${escapeHtml(p.name)}</b>${p.isMe?' <span class="muted">(you)</span>':''}</td>
+          <td><b>${escapeHtml(alias)}</b>${p.isMe?' <span class="muted">(you)</span>':''}</td>
           <td>${champHtml}</td>
           <td class="pts">${p.score}</td>
         </tr>`;
@@ -1242,7 +1298,7 @@ function renderAdmin() {
     ?'<p class="muted">No players added yet.</p>'
     :'<h4 style="margin:0.5rem 0;color:var(--lavender)">Players ('+state.players.length+')</h4>'
     +state.players.map((p,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border)">
-      <span>${escapeHtml(p.name)}</span>
+      <span>${escapeHtml(playerAlias(p))}</span>
       <button class="btn secondary" style="padding:0.25rem 0.65rem;font-size:0.75rem" onclick="removePlayer(${i})">Remove</button>
     </div>`).join('');
 
@@ -1264,7 +1320,7 @@ function renderAdmin() {
 
   renderAdminBracket();
 }
-function cycleGroupResult(L, code) {
+async function cycleGroupResult(L, code) {
   let arr=state.results.group[L]||[], idx=arr.indexOf(code);
   if (idx===0) { arr=arr.filter(c=>c!==code); arr.push(code); if(arr.length===2&&arr[0]===code)arr=[arr[1],arr[0]]; }
   else if (idx===1) { arr=arr.filter(c=>c!==code); }
@@ -1272,6 +1328,8 @@ function cycleGroupResult(L, code) {
   state.results.group[L]=arr;
   state.results.r32={}; state.results.r16={}; state.results.qf={}; state.results.sf={}; state.results.final=null;
   save(); renderAdmin(); renderLeaderboard();
+  try { await adminPost('/api/results', { results: state.results }); }
+  catch (e) { showToast(e.message); }
 }
 function renderAdminBracket() {
   const wrap=document.getElementById('adminBracket');
@@ -1311,7 +1369,7 @@ function adminSlot(code,winnerCode,roundKey,matchIdx) {
   const onclick=disabled?'':`onclick="setResult('${roundKey}',${matchIdx},'${code}')"`;
   return `<div class="match-slot ${disabled?'disabled':''} ${picked?'picked':''}" ${onclick}>${teamTag(code)}</div>`;
 }
-function setResult(roundKey,matchIdx,code) {
+async function setResult(roundKey,matchIdx,code) {
   if (roundKey==='f') {
     state.results.final=(state.results.final===code)?null:code;
   } else {
@@ -1322,10 +1380,18 @@ function setResult(roundKey,matchIdx,code) {
     if (i>=0) { for(let j=i+1;j<order.length;j++) state.results[order[j]]={}; state.results.final=null; }
   }
   save(); renderAdminBracket(); renderLeaderboard();
+  try { await adminPost('/api/results', { results: state.results }); }
+  catch (e) { showToast(e.message); }
 }
-function removePlayer(i) {
-  if (!confirm('Remove '+state.players[i].name+'?')) return;
-  state.players.splice(i,1); save(); renderAdmin(); renderLeaderboard();
+async function removePlayer(i) {
+  const p = state.players[i]; if (!p) return;
+  const alias = playerAlias(p);
+  if (!confirm('Remove '+alias+'?')) return;
+  try {
+    await adminPost('/api/remove-player', { alias });
+    state.players.splice(i,1); save(); renderAdmin(); renderLeaderboard();
+    showToast('Removed '+alias);
+  } catch (e) { showToast(e.message); }
 }
 function exportData() {
   document.getElementById('dataEditor').value=JSON.stringify({groups:state.groups,schedule:state.schedule},null,2);

@@ -726,8 +726,11 @@
   <div class="groups-grid" id="groupsGrid"></div>
 
   <h3 style="margin-top:2rem;color:var(--lavender)">Knockout Bracket</h3>
-  <p class="muted" style="margin-top:0;margin-bottom:1rem">Matchups populate from your group picks. Click a team to advance them.</p>
-  <div class="bracket-wrap">
+  <p class="muted" style="margin-top:0;margin-bottom:0.5rem">Matchups populate from your group picks. Click a team to advance them. <strong style="color:var(--lime)">Scroll horizontally →</strong> to reach the Final and pick your champion.</p>
+  <div class="actions-row" style="margin-bottom:0.75rem">
+    <button type="button" class="btn secondary" onclick="jumpToFinal()">Jump to Final →</button>
+  </div>
+  <div class="bracket-wrap" id="bracketScroll">
     <div class="bracket" id="bracketWrap"></div>
   </div>
 
@@ -1237,6 +1240,16 @@ function renderBracket() {
   document.getElementById('championDisplay').innerHTML=final
     ?`${TEAMS[final]?.flag||'⚪'} ${TEAMS[final]?.name||final}`
     :'— pick the final winner above —';
+  maybeScrollBracketToFinal();
+}
+function jumpToFinal() {
+  const el=document.getElementById('bracketScroll');
+  if (el) el.scrollTo({left: el.scrollWidth, behavior: 'smooth'});
+}
+function maybeScrollBracketToFinal() {
+  const el=document.getElementById('bracketScroll'); if (!el) return;
+  const sf=state.myPicks.sf||{};
+  if (sf[0] && sf[1]) requestAnimationFrame(()=>el.scrollTo({left: el.scrollWidth, behavior: 'smooth'}));
 }
 function slotHtml(code,pickedCode,roundKey,matchIdx) {
   const disabled=!code, picked=code&&pickedCode===code;

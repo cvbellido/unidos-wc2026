@@ -539,6 +539,18 @@
     text-align: center;
   }
 
+  /* ── Picks header grid (intro + champion card) ─────────────── */
+  .picks-header-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 720px) {
+    .picks-header-grid { grid-template-columns: 1fr; }
+  }
+
   /* ── Help accordion ────────────────────────────────────────── */
   details.help {
     background: rgba(27,225,242,0.06);
@@ -708,10 +720,18 @@
 
 <!-- ── MY PICKS ──────────────────────────────────────────────── -->
 <section id="picks" class="panel">
-  <div class="stage-header">
+  <div class="picks-header-grid">
     <div>
-      <h2>Make Your Picks</h2>
+      <h2 style="margin-top:0">Make Your Picks</h2>
       <p class="muted">Click a team to mark your prediction. Group stage first, then the bracket fills in from your picks. Once you submit, your picks are locked — so choose carefully!<br><strong>Group Stage — pick 1st &amp; 2nd in each group. Click once for 1st, click again for 2nd, click again to clear.</strong></p>
+    </div>
+    <div>
+      <div class="round-label">Your Champion</div>
+      <div class="champion-card">
+        <h3>🏆 WORLD CHAMPIONS 🏆</h3>
+        <div class="champion-team" id="championDisplay" style="margin-bottom:0.75rem">— select your champion below —</div>
+        <select id="championSelect" onchange="pickChampion(this.value)" style="width:100%;padding:0.6rem 0.75rem;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.25);color:#fff;font-size:0.95rem;font-weight:600"></select>
+      </div>
     </div>
   </div>
 
@@ -729,15 +749,6 @@
   <p class="muted" style="margin-top:0;margin-bottom:1rem">Matchups populate from your group picks. Click a team to advance them.</p>
   <div class="bracket-wrap">
     <div class="bracket" id="bracketWrap"></div>
-  </div>
-
-  <div style="max-width:340px; margin:1.5rem auto 0">
-    <div class="round-label">Your Champion</div>
-    <div class="champion-card">
-      <h3>🏆 WORLD CHAMPIONS 🏆</h3>
-      <div class="champion-team" id="championDisplay" style="margin-bottom:0.75rem">— select your champion below —</div>
-      <select id="championSelect" onchange="pickChampion(this.value)" style="width:100%;padding:0.6rem 0.75rem;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.25);color:#fff;font-size:0.95rem;font-weight:600"></select>
-    </div>
   </div>
 </section>
 

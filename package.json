@@ -2,6 +2,7 @@
   "name": "unidos-wc2026",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@vercel/postgres": "^0.10.0"
   }

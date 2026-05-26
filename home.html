@@ -1254,7 +1254,7 @@ function pickBracket(roundKey,matchIdx,code) {
     if (cur[matchIdx]===code) delete cur[matchIdx]; else cur[matchIdx]=code;
     state.myPicks[roundKey]=cur;
     const order=['r32','r16','qf','sf'], i=order.indexOf(roundKey);
-    if (i>=0) { for (let j=i+1;j<order.length;j++) state.myPicks[order[j]={}]; state.myPicks.final=null; }
+    if (i>=0) { for (let j=i+1;j<order.length;j++) state.myPicks[order[j]]={}; state.myPicks.final=null; }
   }
   save(); renderBracket(); updatePicksProgress();
 }

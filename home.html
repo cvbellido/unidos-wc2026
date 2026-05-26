@@ -1260,9 +1260,11 @@ async function sharePicks() {
    SCORING
 ===================================================== */
 function scorePicks(picks) {
+  picks = picks || {};
   const r=state.results; let pts=0;
+  const g = picks.group || {};
   for (const [L,actual] of Object.entries(r.group||{})) {
-    const mine=picks.group[L]||[], actualSet=new Set(actual||[]);
+    const mine=g[L]||[], actualSet=new Set(actual||[]);
     mine.forEach(c=>{ if(actualSet.has(c)) pts+=1; });
   }
   const weights={r32:2,r16:4,qf:8,sf:16};
@@ -1284,7 +1286,7 @@ function renderLeaderboard() {
   if (state.user) {
     const mine=everyone.find(p=>playerAlias(p).toLowerCase()===state.user.toLowerCase());
     if (!mine) everyone.push({alias:state.user,picks:state.myPicks,isMe:true});
-    else mine.isMe=true;
+    else { mine.isMe=true; mine.picks = state.myPicks; }
   }
   document.getElementById('statPlayers').textContent=everyone.length;
   if (everyone.length===0) {

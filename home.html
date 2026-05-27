@@ -785,6 +785,9 @@
     <p class="muted" style="margin-bottom:0.75rem">Players are added automatically when they register on the landing page and submit their picks. Remove anyone who shouldn't be on the leaderboard here.</p>
     <p class="muted" style="margin-bottom:0.75rem">The official private list of real names, emails, markets, and aliases lives in <a href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer" style="color:var(--lime);font-weight:700;text-decoration:none">this spreadsheet</a>.</p>
     <div id="playersList"></div>
+    <div style="margin-top:0.75rem">
+      <button class="btn secondary" style="background:rgba(255,77,95,0.18);border-color:rgba(255,77,95,0.4);color:#ffb3bb" onclick="wipeAllPlayers()">🗑 Remove ALL players</button>
+    </div>
   </div>
 
   <div class="card">
@@ -1617,6 +1620,15 @@ async function removePlayer(i) {
     await adminPost('/api/remove-player', { alias });
     state.players.splice(i,1); save(); renderAdmin(); renderLeaderboard();
     showToast('Removed '+alias);
+  } catch (e) { showToast(e.message); }
+}
+async function wipeAllPlayers() {
+  if (!confirm('Remove ALL players from the leaderboard? This cannot be undone.')) return;
+  if (!confirm('Are you absolutely sure? Every registered alias and their picks will be permanently deleted.')) return;
+  try {
+    const r = await adminPost('/api/wipe-players', {});
+    state.players = []; save(); renderAdmin(); renderLeaderboard();
+    showToast('Removed '+(r?.removed ?? 'all')+' players');
   } catch (e) { showToast(e.message); }
 }
 function exportData() {

@@ -457,9 +457,12 @@
   /* ── Bonus awards ─────────────────────────────── */
   .bonus-awards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
     margin-bottom: 1.25rem;
+  }
+  @media (max-width: 720px) {
+    .bonus-awards { grid-template-columns: 1fr; }
   }
   .bonus-card {
     background: linear-gradient(135deg, rgba(199,185,255,0.08), rgba(27,225,242,0.05));

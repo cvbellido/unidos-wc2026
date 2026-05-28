@@ -1015,7 +1015,11 @@ async function refreshLeaderboard() {
     }
     renderLeaderboard();
     if (document.querySelector('.panel.active')?.id === 'admin') renderAdmin();
-  } catch (e) { /* offline / no backend */ }
+  } catch (e) {
+    console.error('Leaderboard error:', e);
+    const wrap = document.getElementById('leaderboardWrap');
+    if (wrap) wrap.innerHTML = `<div class="empty">Leaderboard error: ${escapeHtml(e.message||String(e))}</div>`;
+  }
 }
 function startLeaderboardPolling() {
   if (_pollTimer) return;
@@ -1375,12 +1379,14 @@ function renderLeaderboard() {
   renderBonusAwards();
   const wrap=document.getElementById('leaderboardWrap');
   const everyone=[...state.players];
+  const emptyPicks = { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null };
   if (state.user) {
     const mine=everyone.find(p=>playerAlias(p).toLowerCase()===state.user.toLowerCase());
-    if (!mine) everyone.push({alias:state.user,picks:state.myPicks,isMe:true});
-    else { mine.isMe=true; mine.picks = state.myPicks; }
+    if (!mine) everyone.push({alias:state.user,picks:state.myPicks||emptyPicks,isMe:true});
+    else { mine.isMe=true; mine.picks = state.myPicks || mine.picks || emptyPicks; }
   }
-  document.getElementById('statPlayers').textContent=everyone.length;
+  everyone.forEach(p => { if (!p.picks) p.picks = emptyPicks; });
+  const sp=document.getElementById('statPlayers'); if (sp) sp.textContent=everyone.length;
   if (everyone.length===0) {
     wrap.innerHTML='<div class="empty">No players yet. Teammates submit picks and you import them in Admin — then they\'ll show here.</div>'; return;
   }
@@ -1390,7 +1396,7 @@ function renderLeaderboard() {
     <table class="leaderboard-table">
       <thead><tr><th>#</th><th>Alias</th><th>Champion Pick</th><th style="text-align:right">Points</th></tr></thead>
       <tbody>${everyone.map((p,i)=>{
-        const champ=p.picks.final;
+        const champ=p.picks?.final;
         const alias=playerAlias(p);
         const champHtml=champ
           ?`<span class="champion-pill">${TEAMS[champ]?.flag||'⚪'} ${TEAMS[champ]?.name||champ}</span>`

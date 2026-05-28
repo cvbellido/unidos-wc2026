@@ -133,7 +133,8 @@
 
   label { font-size: 0.8rem; font-weight: 600; color: var(--lavender); }
 
-  input[type="text"] {
+  input[type="text"],
+  input[type="password"] {
     padding: 0.72rem 1rem;
     border: 1.5px solid rgba(199, 185, 255, 0.3);
     border-radius: 10px;
@@ -303,23 +304,23 @@
 
         <!-- Copy -->
         <div class="copy">
-          <h2>Register to play.</h2>
-          <p>Earn points as the tournament plays out. Highest score at the final whistle wins bragging rights. 🎉🏆</p>
+          <h2>Enter the Bracket Challenge.</h2>
+          <p>This site is for Slalom employees only. Enter the access code shared by your team to continue.</p>
         </div>
 
-        <!-- Registration form -->
+        <!-- Access form -->
         <form class="reg-form" id="reg-form" novalidate>
 
           <div class="form-group">
-            <label for="field-alias">Alias</label>
-            <input type="text" id="field-alias" placeholder="Choose an alias"
-                   autocomplete="nickname" required />
-            <span class="field-hint">Please register using an alias instead of your real first name, last name, work email, or any other easily recognizable information to protect privacy. Use the <a class="sheet-link" href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer">official registration spreadsheet</a> to provide your personal details, as it will be used to track the winners!</span>
-            <span class="field-error" id="err-alias">Please enter an alias. Do not use an email address.</span>
+            <label for="field-password">Access code</label>
+            <input type="password" id="field-password" placeholder="Enter access code"
+                   autocomplete="current-password" required />
+            <span class="field-hint">Don't have the code? Ask your Unidos point of contact. You'll choose an alias on the next screen.</span>
+            <span class="field-error" id="err-password">Incorrect access code.</span>
           </div>
 
-          <button type="submit" class="btn-register" id="btn-register" onclick="handleRegister(event)">
-            Join the Bracket Challenge &rarr;
+          <button type="submit" class="btn-register" id="btn-register" onclick="handleUnlock(event)">
+            Enter &rarr;
           </button>
 
         </form>
@@ -369,54 +370,40 @@
   </div>
 
   <script>
-    function isValidAlias(value) {
-      const alias = value.trim();
-      return alias && !alias.includes('@');
-    }
-
-    async function handleRegister(e) {
+    async function handleUnlock(e) {
       e.preventDefault();
 
-      const aliasEl = document.getElementById('field-alias');
-      const errAlias = document.getElementById('err-alias');
+      const pwEl = document.getElementById('field-password');
+      const errEl = document.getElementById('err-password');
       const btn = document.getElementById('btn-register');
 
-      aliasEl.classList.remove('input-error');
-      errAlias.classList.remove('show');
-      errAlias.textContent = 'Please enter an alias. Do not use an email address.';
+      pwEl.classList.remove('input-error');
+      errEl.classList.remove('show');
 
-      if (!isValidAlias(aliasEl.value)) {
-        aliasEl.classList.add('input-error'); errAlias.classList.add('show');
+      const password = pwEl.value;
+      if (!password) {
+        errEl.textContent = 'Please enter the access code.';
+        pwEl.classList.add('input-error'); errEl.classList.add('show');
         return;
       }
 
-      const alias = aliasEl.value.trim();
       const originalLabel = btn.innerHTML;
-      btn.disabled = true; btn.innerHTML = 'Registering…';
+      btn.disabled = true; btn.innerHTML = 'Checking…';
       try {
-        const res = await fetch('/api/register', {
+        const res = await fetch('/api/unlock', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ alias }),
+          body: JSON.stringify({ password }),
         });
-        const ct = res.headers.get('content-type') || '';
-        let data = {};
-        if (ct.includes('application/json')) {
-          data = await res.json().catch(() => ({}));
-        } else {
-          const text = await res.text().catch(() => '');
-          data.error = `Server returned ${res.status} (${text.slice(0, 80) || 'no body'})`;
-        }
-        if (!res.ok) throw new Error(data.error || `Registration failed (HTTP ${res.status})`);
-        const existing = JSON.parse(localStorage.getItem('wc2026-bracket-v1') || '{}');
-        existing.user = data.alias || alias;
-        localStorage.setItem('wc2026-bracket-v1', JSON.stringify(existing));
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `Unlock failed (HTTP ${res.status})`);
+        sessionStorage.setItem('wc2026-unlocked', '1');
         window.location.href = 'home.html';
       } catch (err) {
-        console.error('register failed', err);
-        errAlias.textContent = err.message || 'Could not reach the server. Try again.';
-        errAlias.classList.add('show');
-        aliasEl.classList.add('input-error');
+        console.error('unlock failed', err);
+        errEl.textContent = err.message || 'Could not verify code. Try again.';
+        errEl.classList.add('show');
+        pwEl.classList.add('input-error');
         btn.disabled = false; btn.innerHTML = originalLabel;
       }
     }

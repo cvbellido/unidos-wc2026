@@ -841,6 +841,13 @@
 
 <script>
 /* =====================================================
+   ACCESS GATE — require unlock from index.html
+===================================================== */
+if (sessionStorage.getItem('wc2026-unlocked') !== '1') {
+  window.location.replace('index.html');
+}
+
+/* =====================================================
    DATA — 48 teams
 ===================================================== */
 const TEAMS = {
@@ -1205,6 +1212,10 @@ function renderWelcome() {
       <div class="welcome-form">
         <input type="text" id="userInput" placeholder="Your alias (e.g. Golden Boot)" />
         <button class="btn" onclick="setUser()">Let's go</button>
+        <p style="font-size:0.8rem;color:rgba(255,255,255,0.75);line-height:1.5;margin-top:0.5rem;max-width:480px;text-align:center">
+          Please register using an alias instead of your real first name, last name, work email, or any other easily recognizable information to protect privacy.
+          Use the <a style="color:var(--lime,#DEFF4D);font-weight:700;text-decoration:none" href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer">official registration spreadsheet</a> to provide your personal details, as it will be used to track the winners!
+        </p>
       </div>`;
     setTimeout(() => document.getElementById('userInput')?.focus(), 100);
     document.getElementById('userInput')?.addEventListener('keydown', e => { if (e.key==='Enter') setUser(); });

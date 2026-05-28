@@ -820,6 +820,12 @@
   </div>
 
   <div class="card">
+    <h3>All Player Picks</h3>
+    <p class="muted" style="margin-bottom:0.75rem">Every registered player's bracket at a glance. Click a row to expand full knockout picks.</p>
+    <div style="overflow-x:auto"><div id="allPicksTable"></div></div>
+  </div>
+
+  <div class="card">
     <h3>Auto-Sync Results</h3>
     <p class="muted" style="margin-bottom:0.75rem">Pull live match results from <a href="https://www.thesportsdb.com" target="_blank" rel="noreferrer" style="color:var(--lime);font-weight:700;text-decoration:none">TheSportsDB</a>. Group standings (top 2) fill in once all 3 group matches are played; knockout winners fill in as matches finish. You can still override anything below.</p>
     <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
@@ -1680,6 +1686,63 @@ function renderAdmin() {
   }).join('');
 
   renderAdminBracket();
+  renderAllPicksTable();
+}
+
+function renderAllPicksTable() {
+  const wrap = document.getElementById('allPicksTable');
+  if (!wrap) return;
+  const players = state.players || [];
+  if (players.length === 0) {
+    wrap.innerHTML = '<p class="muted">No player picks yet.</p>';
+    return;
+  }
+  const groupLetters = Object.keys(state.groups || {}).sort();
+  const teamCell = code => {
+    if (!code) return '<span class="muted">—</span>';
+    const t = TEAMS[code];
+    return t ? `${t.flag||''} ${escapeHtml(t.name)}` : escapeHtml(code);
+  };
+  const groupCell = (picks, L) => {
+    const arr = (picks?.group?.[L]) || [];
+    const first = arr[0], second = arr[1];
+    return `<div style="white-space:nowrap;font-size:0.78rem">
+      <div>1. ${teamCell(first)}</div>
+      <div>2. ${teamCell(second)}</div>
+    </div>`;
+  };
+  const ko = (picks) => {
+    const r32 = Object.keys(picks?.r32 || {}).length;
+    const r16 = Object.keys(picks?.r16 || {}).length;
+    const qf  = Object.keys(picks?.qf  || {}).length;
+    const sf  = Object.keys(picks?.sf  || {}).length;
+    return `R32 ${r32}/16 · R16 ${r16}/16 · QF ${qf}/8 · SF ${sf}/4`;
+  };
+
+  const rows = players.map((p, i) => {
+    const picks = p.picks || {};
+    const name = playerAlias(p);
+    const champ = picks.final;
+    return `<tr style="border-bottom:1px solid var(--card-border)">
+      <td style="padding:0.55rem 0.5rem;font-weight:700;white-space:nowrap">${escapeHtml(name)}</td>
+      <td style="padding:0.55rem 0.5rem;white-space:nowrap">${champ ? teamCell(champ) : '<span class="muted">—</span>'}</td>
+      ${groupLetters.map(L => `<td style="padding:0.55rem 0.5rem;vertical-align:top">${groupCell(picks, L)}</td>`).join('')}
+      <td style="padding:0.55rem 0.5rem;font-size:0.78rem;color:rgba(255,255,255,0.7);white-space:nowrap">${ko(picks)}</td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+      <thead>
+        <tr style="border-bottom:2px solid var(--card-border);color:var(--lime);text-align:left">
+          <th style="padding:0.5rem 0.5rem">Name</th>
+          <th style="padding:0.5rem 0.5rem">Champion</th>
+          ${groupLetters.map(L => `<th style="padding:0.5rem 0.5rem">Grp ${L}</th>`).join('')}
+          <th style="padding:0.5rem 0.5rem">Knockout</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 async function cycleGroupResult(L, code) {
   let arr=state.results.group[L]||[], idx=arr.indexOf(code);

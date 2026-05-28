@@ -813,7 +813,7 @@
   <div class="card">
     <h3>Players</h3>
     <p class="muted" style="margin-bottom:0.75rem">Players are added automatically when they register on the landing page and submit their picks. Remove anyone who shouldn't be on the leaderboard here.</p>
-    <p class="muted" style="margin-bottom:0.75rem">The official private list of real names, emails, markets, and aliases lives in <a href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer" style="color:var(--lime);font-weight:700;text-decoration:none">this spreadsheet</a>.</p>
+    <p class="muted" style="margin-bottom:0.75rem">The official private list of real names, emails, and markets lives in <a href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer" style="color:var(--lime);font-weight:700;text-decoration:none">this spreadsheet</a>.</p>
     <div id="playersList"></div>
     <div style="margin-top:0.75rem">
       <button class="btn secondary" style="background:rgba(255,77,95,0.18);border-color:rgba(255,77,95,0.4);color:#ffb3bb" onclick="wipeAllPlayers()">🗑 Remove ALL players</button>
@@ -1241,7 +1241,7 @@ function renderWelcome() {
     userArea.innerHTML = '';
     welcomeBox.innerHTML = `
       <div class="welcome-form">
-        <input type="text" id="userInput" placeholder="Your alias (e.g. Golden Boot)" />
+        <input type="text" id="userInput" placeholder="Your name (e.g. Carla Bellido)" autocomplete="name" />
         <button class="btn" onclick="setUser()">Let's go</button>
       </div>`;
     setTimeout(() => document.getElementById('userInput')?.focus(), 100);
@@ -1251,7 +1251,7 @@ function renderWelcome() {
 }
 async function setUser() {
   const v = document.getElementById('userInput').value.trim();
-  if (!v || v.includes('@')) { showToast('Enter an alias, not an email'); return; }
+  if (!v || v.includes('@')) { showToast('Enter your name, not an email'); return; }
   try {
     const r = await fetch('/api/register', {
       method: 'POST',
@@ -1457,7 +1457,7 @@ function autoPick() {
    SHARE / IMPORT
 ===================================================== */
 async function sharePicks() {
-  if (!state.user) { showToast('Enter your alias first'); switchTab('home'); return; }
+  if (!state.user) { showToast('Enter your name first'); switchTab('home'); return; }
   if (picksLocked()) { showToast('\u{1F512} Picks closed on ' + deadlineLabel()); return; }
   if (!picksHaveContent(state.myPicks)) { showToast('Make at least one pick first'); return; }
   if (!confirm('Save your picks? You can keep editing until ' + deadlineLabel() + '.')) return;
@@ -1521,7 +1521,7 @@ function renderLeaderboard() {
   everyone.sort((a,b)=>b.score-a.score);
   wrap.innerHTML=`
     <table class="leaderboard-table">
-      <thead><tr><th>#</th><th>Alias</th><th>Champion Pick</th><th style="text-align:right">Points</th></tr></thead>
+      <thead><tr><th>#</th><th>Name</th><th>Champion Pick</th><th style="text-align:right">Points</th></tr></thead>
       <tbody>${everyone.map((p,i)=>{
         const champ=p.picks?.final;
         const alias=playerAlias(p);
@@ -1757,7 +1757,7 @@ async function removePlayer(i) {
 }
 async function wipeAllPlayers() {
   if (!confirm('Remove ALL players from the leaderboard? This cannot be undone.')) return;
-  if (!confirm('Are you absolutely sure? Every registered alias and their picks will be permanently deleted.')) return;
+  if (!confirm('Are you absolutely sure? Every registered player and their picks will be permanently deleted.')) return;
   try {
     const r = await adminPost('/api/wipe-players', {});
     state.players = []; save(); renderAdmin(); renderLeaderboard();

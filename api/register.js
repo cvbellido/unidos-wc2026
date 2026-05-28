@@ -9,13 +9,13 @@ export default async function handler(req, res) {
     if (!alias) return res.status(400).json({ error: 'Invalid alias' });
 
     const key = aliasKey(alias);
-    if (!key) return res.status(400).json({ error: 'Alias must contain letters or numbers' });
+    if (!key) return res.status(400).json({ error: 'Name must contain letters or numbers' });
 
     const all = await sql`SELECT alias FROM players;`;
     const clash = all.rows.find(r => aliasKey(r.alias) === key);
     if (clash) {
       return res.status(409).json({
-        error: `The alias "${alias}" is too similar to "${clash.alias}", which is already taken. Please pick a different alias.`,
+        error: `The name "${alias}" is too similar to "${clash.alias}", which is already taken. Please use a different name.`,
         existing: clash.alias,
       });
     }

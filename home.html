@@ -726,7 +726,7 @@
   <div class="picks-header-grid">
     <div>
       <h2 style="margin-top:0">Make Your Picks</h2>
-      <p class="muted" style="margin-bottom:1rem;color:#fff">Click a team to mark your prediction. Group stage first, then the bracket fills in from your picks. Once you submit, your picks are locked — so choose carefully!</p>
+      <p class="muted" style="margin-bottom:1rem;color:#fff">Click a team to mark your prediction. Group stage first, then the bracket fills in from your picks. You can edit your picks anytime until <b>June 10, 2026 at 11:59 PM ET</b> — after that they're locked.</p>
       <p class="muted" style="margin-top:1rem;color:#fff"><strong>Group Stage — pick 1st &amp; 2nd in each group. Click once for 1st, click again for 2nd, click again to clear.</strong></p>
     </div>
     <div>
@@ -958,12 +958,17 @@ function buildSchedule(groups) {
    STATE
 ===================================================== */
 const STORAGE_KEY = 'wc2026-bracket-v1';
+// Picks close at end of day June 10, 2026 (Eastern Time). World Cup kicks off June 11.
+const PICKS_DEADLINE = new Date('2026-06-11T03:59:59Z').getTime(); // 23:59:59 EDT June 10
+function picksLocked() { return Date.now() >= PICKS_DEADLINE; }
+function deadlineLabel() {
+  return 'June 10, 2026 \u2014 11:59 PM ET';
+}
 const state = {
   user: null, groups: null, schedule: null,
   myPicks: { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   results: { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   players: [],
-  picksLocked: false,
 };
 function picksHaveContent(p) {
   if (!p) return false;
@@ -973,7 +978,7 @@ function picksHaveContent(p) {
   return false;
 }
 function enforceLock() {
-  if (state.picksLocked) { showToast('\u{1F512} Picks are locked'); return true; }
+  if (picksLocked()) { showToast('\u{1F512} Picks closed on ' + deadlineLabel()); return true; }
   return false;
 }
 function save() {
@@ -1005,9 +1010,7 @@ async function refreshLeaderboard() {
     }
     if (state.user) {
       const mine = state.players.find(p => playerAlias(p).toLowerCase() === state.user.toLowerCase());
-      const serverLocked = mine && picksHaveContent(mine.picks);
-      if (serverLocked && !state.picksLocked) {
-        state.picksLocked = true;
+      if (mine && picksHaveContent(mine.picks) && !picksHaveContent(state.myPicks)) {
         state.myPicks = mine.picks;
         save();
         if (document.querySelector('.panel.active')?.id === 'picks') renderPicks();
@@ -1146,15 +1149,16 @@ async function setUser() {
 ===================================================== */
 function renderPicks() {
   const banner = document.getElementById('picksLockBanner');
+  const locked = picksLocked();
   if (banner) {
-    banner.innerHTML = state.picksLocked
-      ? `<div class="picks-locked-banner">\u{1F512} Your picks are locked in. Good luck! \u26BD</div>`
-      : '';
+    banner.innerHTML = locked
+      ? `<div class="picks-locked-banner">\u{1F512} Picks closed on ${deadlineLabel()}. Good luck! \u26BD</div>`
+      : `<div class="picks-locked-banner" style="color:var(--cyan);border-color:rgba(27,225,242,0.4);background:linear-gradient(90deg,rgba(27,225,242,0.12),rgba(199,185,255,0.08))">\u23F0 Picks close ${deadlineLabel()}. You can edit anytime until then.</div>`;
   }
   document.querySelectorAll('#picks .actions-row .btn').forEach(b => {
-    b.disabled = state.picksLocked;
-    b.style.opacity = state.picksLocked ? '0.45' : '';
-    b.style.cursor = state.picksLocked ? 'not-allowed' : '';
+    b.disabled = locked;
+    b.style.opacity = locked ? '0.45' : '';
+    b.style.cursor = locked ? 'not-allowed' : '';
   });
   renderGroupPicks(); renderBracket(); updatePicksProgress();
 }
@@ -1268,7 +1272,7 @@ function renderChampionSelect() {
   let html='<option value="">— pick a champion —</option>';
   for (const t of teams) html+=`<option value="${t.code}" ${t.code===cur?'selected':''}>${t.flag} ${t.name}</option>`;
   sel.innerHTML=html;
-  sel.disabled=!!state.picksLocked;
+  sel.disabled=picksLocked();
 }
 function pickChampion(code) {
   if (enforceLock()) { renderChampionSelect(); return; }
@@ -1329,9 +1333,9 @@ function autoPick() {
 ===================================================== */
 async function sharePicks() {
   if (!state.user) { showToast('Enter your alias first'); switchTab('home'); return; }
-  if (state.picksLocked) { showToast('\u{1F512} Picks already submitted'); return; }
+  if (picksLocked()) { showToast('\u{1F512} Picks closed on ' + deadlineLabel()); return; }
   if (!picksHaveContent(state.myPicks)) { showToast('Make at least one pick first'); return; }
-  if (!confirm('Submit your picks? Once submitted, they cannot be changed.')) return;
+  if (!confirm('Save your picks? You can keep editing until ' + deadlineLabel() + '.')) return;
   try {
     const res = await fetch('/api/submit-picks', {
       method: 'POST',
@@ -1340,14 +1344,12 @@ async function sharePicks() {
     });
     const d = await res.json().catch(()=>({}));
     if (!res.ok) {
-      if (d.locked) { state.picksLocked = true; renderPicks(); }
       showToast(d.error || 'Could not save picks');
       return;
     }
-    state.picksLocked = true;
     save();
     renderPicks();
-    showToast('Picks locked in! \u2705 Good luck!');
+    showToast('Picks saved! \u2705 Edit anytime before ' + deadlineLabel() + '.');
     refreshLeaderboard();
   } catch (e) { showToast('Network error \u2014 picks not saved'); }
 }

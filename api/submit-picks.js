@@ -1,12 +1,7 @@
 import { sql, initDb, normalizeAlias } from './_db.js';
 
-function picksHaveContent(p) {
-  if (!p || typeof p !== 'object') return false;
-  const g = p.group || {}; if (Object.values(g).some(a => Array.isArray(a) && a.length)) return true;
-  for (const k of ['r32','r16','qf','sf']) if (p[k] && Object.keys(p[k]).length) return true;
-  if (p.final) return true;
-  return false;
-}
+// Picks close at end of day June 10, 2026 ET (23:59:59 EDT = 03:59:59 UTC June 11).
+const PICKS_DEADLINE_MS = Date.UTC(2026, 5, 11, 3, 59, 59);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
@@ -17,12 +12,13 @@ export default async function handler(req, res) {
     if (!alias) return res.status(400).json({ error: 'Invalid alias' });
     if (!picks || typeof picks !== 'object') return res.status(400).json({ error: 'Invalid picks' });
 
-    const existing = await sql`SELECT alias, picks FROM players WHERE LOWER(alias) = LOWER(${alias}) LIMIT 1;`;
+    if (Date.now() >= PICKS_DEADLINE_MS) {
+      return res.status(409).json({ error: 'Picks closed on June 10, 2026 at 11:59 PM ET.', locked: true });
+    }
+
+    const existing = await sql`SELECT alias FROM players WHERE LOWER(alias) = LOWER(${alias}) LIMIT 1;`;
     if (existing.rowCount === 0) {
       return res.status(404).json({ error: 'Player not registered. Please register first.' });
-    }
-    if (picksHaveContent(existing.rows[0].picks)) {
-      return res.status(409).json({ error: 'Your picks have already been submitted and cannot be changed.', locked: true });
     }
 
     const result = await sql`
@@ -31,7 +27,7 @@ export default async function handler(req, res) {
       WHERE LOWER(alias) = LOWER(${alias})
       RETURNING alias;
     `;
-    return res.status(200).json({ alias: result.rows[0].alias, ok: true, locked: true });
+    return res.status(200).json({ alias: result.rows[0].alias, ok: true });
   } catch (err) {
     console.error('submit-picks error', err);
     return res.status(500).json({ error: 'Server error' });

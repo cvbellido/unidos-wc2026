@@ -791,6 +791,15 @@
   </div>
 
   <div class="card">
+    <h3>Auto-Sync Results</h3>
+    <p class="muted" style="margin-bottom:0.75rem">Pull live match results from <a href="https://www.thesportsdb.com" target="_blank" rel="noreferrer" style="color:var(--lime);font-weight:700;text-decoration:none">TheSportsDB</a>. Group standings (top 2) fill in once all 3 group matches are played; knockout winners fill in as matches finish. You can still override anything below.</p>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+      <button class="btn" onclick="syncFromSportsDb()">🔄 Sync results now</button>
+      <span id="syncStatus" class="muted" style="font-size:0.85rem"></span>
+    </div>
+  </div>
+
+  <div class="card">
     <h3>Enter Group Stage Results</h3>
     <p class="muted" style="margin-bottom:0.75rem">Select the 1st and 2nd place finisher in each group as it becomes official.</p>
     <div id="adminGroups"></div>
@@ -1638,6 +1647,34 @@ async function wipeAllPlayers() {
     state.players = []; save(); renderAdmin(); renderLeaderboard();
     showToast('Removed '+(r?.removed ?? 'all')+' players');
   } catch (e) { showToast(e.message); }
+}
+async function syncFromSportsDb() {
+  const status = document.getElementById('syncStatus');
+  if (status) { status.textContent = 'Syncing…'; status.style.color = 'var(--cyan)'; }
+  try {
+    const r = await adminPost('/api/sync-results', { groups: state.groups });
+    const ko = r.knockoutCounts || {};
+    const parts = [];
+    parts.push(`${r.groupsComplete||0}/12 groups complete`);
+    if (ko.r32) parts.push(`R32:${ko.r32}`);
+    if (ko.r16) parts.push(`R16:${ko.r16}`);
+    if (ko.qf)  parts.push(`QF:${ko.qf}`);
+    if (ko.sf)  parts.push(`SF:${ko.sf}`);
+    if (ko.final) parts.push('Final ✓');
+    if (status) {
+      status.textContent = `${r.finished||0} finished matches synced \u2014 ${parts.join(', ')}`;
+      status.style.color = 'var(--lime)';
+    }
+    if (Array.isArray(r.unknownTeams) && r.unknownTeams.length) {
+      console.warn('Sync: unknown team names (add to NAME_TO_CODE in api/sync-results.js):', r.unknownTeams);
+    }
+    await refreshLeaderboard();
+    renderAdmin();
+    showToast('Results synced \u2705');
+  } catch (e) {
+    if (status) { status.textContent = 'Error: ' + e.message; status.style.color = 'var(--rose, #ff4d5f)'; }
+    showToast('Sync failed: ' + e.message);
+  }
 }
 function exportData() {
   document.getElementById('dataEditor').value=JSON.stringify({groups:state.groups,schedule:state.schedule},null,2);

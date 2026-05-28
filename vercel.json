@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "api/home.js": {
+      "includeFiles": "app.html"
+    }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/home", "destination": "/api/home" },
+    { "source": "/home.html", "destination": "/api/home" }
+  ],
+  "redirects": [
+    { "source": "/app.html", "destination": "/home.html", "permanent": false },
+    { "source": "/app", "destination": "/home.html", "permanent": false }
+  ]
+}

@@ -56,7 +56,9 @@ export const ACCESS_COOKIE = 'wc_access';
 const ACCESS_MAX_AGE_SECONDS = 60 * 60 * 24 * 60; // 60 days
 
 export function accessToken() {
-  const secret = process.env.ADMIN_PASSWORD || '';
+  // Sign with ACCESS_CODE so changing the user code rotates all cookies,
+  // without affecting the separate ADMIN_PASSWORD.
+  const secret = process.env.ACCESS_CODE || '';
   return crypto.createHmac('sha256', secret).update('wc2026-access-v1').digest('hex');
 }
 

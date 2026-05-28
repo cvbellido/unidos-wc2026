@@ -12,6 +12,10 @@ jobs:
     steps:
       - name: Call /api/sync-results
         run: |
-          curl -fsS -X POST \
+          HTTP_CODE=$(curl -sS -o /tmp/body.txt -w "%{http_code}" -X POST \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://unidos-wc2026.vercel.app/api/sync-results
+            https://unidos-wc2026.vercel.app/api/sync-results)
+          echo "HTTP $HTTP_CODE"
+          cat /tmp/body.txt
+          echo
+          test "$HTTP_CODE" = "200"

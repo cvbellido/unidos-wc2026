@@ -2,25 +2,68 @@ import { sql, initDb, requireAdmin } from './_db.js';
 
 const SPORTS_DB_URL = 'https://www.thesportsdb.com/api/v1/json/123/eventsseason.php?id=4429&s=2026';
 
-// TheSportsDB team-name → our 3-letter code. Add aliases for any name variant we see.
+// TheSportsDB team-name → our 3-letter code. Covers all 48 official FIFA WC 2026 teams.
 const NAME_TO_CODE = {
+  // Group A
+  'Mexico':'MEX',
+  'South Africa':'RSA',
+  'Korea Republic':'KOR','South Korea':'KOR',
+  'Czechia':'CZE','Czech Republic':'CZE',
+  // Group B
+  'Canada':'CAN',
+  'Bosnia and Herzegovina':'BIH','Bosnia & Herzegovina':'BIH','Bosnia-Herzegovina':'BIH',
+  'Switzerland':'SUI',
+  'Qatar':'QAT',
+  // Group C
+  'Haiti':'HAI',
+  'Scotland':'SCO',
+  'Brazil':'BRA',
+  'Morocco':'MAR',
+  // Group D
   'USA':'USA','United States':'USA',
-  'Mexico':'MEX','Canada':'CAN',
-  'Argentina':'ARG','Brazil':'BRA','Uruguay':'URU','Colombia':'COL',
-  'Ecuador':'ECU','Paraguay':'PAR',
-  'France':'FRA','England':'ENG','Spain':'ESP','Germany':'GER','Portugal':'POR',
-  'Netherlands':'NED','Belgium':'BEL','Italy':'ITA','Croatia':'CRO',
-  'Switzerland':'SUI','Denmark':'DEN','Austria':'AUT','Poland':'POL',
-  'Serbia':'SRB','Norway':'NOR',
+  'Paraguay':'PAR',
+  'Australia':'AUS',
   'Türkiye':'TUR','Turkey':'TUR',
-  'Morocco':'MAR','Senegal':'SEN','Egypt':'EGY','Nigeria':'NGA','Algeria':'ALG',
-  'Tunisia':'TUN','Ghana':'GHA','Cameroon':'CMR',
+  // Group E
   "Côte d'Ivoire":'CIV','Ivory Coast':'CIV',
-  'Japan':'JPN','South Korea':'KOR','Korea Republic':'KOR',
-  'Iran':'IRN','IR Iran':'IRN',
-  'Saudi Arabia':'KSA','Australia':'AUS','Iraq':'IRQ','Uzbekistan':'UZB','Qatar':'QAT',
-  'Costa Rica':'CRC','Jamaica':'JAM','Panama':'PAN','New Zealand':'NZL',
-  'Ukraine':'UKR','Scotland':'SCO',
+  'Ecuador':'ECU',
+  'Germany':'GER',
+  'Curaçao':'CUW','Curacao':'CUW',
+  // Group F
+  'Netherlands':'NED',
+  'Japan':'JPN',
+  'Sweden':'SWE',
+  'Tunisia':'TUN',
+  // Group G
+  'IR Iran':'IRN','Iran':'IRN',
+  'New Zealand':'NZL',
+  'Belgium':'BEL',
+  'Egypt':'EGY',
+  // Group H
+  'Saudi Arabia':'KSA',
+  'Uruguay':'URU',
+  'Spain':'ESP',
+  'Cabo Verde':'CPV','Cape Verde':'CPV',
+  // Group I
+  'France':'FRA',
+  'Senegal':'SEN',
+  'Iraq':'IRQ',
+  'Norway':'NOR',
+  // Group J
+  'Argentina':'ARG',
+  'Algeria':'ALG',
+  'Austria':'AUT',
+  'Jordan':'JOR',
+  // Group K
+  'Portugal':'POR',
+  'Congo DR':'COD','DR Congo':'COD','Democratic Republic of the Congo':'COD',
+  'Uzbekistan':'UZB',
+  'Colombia':'COL',
+  // Group L
+  'Ghana':'GHA',
+  'Panama':'PAN',
+  'England':'ENG',
+  'Croatia':'CRO',
 };
 
 // Approximate stage detection by date (FIFA 2026 official window).

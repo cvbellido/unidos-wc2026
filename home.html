@@ -844,69 +844,81 @@
    DATA — 48 teams
 ===================================================== */
 const TEAMS = {
-  USA: { name: 'United States', flag: '🇺🇸' },
+  // Group A
   MEX: { name: 'Mexico', flag: '🇲🇽' },
+  RSA: { name: 'South Africa', flag: '🇿🇦' },
+  KOR: { name: 'Korea Republic', flag: '🇰🇷' },
+  CZE: { name: 'Czechia', flag: '🇨🇿' },
+  // Group B
   CAN: { name: 'Canada', flag: '🇨🇦' },
-  ARG: { name: 'Argentina', flag: '🇦🇷' },
-  BRA: { name: 'Brazil', flag: '🇧🇷' },
-  URU: { name: 'Uruguay', flag: '🇺🇾' },
-  COL: { name: 'Colombia', flag: '🇨🇴' },
-  ECU: { name: 'Ecuador', flag: '🇪🇨' },
-  PAR: { name: 'Paraguay', flag: '🇵🇾' },
-  FRA: { name: 'France', flag: '🇫🇷' },
-  ENG: { name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
-  ESP: { name: 'Spain', flag: '🇪🇸' },
-  GER: { name: 'Germany', flag: '🇩🇪' },
-  POR: { name: 'Portugal', flag: '🇵🇹' },
-  NED: { name: 'Netherlands', flag: '🇳🇱' },
-  BEL: { name: 'Belgium', flag: '🇧🇪' },
-  ITA: { name: 'Italy', flag: '🇮🇹' },
-  CRO: { name: 'Croatia', flag: '🇭🇷' },
+  BIH: { name: 'Bosnia & Herzegovina', flag: '🇧🇦' },
   SUI: { name: 'Switzerland', flag: '🇨🇭' },
-  DEN: { name: 'Denmark', flag: '🇩🇰' },
-  AUT: { name: 'Austria', flag: '🇦🇹' },
-  POL: { name: 'Poland', flag: '🇵🇱' },
-  SRB: { name: 'Serbia', flag: '🇷🇸' },
-  NOR: { name: 'Norway', flag: '🇳🇴' },
-  TUR: { name: 'Türkiye', flag: '🇹🇷' },
-  MAR: { name: 'Morocco', flag: '🇲🇦' },
-  SEN: { name: 'Senegal', flag: '🇸🇳' },
-  EGY: { name: 'Egypt', flag: '🇪🇬' },
-  NGA: { name: 'Nigeria', flag: '🇳🇬' },
-  ALG: { name: 'Algeria', flag: '🇩🇿' },
-  TUN: { name: 'Tunisia', flag: '🇹🇳' },
-  GHA: { name: 'Ghana', flag: '🇬🇭' },
-  CMR: { name: 'Cameroon', flag: '🇨🇲' },
-  CIV: { name: "Côte d'Ivoire", flag: '🇨🇮' },
-  JPN: { name: 'Japan', flag: '🇯🇵' },
-  KOR: { name: 'South Korea', flag: '🇰🇷' },
-  IRN: { name: 'Iran', flag: '🇮🇷' },
-  KSA: { name: 'Saudi Arabia', flag: '🇸🇦' },
-  AUS: { name: 'Australia', flag: '🇦🇺' },
-  IRQ: { name: 'Iraq', flag: '🇮🇶' },
-  UZB: { name: 'Uzbekistan', flag: '🇺🇿' },
   QAT: { name: 'Qatar', flag: '🇶🇦' },
-  CRC: { name: 'Costa Rica', flag: '🇨🇷' },
-  JAM: { name: 'Jamaica', flag: '🇯🇲' },
-  PAN: { name: 'Panama', flag: '🇵🇦' },
-  NZL: { name: 'New Zealand', flag: '🇳🇿' },
-  UKR: { name: 'Ukraine', flag: '🇺🇦' },
+  // Group C
+  HAI: { name: 'Haiti', flag: '🇭🇹' },
   SCO: { name: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+  BRA: { name: 'Brazil', flag: '🇧🇷' },
+  MAR: { name: 'Morocco', flag: '🇲🇦' },
+  // Group D
+  USA: { name: 'United States', flag: '🇺🇸' },
+  PAR: { name: 'Paraguay', flag: '🇵🇾' },
+  AUS: { name: 'Australia', flag: '🇦🇺' },
+  TUR: { name: 'Türkiye', flag: '🇹🇷' },
+  // Group E
+  CIV: { name: "Côte d'Ivoire", flag: '🇨🇮' },
+  ECU: { name: 'Ecuador', flag: '🇪🇨' },
+  GER: { name: 'Germany', flag: '🇩🇪' },
+  CUW: { name: 'Curaçao', flag: '🇨🇼' },
+  // Group F
+  NED: { name: 'Netherlands', flag: '🇳🇱' },
+  JPN: { name: 'Japan', flag: '🇯🇵' },
+  SWE: { name: 'Sweden', flag: '🇸🇪' },
+  TUN: { name: 'Tunisia', flag: '🇹🇳' },
+  // Group G
+  IRN: { name: 'IR Iran', flag: '🇮🇷' },
+  NZL: { name: 'New Zealand', flag: '🇳🇿' },
+  BEL: { name: 'Belgium', flag: '🇧🇪' },
+  EGY: { name: 'Egypt', flag: '🇪🇬' },
+  // Group H
+  KSA: { name: 'Saudi Arabia', flag: '🇸🇦' },
+  URU: { name: 'Uruguay', flag: '🇺🇾' },
+  ESP: { name: 'Spain', flag: '🇪🇸' },
+  CPV: { name: 'Cabo Verde', flag: '🇨🇻' },
+  // Group I
+  FRA: { name: 'France', flag: '🇫🇷' },
+  SEN: { name: 'Senegal', flag: '🇸🇳' },
+  IRQ: { name: 'Iraq', flag: '🇮🇶' },
+  NOR: { name: 'Norway', flag: '🇳🇴' },
+  // Group J
+  ARG: { name: 'Argentina', flag: '🇦🇷' },
+  ALG: { name: 'Algeria', flag: '🇩🇿' },
+  AUT: { name: 'Austria', flag: '🇦🇹' },
+  JOR: { name: 'Jordan', flag: '🇯🇴' },
+  // Group K
+  POR: { name: 'Portugal', flag: '🇵🇹' },
+  COD: { name: 'Congo DR', flag: '🇨🇩' },
+  UZB: { name: 'Uzbekistan', flag: '🇺🇿' },
+  COL: { name: 'Colombia', flag: '🇨🇴' },
+  // Group L
+  GHA: { name: 'Ghana', flag: '🇬🇭' },
+  PAN: { name: 'Panama', flag: '🇵🇦' },
+  ENG: { name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  CRO: { name: 'Croatia', flag: '🇭🇷' },
 };
 
 let DEFAULT_GROUPS = {
-  A: ['MEX','JPN','BEL','JAM'],
-  B: ['CAN','CRO','SUI','NGA'],
-  C: ['USA','POR','SCO','IRN'],
-  D: ['ARG','NOR','KOR','TUN'],
-  E: ['ESP','AUT','PAR','CIV'],
-  F: ['BRA','URU','IRQ','PAN'],
-  G: ['ENG','SRB','ECU','UZB'],
-  H: ['FRA','DEN','KSA','NZL'],
-  I: ['GER','TUR','EGY','CRC'],
-  J: ['NED','COL','SEN','QAT'],
-  K: ['MAR','POL','AUS','CMR'],
-  L: ['ITA','UKR','GHA','ALG'],
+  A: ['MEX','RSA','KOR','CZE'],
+  B: ['CAN','BIH','SUI','QAT'],
+  C: ['HAI','SCO','BRA','MAR'],
+  D: ['USA','PAR','AUS','TUR'],
+  E: ['CIV','ECU','GER','CUW'],
+  F: ['NED','JPN','SWE','TUN'],
+  G: ['IRN','NZL','BEL','EGY'],
+  H: ['KSA','URU','ESP','CPV'],
+  I: ['FRA','SEN','IRQ','NOR'],
+  J: ['ARG','ALG','AUT','JOR'],
+  K: ['POR','COD','UZB','COL'],
+  L: ['GHA','PAN','ENG','CRO'],
 };
 
 const VENUES = {
@@ -917,48 +929,114 @@ const VENUES = {
   TOR:'Toronto', VAN:'Vancouver',
 };
 
-function buildSchedule(groups) {
-  const sched = []; let id = 1;
-  const groupDates = [
-    ['2026-06-11','MEX'],['2026-06-12','TOR'],['2026-06-12','LA'],
-    ['2026-06-13','PHI'],['2026-06-13','BOS'],['2026-06-13','GDL'],
-    ['2026-06-14','SEA'],['2026-06-14','NY'],['2026-06-14','VAN'],
-    ['2026-06-15','HOU'],['2026-06-15','KC'],['2026-06-16','MIA'],
-    ['2026-06-17','MTY'],['2026-06-17','ATL'],['2026-06-18','PHI'],
-    ['2026-06-18','DAL'],['2026-06-19','LA'],['2026-06-19','SF'],
-    ['2026-06-20','NY'],['2026-06-20','KC'],['2026-06-21','TOR'],
-    ['2026-06-21','BOS'],['2026-06-22','VAN'],['2026-06-22','SEA'],
-    ['2026-06-23','ATL'],['2026-06-23','MIA'],['2026-06-24','PHI'],
-    ['2026-06-24','BOS'],['2026-06-25','HOU'],['2026-06-25','GDL'],
-    ['2026-06-25','MEX'],['2026-06-26','NY'],['2026-06-26','TOR'],
-    ['2026-06-27','KC'],['2026-06-27','LA'],['2026-06-27','SEA'],
+// Official FIFA World Cup 2026 schedule (June 11 – July 19, 2026).
+// Kickoff times are TBD until FIFA publishes the local match times.
+function buildSchedule(/* groups */) {
+  let id = 1;
+  const V = (k) => VENUES[k] || k;
+  const G = (L) => 'Group ' + L;
+  // [date, group, home, away, venueCode]
+  const groupFixtures = [
+    ['2026-06-11','A','MEX','RSA','MEX'],
+    ['2026-06-11','A','KOR','CZE','GDL'],
+    ['2026-06-12','B','CAN','BIH','TOR'],
+    ['2026-06-12','D','USA','PAR','LA'],
+    ['2026-06-13','C','HAI','SCO','BOS'],
+    ['2026-06-13','D','AUS','TUR','VAN'],
+    ['2026-06-13','C','BRA','MAR','NY'],
+    ['2026-06-13','B','QAT','SUI','SF'],
+    ['2026-06-14','E','CIV','ECU','PHI'],
+    ['2026-06-14','E','GER','CUW','HOU'],
+    ['2026-06-14','F','NED','JPN','DAL'],
+    ['2026-06-14','F','SWE','TUN','MTY'],
+    ['2026-06-15','H','KSA','URU','MIA'],
+    ['2026-06-15','H','ESP','CPV','ATL'],
+    ['2026-06-15','G','IRN','NZL','LA'],
+    ['2026-06-15','G','BEL','EGY','SEA'],
+    ['2026-06-16','I','FRA','SEN','NY'],
+    ['2026-06-16','I','IRQ','NOR','BOS'],
+    ['2026-06-16','J','ARG','ALG','KC'],
+    ['2026-06-16','J','AUT','JOR','SF'],
+    ['2026-06-17','L','GHA','PAN','TOR'],
+    ['2026-06-17','L','ENG','CRO','DAL'],
+    ['2026-06-17','K','POR','COD','HOU'],
+    ['2026-06-17','K','UZB','COL','MEX'],
+    ['2026-06-18','A','CZE','RSA','ATL'],
+    ['2026-06-18','B','SUI','BIH','LA'],
+    ['2026-06-18','B','CAN','QAT','VAN'],
+    ['2026-06-18','A','MEX','KOR','GDL'],
+    ['2026-06-19','C','BRA','HAI','PHI'],
+    ['2026-06-19','C','SCO','MAR','BOS'],
+    ['2026-06-19','D','TUR','PAR','SF'],
+    ['2026-06-19','D','USA','AUS','SEA'],
+    ['2026-06-20','E','GER','CIV','TOR'],
+    ['2026-06-20','E','ECU','CUW','KC'],
+    ['2026-06-20','F','NED','SWE','HOU'],
+    ['2026-06-20','F','TUN','JPN','MTY'],
+    ['2026-06-21','H','URU','CPV','MIA'],
+    ['2026-06-21','H','ESP','KSA','ATL'],
+    ['2026-06-21','G','BEL','IRN','LA'],
+    ['2026-06-21','G','NZL','EGY','VAN'],
+    ['2026-06-22','I','NOR','SEN','NY'],
+    ['2026-06-22','I','FRA','IRQ','PHI'],
+    ['2026-06-22','J','ARG','AUT','DAL'],
+    ['2026-06-22','J','JOR','ALG','SF'],
+    ['2026-06-23','L','ENG','GHA','BOS'],
+    ['2026-06-23','L','PAN','CRO','TOR'],
+    ['2026-06-23','K','POR','UZB','HOU'],
+    ['2026-06-23','K','COL','COD','GDL'],
+    ['2026-06-24','C','SCO','BRA','MIA'],
+    ['2026-06-24','C','MAR','HAI','ATL'],
+    ['2026-06-24','B','SUI','CAN','VAN'],
+    ['2026-06-24','B','BIH','QAT','SEA'],
+    ['2026-06-24','A','CZE','MEX','MEX'],
+    ['2026-06-24','A','RSA','KOR','MTY'],
+    ['2026-06-25','E','CUW','CIV','PHI'],
+    ['2026-06-25','E','ECU','GER','NY'],
+    ['2026-06-25','F','JPN','SWE','DAL'],
+    ['2026-06-25','F','TUN','NED','KC'],
+    ['2026-06-25','D','TUR','USA','LA'],
+    ['2026-06-25','D','PAR','AUS','SF'],
+    ['2026-06-26','I','NOR','FRA','BOS'],
+    ['2026-06-26','I','SEN','IRQ','TOR'],
+    ['2026-06-26','G','EGY','IRN','SEA'],
+    ['2026-06-26','G','NZL','BEL','VAN'],
+    ['2026-06-26','H','CPV','KSA','HOU'],
+    ['2026-06-26','H','URU','ESP','GDL'],
+    ['2026-06-27','L','PAN','ENG','NY'],
+    ['2026-06-27','L','CRO','GHA','PHI'],
+    ['2026-06-27','J','ALG','AUT','KC'],
+    ['2026-06-27','J','JOR','ARG','DAL'],
+    ['2026-06-27','K','COL','POR','MIA'],
+    ['2026-06-27','K','COD','UZB','ATL'],
   ];
-  const letters = Object.keys(groups);
-  for (let g=0;g<letters.length;g++) {
-    const L=letters[g],T=groups[L],[d1,v1]=groupDates[g]||['2026-06-11','TBD'];
-    sched.push({id:id++,stage:'Group '+L,date:d1,time:'15:00',home:T[0],away:T[1],venue:VENUES[v1]||v1});
-    sched.push({id:id++,stage:'Group '+L,date:d1,time:'18:00',home:T[2],away:T[3],venue:VENUES[v1]||v1});
-  }
-  for (let g=0;g<letters.length;g++) {
-    const L=letters[g],T=groups[L],[d2,v2]=groupDates[12+g]||['2026-06-17','TBD'];
-    sched.push({id:id++,stage:'Group '+L,date:d2,time:'15:00',home:T[0],away:T[2],venue:VENUES[v2]||v2});
-    sched.push({id:id++,stage:'Group '+L,date:d2,time:'18:00',home:T[1],away:T[3],venue:VENUES[v2]||v2});
-  }
-  for (let g=0;g<letters.length;g++) {
-    const L=letters[g],T=groups[L],[d3,v3]=groupDates[24+g]||['2026-06-27','TBD'];
-    sched.push({id:id++,stage:'Group '+L,date:d3,time:'16:00',home:T[0],away:T[3],venue:VENUES[v3]||v3});
-    sched.push({id:id++,stage:'Group '+L,date:d3,time:'16:00',home:T[1],away:T[2],venue:VENUES[v3]||v3});
-  }
-  const koRounds=[
-    {stage:'Round of 32',start:'2026-06-29',n:16},
-    {stage:'Round of 16',start:'2026-07-04',n:8},
-    {stage:'Quarterfinal',start:'2026-07-09',n:4},
-    {stage:'Semifinal',start:'2026-07-14',n:2},
-    {stage:'3rd Place',start:'2026-07-18',n:1},
-    {stage:'Final',start:'2026-07-19',n:1},
+  const sched = groupFixtures.map(([d,L,h,a,v]) => ({
+    id: id++, stage: G(L), date: d, time: 'TBD', home: h, away: a, venue: V(v),
+  }));
+  // Knockout fixtures (matchups determined after group stage finishes).
+  const ko = [
+    { stage:'Round of 32', date:'2026-06-28', venues:['LA'] },
+    { stage:'Round of 32', date:'2026-06-29', venues:['BOS','MTY','HOU'] },
+    { stage:'Round of 32', date:'2026-06-30', venues:['NY','DAL','MEX'] },
+    { stage:'Round of 32', date:'2026-07-01', venues:['ATL','SF','SEA'] },
+    { stage:'Round of 32', date:'2026-07-02', venues:['TOR','LA','VAN'] },
+    { stage:'Round of 32', date:'2026-07-03', venues:['MIA','KC','DAL'] },
+    { stage:'Round of 16', date:'2026-07-04', venues:['PHI','HOU'] },
+    { stage:'Round of 16', date:'2026-07-05', venues:['NY','MEX'] },
+    { stage:'Round of 16', date:'2026-07-06', venues:['DAL','SEA'] },
+    { stage:'Round of 16', date:'2026-07-07', venues:['ATL','VAN'] },
+    { stage:'Quarterfinal', date:'2026-07-09', venues:['BOS'] },
+    { stage:'Quarterfinal', date:'2026-07-10', venues:['LA'] },
+    { stage:'Quarterfinal', date:'2026-07-11', venues:['MIA','KC'] },
+    { stage:'Semifinal', date:'2026-07-14', venues:['DAL'] },
+    { stage:'Semifinal', date:'2026-07-15', venues:['ATL'] },
+    { stage:'3rd Place', date:'2026-07-18', venues:['MIA'] },
+    { stage:'Final', date:'2026-07-19', venues:['NY'] },
   ];
-  for (const r of koRounds) {
-    for (let i=0;i<r.n;i++) sched.push({id:id++,stage:r.stage,date:r.start,time:'TBD',home:'TBD',away:'TBD',venue:'TBD'});
+  for (const r of ko) {
+    for (const v of r.venues) {
+      sched.push({ id: id++, stage: r.stage, date: r.date, time: 'TBD', home: null, away: null, venue: V(v) });
+    }
   }
   return sched;
 }
@@ -966,7 +1044,7 @@ function buildSchedule(groups) {
 /* =====================================================
    STATE
 ===================================================== */
-const STORAGE_KEY = 'wc2026-bracket-v1';
+const STORAGE_KEY = 'wc2026-bracket-v2';
 // Picks close at end of day June 10, 2026 (Eastern Time). World Cup kicks off June 11.
 const PICKS_DEADLINE = new Date('2026-06-11T03:59:59Z').getTime(); // 23:59:59 EDT June 10
 function picksLocked() { return Date.now() >= PICKS_DEADLINE; }

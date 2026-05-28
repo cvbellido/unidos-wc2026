@@ -355,15 +355,45 @@
   .match-slot .team-flag { font-size: 0.95rem; width: 20px; }
   .match-slot .team-name { font-size: 0.78rem; }
   .champion-card {
-    background: #ffffff;
-    border: 2px solid var(--lime);
+    position: relative;
+    background: linear-gradient(140deg, var(--blue-dark) 0%, #001a7a 100%);
+    border: 1px solid var(--card-border);
+    border-top: 3px solid var(--lime);
     border-radius: var(--radius);
     padding: 1.25rem;
     text-align: center;
-    box-shadow: 0 0 32px rgba(222,255,77,0.25);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25), 0 0 0 1px rgba(222,255,77,0.08);
   }
-  .champion-card h3 { font-size: 0.75rem; margin: 0 0 0.4rem; letter-spacing: 0.15em; color: #0a1a4a; }
-  .champion-team { font-size: 1.25rem; font-weight: 800; color: #0a1a4a; }
+  .champion-card h3 {
+    font-size: 0.7rem;
+    margin: 0 0 0.5rem;
+    letter-spacing: 0.2em;
+    color: var(--lime);
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+  .champion-team {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 0.85rem;
+    letter-spacing: 0.02em;
+  }
+  .champion-card select {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .champion-card select:hover { border-color: var(--lime); }
+  .champion-card select:focus { outline: none; border-color: var(--lime); background: rgba(255,255,255,0.1); }
+  .champion-card select option { background: var(--blue-dark); color: #fff; }
 
   /* ── Schedule ──────────────────────────────────────────────── */
   .schedule-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
@@ -731,9 +761,9 @@
     </div>
     <div>
       <div class="champion-card">
-        <h3>🏆 WORLD CHAMPIONS 🏆</h3>
-        <div class="champion-team" id="championDisplay" style="margin-bottom:0.75rem">— select your champion below —</div>
-        <select id="championSelect" onchange="pickChampion(this.value)" style="width:100%;padding:0.6rem 0.75rem;border-radius:10px;border:1px solid rgba(10,26,74,0.25);background:#f4f6ff;color:#0a1a4a;font-size:0.95rem;font-weight:600"></select>
+        <h3>🏆 Pick Your Champion 🏆</h3>
+        <div class="champion-team" id="championDisplay">— no champion selected —</div>
+        <select id="championSelect" onchange="pickChampion(this.value)"></select>
       </div>
     </div>
   </div>
@@ -1356,7 +1386,7 @@ function renderBracket() {
   const final=state.myPicks.final;
   document.getElementById('championDisplay').innerHTML=final
     ?`${TEAMS[final]?.flag||'⚪'} ${TEAMS[final]?.name||final}`
-    :'— select your champion below —';
+    :'— no champion selected —';
   renderChampionSelect();
 }
 function renderChampionSelect() {

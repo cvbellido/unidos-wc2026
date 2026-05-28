@@ -2,6 +2,22 @@ import { sql, initDb, requireAdmin } from './_db.js';
 
 const SPORTS_DB_URL = 'https://www.thesportsdb.com/api/v1/json/123/eventsseason.php?id=4429&s=2026';
 
+// Official FIFA WC 2026 draw — used as fallback if DB hasn't been seeded.
+const OFFICIAL_GROUPS = {
+  A: ['MEX','RSA','KOR','CZE'],
+  B: ['CAN','BIH','SUI','QAT'],
+  C: ['HAI','SCO','BRA','MAR'],
+  D: ['USA','PAR','AUS','TUR'],
+  E: ['CIV','ECU','GER','CUW'],
+  F: ['NED','JPN','SWE','TUN'],
+  G: ['IRN','NZL','BEL','EGY'],
+  H: ['KSA','URU','ESP','CPV'],
+  I: ['FRA','SEN','IRQ','NOR'],
+  J: ['ARG','ALG','AUT','JOR'],
+  K: ['POR','COD','UZB','COL'],
+  L: ['GHA','PAN','ENG','CRO'],
+};
+
 // TheSportsDB team-name → our 3-letter code. Covers all 48 official FIFA WC 2026 teams.
 const NAME_TO_CODE = {
   // Group A
@@ -156,11 +172,9 @@ export default async function handler(req, res) {
       final: results.final || null,
     };
 
-    // Groups come from the client (admin button) or fall back to stored groups.
-    const groups = (req.body && req.body.groups) || results.groups || null;
-    if (!groups || typeof groups !== 'object') {
-      return res.status(400).json({ error: 'No groups provided. Open the app once as admin to seed groups, or pass {groups} in the request body.' });
-    }
+    // Groups come from the client (admin button), then fall back to stored groups,
+    // and finally to the official FIFA WC 2026 draw baked in here.
+    const groups = (req.body && req.body.groups) || results.groups || OFFICIAL_GROUPS;
 
     const r = await fetch(SPORTS_DB_URL, { headers: { 'Accept': 'application/json' } });
     if (!r.ok) return res.status(502).json({ error: `Upstream ${r.status}` });

@@ -841,11 +841,11 @@
 
 <script>
 /* =====================================================
-   ACCESS GATE — require unlock from index.html
+   ACCESS GATE — verify access cookie set by /api/unlock.
+   The leaderboard fetch below will bounce to index.html
+   on a 401, so an unauthenticated visit gets redirected
+   within a single render.
 ===================================================== */
-if (sessionStorage.getItem('wc2026-unlocked') !== '1') {
-  window.location.replace('index.html');
-}
 
 /* =====================================================
    DATA — 48 teams
@@ -1092,6 +1092,7 @@ let _pollTimer = null;
 async function refreshLeaderboard() {
   try {
     const r = await fetch('/api/leaderboard', { cache: 'no-store' });
+    if (r.status === 401) { window.location.replace('index.html'); return; }
     if (!r.ok) return;
     const d = await r.json();
     if (Array.isArray(d.players)) state.players = d.players;

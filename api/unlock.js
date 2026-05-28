@@ -1,5 +1,7 @@
 // Simple shared-password gate. Verifies against ADMIN_PASSWORD env var
-// so we don't need a separate secret for now.
+// and sets an HttpOnly access cookie that gates every other player API.
+import { setAccessCookie } from './_db.js';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -11,5 +13,6 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Incorrect password' });
   }
 
+  setAccessCookie(res);
   return res.status(200).json({ ok: true });
 }

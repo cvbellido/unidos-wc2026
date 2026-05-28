@@ -1,7 +1,8 @@
-import { sql, initDb, normalizeAlias, aliasKey } from './_db.js';
+import { sql, initDb, normalizeAlias, aliasKey, denyIfLocked } from './_db.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+  if (denyIfLocked(req, res)) return;
   try {
     await initDb();
     const alias = normalizeAlias(req.body?.alias);

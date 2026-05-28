@@ -397,7 +397,6 @@
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || `Unlock failed (HTTP ${res.status})`);
-        sessionStorage.setItem('wc2026-unlocked', '1');
         window.location.href = 'home.html';
       } catch (err) {
         console.error('unlock failed', err);

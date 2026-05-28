@@ -1,6 +1,7 @@
-import { sql, initDb, requireAdmin } from './_db.js';
+import { sql, initDb, requireAdmin, denyIfLocked } from './_db.js';
 
 export default async function handler(req, res) {
+  if (denyIfLocked(req, res)) return;
   try {
     await initDb();
     if (req.method === 'GET') {

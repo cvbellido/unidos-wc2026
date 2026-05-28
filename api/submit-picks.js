@@ -1,10 +1,11 @@
-import { sql, initDb, normalizeAlias } from './_db.js';
+import { sql, initDb, normalizeAlias, denyIfLocked } from './_db.js';
 
 // Picks close at end of day June 10, 2026 ET (23:59:59 EDT = 03:59:59 UTC June 11).
 const PICKS_DEADLINE_MS = Date.UTC(2026, 5, 11, 3, 59, 59);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+  if (denyIfLocked(req, res)) return;
   try {
     await initDb();
     const alias = normalizeAlias(req.body?.alias);

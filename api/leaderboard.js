@@ -1,7 +1,8 @@
-import { sql, initDb } from './_db.js';
+import { sql, initDb, denyIfLocked } from './_db.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
+  if (denyIfLocked(req, res)) return;
   try {
     await initDb();
     const [playersQ, resultsQ] = await Promise.all([

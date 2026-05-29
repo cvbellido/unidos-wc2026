@@ -2023,6 +2023,7 @@ if (location.hash==='#admin') document.querySelector('[data-tab="admin"]').style
       if (picksHaveContent(d.picks) && !picksHaveContent(state.myPicks)) {
         state.myPicks = d.picks;
       }
+      if (picksHaveContent(d.picks)) state.submitted = true;
       save();
     }
   } catch (e) {

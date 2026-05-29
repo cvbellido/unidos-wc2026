@@ -401,6 +401,27 @@
   .match-slot.picked { background: rgba(0,100,255,0.2); font-weight: 700; }
   .match-slot .team-flag { font-size: 0.95rem; width: 20px; }
   .match-slot .team-name { font-size: 0.78rem; }
+  .bracket-pair {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .bracket-pair:last-child { margin-bottom: 0; }
+  .bracket-pair::after {
+    content: '';
+    position: absolute;
+    right: -9px;
+    top: 25%;
+    width: 9px;
+    height: 50%;
+    border-top: 1.5px solid rgba(199,185,255,0.2);
+    border-right: 1.5px solid rgba(199,185,255,0.2);
+    border-bottom: 1.5px solid rgba(199,185,255,0.2);
+    border-radius: 0 4px 4px 0;
+    pointer-events: none;
+  }
   .champion-card {
     background: #0631A5;
     backdrop-filter: blur(14px);
@@ -784,6 +805,7 @@
 
   <div class="actions-row">
     <button class="btn secondary" onclick="autoPick()">🎲 Random picks</button>
+    <button class="btn secondary" onclick="fillBracket()">⚡ Fill bracket</button>
     <button class="btn secondary" onclick="clearPicks()">Clear all</button>
   </div>
 
@@ -1490,12 +1512,29 @@ function renderBracket() {
   ];
   for (const r of rounds) {
     const col=document.createElement('div'); col.className='bracket-round';
-    let html=`<div class="round-label">${r.label}</div>`;
-    r.matches.forEach((m,idx) => {
-      const picked=r.key==='f'?state.myPicks.final:(state.myPicks[r.key]||{})[idx];
-      html+=`<div class="match">${slotHtml(m.a,picked,r.key,idx)}${slotHtml(m.b,picked,r.key,idx)}</div>`;
-    });
-    col.innerHTML=html; wrap.appendChild(col);
+    const labelDiv=document.createElement('div'); labelDiv.className='round-label'; labelDiv.textContent=r.label;
+    col.appendChild(labelDiv);
+    if (r.key==='f') {
+      // Final: single match, no pairing
+      const m=r.matches[0], picked=state.myPicks.final;
+      const matchDiv=document.createElement('div'); matchDiv.className='match';
+      matchDiv.innerHTML=slotHtml(m.a,picked,'f',0)+slotHtml(m.b,picked,'f',0);
+      col.appendChild(matchDiv);
+    } else {
+      // Group matches into pairs (every 2 matches feed the next round's 1 match)
+      for (let p=0;p<r.matches.length;p+=2) {
+        const pairDiv=document.createElement('div'); pairDiv.className='bracket-pair';
+        for (let j=p;j<p+2&&j<r.matches.length;j++) {
+          const m=r.matches[j], idx=j;
+          const picked=(state.myPicks[r.key]||{})[idx];
+          const matchDiv=document.createElement('div'); matchDiv.className='match';
+          matchDiv.innerHTML=slotHtml(m.a,picked,r.key,idx)+slotHtml(m.b,picked,r.key,idx);
+          pairDiv.appendChild(matchDiv);
+        }
+        col.appendChild(pairDiv);
+      }
+    }
+    wrap.appendChild(col);
   }
   // Champion column — sits to the right of Final
   const champion=state.myPicks.final;
@@ -1576,6 +1615,22 @@ function autoPick() {
   const fin=getFinalMatchup(), c=[fin.a,fin.b].filter(Boolean);
   if (c.length) state.myPicks.final=c[Math.floor(Math.random()*c.length)];
   save(); renderPicks(); showToast('Random picks generated 🎲');
+}
+function fillBracket() {
+  if (enforceLock()) return;
+  const letters=Object.keys(state.groups||{});
+  const groupsDone=letters.every(L=>(state.myPicks.group[L]||[]).length>=3);
+  const tpDone=(state.myPicks.thirdPlace||[]).length>=8;
+  if (!groupsDone) { showToast('Finish your group picks first'); return; }
+  if (!tpDone) { showToast('Pick your 8 third-place qualifiers first'); return; }
+  state.myPicks.r32={}; state.myPicks.r16={}; state.myPicks.qf={}; state.myPicks.sf={}; state.myPicks.final=null;
+  for (const round of ['r32','r16','qf','sf']) {
+    const fn={r32:getR32Matchups,r16:getR16Matchups,qf:getQFMatchups,sf:getSFMatchups}[round];
+    fn().forEach((m,i)=>{const c=[m.a,m.b].filter(Boolean);if(c.length)state.myPicks[round][i]=c[Math.floor(Math.random()*c.length)];});
+  }
+  const fin=getFinalMatchup(), c=[fin.a,fin.b].filter(Boolean);
+  if (c.length) state.myPicks.final=c[Math.floor(Math.random()*c.length)];
+  save(); renderBracket(); updatePicksProgress(); renderSubmitSection(); showToast('Bracket filled ⚡');
 }
 
 /* =====================================================
@@ -2152,9 +2207,10 @@ if (location.hash==='#admin') document.querySelector('[data-tab="admin"]').style
   state.user = me.displayName || me.email;
   state.email = me.email;
   state.mustChangePassword = !!me.mustChangePassword;
-  // Server picks win over any stale local picks
+  // Server picks win over any stale local picks; if server has picks, user has submitted before
   if (me.picks && picksHaveContent(me.picks)) {
     state.myPicks = me.picks;
+    state.submitted = true;
     save();
   }
   renderWelcome();

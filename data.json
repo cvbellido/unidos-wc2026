@@ -1,0 +1,18 @@
+{
+  "players": [
+    {
+      "alias": "Golden Boot",
+      "score": 0,
+      "picks": {}
+    },
+    {
+      "alias": "Final Whistle",
+      "score": 0,
+      "picks": {}
+    }
+  ],
+  "results": {
+    "groups": {},
+    "knockout": {}
+  }
+}

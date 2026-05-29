@@ -1,10 +1,14 @@
-import { sql, initDb, requireAdmin, denyIfLocked } from './_db.js';
+import { sql, initDb, requireAdmin, requireUser } from './_db.js';
 
 export default async function handler(req, res) {
-  if (denyIfLocked(req, res)) return;
   try {
     await initDb();
     if (req.method === 'GET') {
+      // GET is allowed for any signed-in user or an admin
+      if (!requireAdmin(req)) {
+        const u = requireUser(req, res);
+        if (!u) return;
+      }
       const q = await sql`SELECT data FROM results WHERE id = 1;`;
       res.setHeader('Cache-Control', 'no-store');
       return res.status(200).json(q.rows[0]?.data || {});

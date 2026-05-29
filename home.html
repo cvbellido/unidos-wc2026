@@ -355,45 +355,15 @@
   .match-slot .team-flag { font-size: 0.95rem; width: 20px; }
   .match-slot .team-name { font-size: 0.78rem; }
   .champion-card {
-    position: relative;
-    background: linear-gradient(140deg, var(--blue-dark) 0%, #001a7a 100%);
-    border: 1px solid var(--card-border);
-    border-top: 3px solid var(--lime);
+    background: #ffffff;
+    border: 2px solid var(--lime);
     border-radius: var(--radius);
     padding: 1.25rem;
     text-align: center;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25), 0 0 0 1px rgba(222,255,77,0.08);
+    box-shadow: 0 0 32px rgba(222,255,77,0.25);
   }
-  .champion-card h3 {
-    font-size: 0.7rem;
-    margin: 0 0 0.5rem;
-    letter-spacing: 0.2em;
-    color: var(--lime);
-    text-transform: uppercase;
-    font-weight: 800;
-  }
-  .champion-team {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 0.85rem;
-    letter-spacing: 0.02em;
-  }
-  .champion-card select {
-    width: 100%;
-    padding: 0.65rem 0.85rem;
-    border-radius: 10px;
-    border: 1px solid var(--card-border);
-    background: rgba(255,255,255,0.06);
-    color: #fff;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-  }
-  .champion-card select:hover { border-color: var(--lime); }
-  .champion-card select:focus { outline: none; border-color: var(--lime); background: rgba(255,255,255,0.1); }
-  .champion-card select option { background: var(--blue-dark); color: #fff; }
+  .champion-card h3 { font-size: 0.75rem; margin: 0 0 0.4rem; letter-spacing: 0.15em; color: #0a1a4a; }
+  .champion-team { font-size: 1.25rem; font-weight: 800; color: #0a1a4a; }
 
   /* ── Schedule ──────────────────────────────────────────────── */
   .schedule-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
@@ -723,6 +693,7 @@
   <div class="welcome-hero">
     <h2>🏆 2026 World Cup<br>Unidos Bracket Challenge</h2>
     <p>Pick your group-stage finishers and knockout-round winners. Earn points as the tournament plays out.<br>Highest score at the final whistle wins bragging rights. 🎉🏆</p>
+    <p class="muted" style="margin-top:1rem">Did you fill out the <a href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer" style="color:var(--lime);font-weight:700;text-decoration:none">26WC BracketChallenge Registration spreadsheet</a> yet?<br>That's how we'll identify and track winners, so make sure you complete it.</p>
     <div id="welcomeBox"></div>
   </div>
 
@@ -760,9 +731,9 @@
     </div>
     <div>
       <div class="champion-card">
-        <h3>🏆 Pick Your Champion 🏆</h3>
-        <div class="champion-team" id="championDisplay">— no champion selected —</div>
-        <select id="championSelect" onchange="pickChampion(this.value)"></select>
+        <h3>🏆 WORLD CHAMPIONS 🏆</h3>
+        <div class="champion-team" id="championDisplay" style="margin-bottom:0.75rem">— select your champion below —</div>
+        <select id="championSelect" onchange="pickChampion(this.value)" style="width:100%;padding:0.6rem 0.75rem;border-radius:10px;border:1px solid rgba(10,26,74,0.25);background:#f4f6ff;color:#0a1a4a;font-size:0.95rem;font-weight:600"></select>
       </div>
     </div>
   </div>
@@ -812,17 +783,11 @@
   <div class="card">
     <h3>Players</h3>
     <p class="muted" style="margin-bottom:0.75rem">Players are added automatically when they register on the landing page and submit their picks. Remove anyone who shouldn't be on the leaderboard here.</p>
-    <p class="muted" style="margin-bottom:0.75rem">The official private list of real names, emails, and markets lives in <a href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer" style="color:var(--lime);font-weight:700;text-decoration:none">this spreadsheet</a>.</p>
+    <p class="muted" style="margin-bottom:0.75rem">The official private list of real names, emails, markets, and aliases lives in <a href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer" style="color:var(--lime);font-weight:700;text-decoration:none">this spreadsheet</a>.</p>
     <div id="playersList"></div>
     <div style="margin-top:0.75rem">
       <button class="btn secondary" style="background:rgba(255,77,95,0.18);border-color:rgba(255,77,95,0.4);color:#ffb3bb" onclick="wipeAllPlayers()">🗑 Remove ALL players</button>
     </div>
-  </div>
-
-  <div class="card">
-    <h3>All Player Picks</h3>
-    <p class="muted" style="margin-bottom:0.75rem">Every registered player's bracket at a glance. Click a row to expand full knockout picks.</p>
-    <div style="overflow-x:auto"><div id="allPicksTable"></div></div>
   </div>
 
   <div class="card">
@@ -1094,8 +1059,7 @@ function deadlineLabel() {
   return 'June 10, 2026 \u2014 11:59 PM ET';
 }
 const state = {
-  user: null, email: null, mustChangePassword: false,
-  groups: null, schedule: null,
+  user: null, groups: null, schedule: null,
   myPicks: { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   results: { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   players: [],
@@ -1139,8 +1103,8 @@ async function refreshLeaderboard() {
         qf: r2.qf || {}, sf: r2.sf || {}, final: r2.final || null,
       };
     }
-    if (state.email) {
-      const mine = state.players.find(p => (p.email||'').toLowerCase() === state.email.toLowerCase());
+    if (state.user) {
+      const mine = state.players.find(p => playerAlias(p).toLowerCase() === state.user.toLowerCase());
       if (mine && picksHaveContent(mine.picks) && !picksHaveContent(state.myPicks)) {
         state.myPicks = mine.picks;
         save();
@@ -1237,12 +1201,7 @@ function renderWelcome() {
   const userArea = document.getElementById('userArea');
   const welcomeBox = document.getElementById('welcomeBox');
   if (state.user) {
-    userArea.innerHTML = `
-      <div class="user-pill" style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
-        <span>👋 ${escapeHtml(state.user)}</span>
-        <button class="btn secondary" style="padding:0.25rem 0.6rem;font-size:0.72rem" onclick="openChangePassword()">Change password</button>
-        <button class="btn secondary" style="padding:0.25rem 0.6rem;font-size:0.72rem" onclick="logout()">Log out</button>
-      </div>`;
+    userArea.innerHTML = `<div class="user-pill">👋 Welcome back, ${escapeHtml(state.user)}!</div>`;
     welcomeBox.innerHTML = `
       <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap">
         <button class="btn" onclick="switchTab('picks')">Make my picks →</button>
@@ -1250,63 +1209,34 @@ function renderWelcome() {
       </div>`;
   } else {
     userArea.innerHTML = '';
-    welcomeBox.innerHTML = '';
+    welcomeBox.innerHTML = `
+      <div class="welcome-form">
+        <input type="text" id="userInput" placeholder="Your alias (e.g. Golden Boot)" />
+        <button class="btn" onclick="setUser()">Let's go</button>
+      </div>`;
+    setTimeout(() => document.getElementById('userInput')?.focus(), 100);
+    document.getElementById('userInput')?.addEventListener('keydown', e => { if (e.key==='Enter') setUser(); });
   }
   document.getElementById('statPlayers').textContent = state.players.length;
 }
-async function logout() {
-  try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
-  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-  window.location.replace('/index.html');
-}
-function openChangePassword(forced) {
-  const title = forced ? 'Set a new password' : 'Change your password';
-  const intro = forced
-    ? '<p class="muted" style="margin-top:0;color:#fff">Your admin reset your password. Choose a new one to continue.</p>'
-    : '';
-  showModal(`
-    <h3 style="margin-top:0">${title}</h3>
-    ${intro}
-    <div class="form-group" style="margin-bottom:0.6rem">
-      <label for="cp-current">Current password</label>
-      <input type="password" id="cp-current" autocomplete="current-password" style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid var(--card-border);background:rgba(255,255,255,0.08);color:#fff" />
-    </div>
-    <div class="form-group" style="margin-bottom:0.6rem">
-      <label for="cp-new">New password (at least 8 characters)</label>
-      <input type="password" id="cp-new" autocomplete="new-password" style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid var(--card-border);background:rgba(255,255,255,0.08);color:#fff" />
-    </div>
-    <div class="form-group" style="margin-bottom:0.6rem">
-      <label for="cp-confirm">Confirm new password</label>
-      <input type="password" id="cp-confirm" autocomplete="new-password" style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid var(--card-border);background:rgba(255,255,255,0.08);color:#fff" />
-    </div>
-    <div id="cp-error" style="color:var(--red,#ff4d5f);font-size:0.8rem;min-height:1.1em;margin-bottom:0.5rem"></div>
-    <div style="display:flex;gap:0.5rem;justify-content:flex-end">
-      ${forced ? '' : '<button class="btn secondary" onclick="closeModal()">Cancel</button>'}
-      <button class="btn" onclick="submitChangePassword(${forced ? 'true' : 'false'})">Save password</button>
-    </div>
-  `);
-}
-async function submitChangePassword(forced) {
-  const cur = document.getElementById('cp-current').value;
-  const nw = document.getElementById('cp-new').value;
-  const cf = document.getElementById('cp-confirm').value;
-  const err = document.getElementById('cp-error');
-  err.textContent = '';
-  if (!cur || !nw) { err.textContent = 'Both fields are required.'; return; }
-  if (nw.length < 8) { err.textContent = 'New password must be at least 8 characters.'; return; }
-  if (nw !== cf) { err.textContent = 'New passwords do not match.'; return; }
+async function setUser() {
+  const v = document.getElementById('userInput').value.trim();
+  if (!v || v.includes('@')) { showToast('Enter an alias, not an email'); return; }
   try {
-    const r = await fetch('/api/auth/change-password', {
+    const r = await fetch('/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ currentPassword: cur, newPassword: nw }),
+      body: JSON.stringify({ alias: v }),
     });
-    const d = await r.json().catch(()=>({}));
-    if (!r.ok) { err.textContent = d.error || 'Could not change password.'; return; }
-    state.mustChangePassword = false;
-    closeModal();
-    showToast('Password updated ✅');
-  } catch (e) { err.textContent = 'Network error.'; }
+    if (!r.ok) {
+      const d = await r.json().catch(()=>({}));
+      showToast(d.error || 'Could not register'); return;
+    }
+    const d = await r.json();
+    state.user = d.alias || v; save(); renderWelcome();
+    refreshLeaderboard();
+    switchTab('picks');
+  } catch (e) { showToast('Network error'); }
 }
 
 /* =====================================================
@@ -1426,7 +1356,7 @@ function renderBracket() {
   const final=state.myPicks.final;
   document.getElementById('championDisplay').innerHTML=final
     ?`${TEAMS[final]?.flag||'⚪'} ${TEAMS[final]?.name||final}`
-    :'— no champion selected —';
+    :'— select your champion below —';
   renderChampionSelect();
 }
 function renderChampionSelect() {
@@ -1497,6 +1427,7 @@ function autoPick() {
    SHARE / IMPORT
 ===================================================== */
 async function sharePicks() {
+  if (!state.user) { showToast('Enter your alias first'); switchTab('home'); return; }
   if (picksLocked()) { showToast('\u{1F512} Picks closed on ' + deadlineLabel()); return; }
   if (!picksHaveContent(state.myPicks)) { showToast('Make at least one pick first'); return; }
   if (!confirm('Save your picks? You can keep editing until ' + deadlineLabel() + '.')) return;
@@ -1504,9 +1435,8 @@ async function sharePicks() {
     const res = await fetch('/api/submit-picks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ picks: state.myPicks }),
+      body: JSON.stringify({ alias: state.user, picks: state.myPicks }),
     });
-    if (res.status === 401) { window.location.replace('/index.html'); return; }
     const d = await res.json().catch(()=>({}));
     if (!res.ok) {
       showToast(d.error || 'Could not save picks');
@@ -1547,9 +1477,9 @@ function renderLeaderboard() {
   const wrap=document.getElementById('leaderboardWrap');
   const everyone=[...state.players];
   const emptyPicks = { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null };
-  if (state.email) {
-    const mine=everyone.find(p=>(p.email||'').toLowerCase()===state.email.toLowerCase());
-    if (!mine) everyone.push({alias:state.user,email:state.email,picks:state.myPicks||emptyPicks,isMe:true});
+  if (state.user) {
+    const mine=everyone.find(p=>playerAlias(p).toLowerCase()===state.user.toLowerCase());
+    if (!mine) everyone.push({alias:state.user,picks:state.myPicks||emptyPicks,isMe:true});
     else { mine.isMe=true; mine.picks = state.myPicks || mine.picks || emptyPicks; }
   }
   everyone.forEach(p => { if (!p.picks) p.picks = emptyPicks; });
@@ -1561,7 +1491,7 @@ function renderLeaderboard() {
   everyone.sort((a,b)=>b.score-a.score);
   wrap.innerHTML=`
     <table class="leaderboard-table">
-      <thead><tr><th>#</th><th>Name</th><th>Champion Pick</th><th style="text-align:right">Points</th></tr></thead>
+      <thead><tr><th>#</th><th>Alias</th><th>Champion Pick</th><th style="text-align:right">Points</th></tr></thead>
       <tbody>${everyone.map((p,i)=>{
         const champ=p.picks?.final;
         const alias=playerAlias(p);
@@ -1699,21 +1629,10 @@ function renderAdmin() {
   pwrap.innerHTML=state.players.length===0
     ?'<p class="muted">No players added yet.</p>'
     :'<h4 style="margin:0.5rem 0;color:var(--lavender)">Players ('+state.players.length+')</h4>'
-    +state.players.map((p,i)=>{
-      const name = escapeHtml(playerAlias(p));
-      const email = escapeHtml(p.email||'');
-      const emailAttr = (p.email||'').replace(/'/g, "\\'");
-      return `<div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;padding:0.4rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
-        <div style="min-width:0;flex:1">
-          <div style="font-weight:700">${name}</div>
-          <div class="muted" style="font-size:0.75rem;word-break:break-all">${email||'<i>no email</i>'}</div>
-        </div>
-        <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
-          ${p.email?`<button class="btn secondary" style="padding:0.25rem 0.65rem;font-size:0.75rem" onclick="resetPlayerPassword('${emailAttr}')">Reset password</button>`:''}
-          <button class="btn secondary" style="padding:0.25rem 0.65rem;font-size:0.75rem" onclick="removePlayer(${i})">Remove</button>
-        </div>
-      </div>`;
-    }).join('');
+    +state.players.map((p,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border)">
+      <span>${escapeHtml(playerAlias(p))}</span>
+      <button class="btn secondary" style="padding:0.25rem 0.65rem;font-size:0.75rem" onclick="removePlayer(${i})">Remove</button>
+    </div>`).join('');
 
   // Group results
   document.getElementById('adminGroups').innerHTML=Object.entries(state.groups).map(([L,teams])=>{
@@ -1732,63 +1651,6 @@ function renderAdmin() {
   }).join('');
 
   renderAdminBracket();
-  renderAllPicksTable();
-}
-
-function renderAllPicksTable() {
-  const wrap = document.getElementById('allPicksTable');
-  if (!wrap) return;
-  const players = state.players || [];
-  if (players.length === 0) {
-    wrap.innerHTML = '<p class="muted">No player picks yet.</p>';
-    return;
-  }
-  const groupLetters = Object.keys(state.groups || {}).sort();
-  const teamCell = code => {
-    if (!code) return '<span class="muted">—</span>';
-    const t = TEAMS[code];
-    return t ? `${t.flag||''} ${escapeHtml(t.name)}` : escapeHtml(code);
-  };
-  const groupCell = (picks, L) => {
-    const arr = (picks?.group?.[L]) || [];
-    const first = arr[0], second = arr[1];
-    return `<div style="white-space:nowrap;font-size:0.78rem">
-      <div>1. ${teamCell(first)}</div>
-      <div>2. ${teamCell(second)}</div>
-    </div>`;
-  };
-  const ko = (picks) => {
-    const r32 = Object.keys(picks?.r32 || {}).length;
-    const r16 = Object.keys(picks?.r16 || {}).length;
-    const qf  = Object.keys(picks?.qf  || {}).length;
-    const sf  = Object.keys(picks?.sf  || {}).length;
-    return `R32 ${r32}/16 · R16 ${r16}/16 · QF ${qf}/8 · SF ${sf}/4`;
-  };
-
-  const rows = players.map((p, i) => {
-    const picks = p.picks || {};
-    const name = playerAlias(p);
-    const champ = picks.final;
-    return `<tr style="border-bottom:1px solid var(--card-border)">
-      <td style="padding:0.55rem 0.5rem;font-weight:700;white-space:nowrap">${escapeHtml(name)}</td>
-      <td style="padding:0.55rem 0.5rem;white-space:nowrap">${champ ? teamCell(champ) : '<span class="muted">—</span>'}</td>
-      ${groupLetters.map(L => `<td style="padding:0.55rem 0.5rem;vertical-align:top">${groupCell(picks, L)}</td>`).join('')}
-      <td style="padding:0.55rem 0.5rem;font-size:0.78rem;color:rgba(255,255,255,0.7);white-space:nowrap">${ko(picks)}</td>
-    </tr>`;
-  }).join('');
-
-  wrap.innerHTML = `
-    <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
-      <thead>
-        <tr style="border-bottom:2px solid var(--card-border);color:var(--lime);text-align:left">
-          <th style="padding:0.5rem 0.5rem">Name</th>
-          <th style="padding:0.5rem 0.5rem">Champion</th>
-          ${groupLetters.map(L => `<th style="padding:0.5rem 0.5rem">Grp ${L}</th>`).join('')}
-          <th style="padding:0.5rem 0.5rem">Knockout</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
 }
 async function cycleGroupResult(L, code) {
   let arr=state.results.group[L]||[], idx=arr.indexOf(code);
@@ -1856,34 +1718,16 @@ async function setResult(roundKey,matchIdx,code) {
 async function removePlayer(i) {
   const p = state.players[i]; if (!p) return;
   const alias = playerAlias(p);
-  const email = p.email || '';
   if (!confirm('Remove '+alias+'?')) return;
   try {
-    await adminPost('/api/remove-player', email ? { email } : { alias });
+    await adminPost('/api/remove-player', { alias });
     state.players.splice(i,1); save(); renderAdmin(); renderLeaderboard();
     showToast('Removed '+alias);
   } catch (e) { showToast(e.message); }
 }
-async function resetPlayerPassword(email) {
-  if (!email) { showToast('No email on file'); return; }
-  if (!confirm('Reset password for '+email+'? They will be forced to set a new one on next login.')) return;
-  try {
-    const r = await adminPost('/api/auth/admin-reset', { email });
-    const temp = r?.tempPassword || '';
-    showModal(`
-      <h3 style="margin-top:0">Temporary password</h3>
-      <p class="muted" style="color:#fff">Share this with <b>${escapeHtml(email)}</b>. They\u2019ll be required to set a new one on next login.</p>
-      <div style="padding:0.75rem 1rem;background:rgba(0,0,0,0.3);border:1px solid var(--card-border);border-radius:8px;font-family:monospace;font-size:1.1rem;letter-spacing:0.1em;color:var(--lime);text-align:center;user-select:all">${escapeHtml(temp)}</div>
-      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem">
-        <button class="btn" onclick="navigator.clipboard.writeText('${temp.replace(/'/g, "\\'")}').then(()=>showToast('Copied'))">Copy</button>
-        <button class="btn secondary" onclick="closeModal()">Close</button>
-      </div>
-    `);
-  } catch (e) { showToast(e.message); }
-}
 async function wipeAllPlayers() {
   if (!confirm('Remove ALL players from the leaderboard? This cannot be undone.')) return;
-  if (!confirm('Are you absolutely sure? Every registered player and their picks will be permanently deleted.')) return;
+  if (!confirm('Are you absolutely sure? Every registered alias and their picks will be permanently deleted.')) return;
   try {
     const r = await adminPost('/api/wipe-players', {});
     state.players = []; save(); renderAdmin(); renderLeaderboard();
@@ -1948,31 +1792,10 @@ if (location.hash==='#admin') document.querySelector('[data-tab="admin"]').style
 /* =====================================================
    INIT
 ===================================================== */
-(async function bootstrap() {
-  let me;
-  try {
-    const r = await fetch('/api/me', { cache: 'no-store' });
-    if (r.status === 401) { window.location.replace('/index.html'); return; }
-    if (!r.ok) throw new Error('me fetch failed');
-    me = await r.json();
-  } catch (e) {
-    window.location.replace('/index.html');
-    return;
-  }
-  state.user = me.displayName || me.email;
-  state.email = me.email;
-  state.mustChangePassword = !!me.mustChangePassword;
-  load();
-  // Server picks win over any stale local picks
-  if (me.picks && picksHaveContent(me.picks)) {
-    state.myPicks = me.picks;
-    save();
-  }
-  renderWelcome();
-  renderPicks();
-  renderSchedule();
-  if (state.mustChangePassword) openChangePassword(true);
-})();
+load();
+renderWelcome();
+renderPicks();
+renderSchedule();
 </script>
 </body>
 </html>

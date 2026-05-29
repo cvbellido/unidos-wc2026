@@ -206,6 +206,42 @@
   .btn-register:active { transform: scale(0.98); }
   .btn-register:disabled { opacity: 0.55; cursor: not-allowed; }
 
+  /* ── Tabs (Sign in / Sign up) ────────────────────── */
+  .auth-tabs {
+    display: flex;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 0.55rem 0.75rem;
+    background: transparent;
+    color: rgba(199, 185, 255, 0.75);
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+  }
+  .auth-tab.active {
+    background: var(--blue-primary);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(0, 100, 255, 0.35);
+  }
+  .auth-pane { display: none; width: 100%; }
+  .auth-pane.active { display: block; }
+  .form-footer-note {
+    font-size: 0.78rem;
+    color: rgba(199, 185, 255, 0.72);
+    text-align: center;
+    margin-top: 0.25rem;
+  }
+
   /* ── Scoring accordion ─────────────────────────────────────── */
   .scoring-accordion {
     border-top: 1px solid rgba(199, 185, 255, 0.2);
@@ -305,25 +341,66 @@
         <!-- Copy -->
         <div class="copy">
           <h2>Enter the Bracket Challenge.</h2>
-          <p>This site is for Slalom employees only. Enter the access code shared by your team to continue.</p>
+          <p>This site is for Slalom employees only. Sign in with your email, or create an account to get started.</p>
         </div>
 
-        <!-- Access form -->
-        <form class="reg-form" id="reg-form" novalidate>
+        <!-- Tabs -->
+        <div class="auth-tabs" role="tablist">
+          <button type="button" class="auth-tab active" data-tab="signin" role="tab">Sign in</button>
+          <button type="button" class="auth-tab" data-tab="signup" role="tab">Sign up</button>
+        </div>
 
-          <div class="form-group">
-            <label for="field-password">Access code</label>
-            <input type="password" id="field-password" placeholder="Enter access code"
-                   autocomplete="current-password" required />
-            <span class="field-hint">Don't have the code? Ask your Unidos point of contact. You'll enter your name on the next screen.</span>
-            <span class="field-error" id="err-password">Incorrect access code.</span>
-          </div>
+        <!-- Sign in pane -->
+        <div class="auth-pane active" id="pane-signin">
+          <form class="reg-form" id="signin-form" novalidate>
+            <div class="form-group">
+              <label for="signin-email">Email</label>
+              <input type="email" id="signin-email" placeholder="you@slalom.com"
+                     autocomplete="email" required />
+            </div>
+            <div class="form-group">
+              <label for="signin-password">Password</label>
+              <input type="password" id="signin-password" placeholder="Your password"
+                     autocomplete="current-password" required />
+              <span class="field-error" id="signin-error"></span>
+            </div>
+            <button type="submit" class="btn-register" id="signin-btn">
+              Sign in &rarr;
+            </button>
+            <p class="form-footer-note">Forgot your password? Contact your admin to reset it.</p>
+          </form>
+        </div>
 
-          <button type="submit" class="btn-register" id="btn-register" onclick="handleUnlock(event)">
-            Enter &rarr;
-          </button>
-
-        </form>
+        <!-- Sign up pane -->
+        <div class="auth-pane" id="pane-signup">
+          <form class="reg-form" id="signup-form" novalidate>
+            <div class="form-group">
+              <label for="signup-name">Display name</label>
+              <input type="text" id="signup-name" placeholder="How you'll appear on the leaderboard"
+                     autocomplete="name" maxlength="40" required />
+            </div>
+            <div class="form-group">
+              <label for="signup-email">Email</label>
+              <input type="email" id="signup-email" placeholder="you@slalom.com"
+                     autocomplete="email" required />
+            </div>
+            <div class="form-group">
+              <label for="signup-password">Password</label>
+              <input type="password" id="signup-password" placeholder="At least 8 characters"
+                     autocomplete="new-password" required />
+            </div>
+            <div class="form-group">
+              <label for="signup-confirm">Confirm password</label>
+              <input type="password" id="signup-confirm" placeholder="Re-enter password"
+                     autocomplete="new-password" required />
+              <span class="field-error" id="signup-error"></span>
+            </div>
+            <button type="submit" class="btn-register" id="signup-btn">
+              Create account &rarr;
+            </button>
+            <p class="form-footer-note">Your picks will be tied to this email. You can edit them any time before kickoff.</p>
+          </form>
+        </div>
 
       </div><!-- /.card-body -->
 
@@ -370,42 +447,103 @@
   </div>
 
   <script>
-    async function handleUnlock(e) {
+    /* ── Tab switching ─────────────────────────────────────── */
+    document.querySelectorAll('.auth-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        document.querySelectorAll('.auth-tab').forEach(b =>
+          b.classList.toggle('active', b.dataset.tab === target));
+        document.querySelectorAll('.auth-pane').forEach(p =>
+          p.classList.toggle('active', p.id === 'pane-' + target));
+        clearError('signin-error', 'signin-email', 'signin-password');
+        clearError('signup-error', 'signup-name', 'signup-email', 'signup-password', 'signup-confirm');
+      });
+    });
+
+    function clearError(errId, ...inputIds) {
+      const errEl = document.getElementById(errId);
+      if (errEl) { errEl.textContent = ''; errEl.classList.remove('show'); }
+      inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('input-error');
+      });
+    }
+    function showError(errId, msg, ...inputIds) {
+      const errEl = document.getElementById(errId);
+      if (errEl) { errEl.textContent = msg; errEl.classList.add('show'); }
+      inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('input-error');
+      });
+    }
+
+    /* ── Sign in ───────────────────────────────────────────── */
+    document.getElementById('signin-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      const pwEl = document.getElementById('field-password');
-      const errEl = document.getElementById('err-password');
-      const btn = document.getElementById('btn-register');
-
-      pwEl.classList.remove('input-error');
-      errEl.classList.remove('show');
-
-      const password = pwEl.value;
-      if (!password) {
-        errEl.textContent = 'Please enter the access code.';
-        pwEl.classList.add('input-error'); errEl.classList.add('show');
+      clearError('signin-error', 'signin-email', 'signin-password');
+      const email = document.getElementById('signin-email').value.trim();
+      const password = document.getElementById('signin-password').value;
+      const btn = document.getElementById('signin-btn');
+      if (!email || !password) {
+        showError('signin-error', 'Email and password are required.', 'signin-email', 'signin-password');
         return;
       }
-
-      const originalLabel = btn.innerHTML;
-      btn.disabled = true; btn.innerHTML = 'Checking…';
+      const original = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = 'Signing in…';
       try {
-        const res = await fetch('/api/unlock', {
+        const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password }),
+          body: JSON.stringify({ email, password }),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || `Unlock failed (HTTP ${res.status})`);
-        window.location.href = 'home.html';
+        if (!res.ok) throw new Error(data.error || `Sign in failed (HTTP ${res.status})`);
+        window.location.href = '/home.html';
       } catch (err) {
-        console.error('unlock failed', err);
-        errEl.textContent = err.message || 'Could not verify code. Try again.';
-        errEl.classList.add('show');
-        pwEl.classList.add('input-error');
-        btn.disabled = false; btn.innerHTML = originalLabel;
+        showError('signin-error', err.message || 'Sign in failed.', 'signin-email', 'signin-password');
+        btn.disabled = false; btn.innerHTML = original;
       }
-    }
+    });
+
+    /* ── Sign up ───────────────────────────────────────────── */
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearError('signup-error', 'signup-name', 'signup-email', 'signup-password', 'signup-confirm');
+      const displayName = document.getElementById('signup-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const confirm = document.getElementById('signup-confirm').value;
+      const btn = document.getElementById('signup-btn');
+
+      if (!displayName) {
+        showError('signup-error', 'Please enter your display name.', 'signup-name'); return;
+      }
+      if (!email) {
+        showError('signup-error', 'Please enter your email.', 'signup-email'); return;
+      }
+      if (!password || password.length < 8) {
+        showError('signup-error', 'Password must be at least 8 characters.', 'signup-password'); return;
+      }
+      if (password !== confirm) {
+        showError('signup-error', 'Passwords do not match.', 'signup-password', 'signup-confirm'); return;
+      }
+
+      const original = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = 'Creating…';
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, displayName }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `Sign up failed (HTTP ${res.status})`);
+        window.location.href = '/home.html';
+      } catch (err) {
+        showError('signup-error', err.message || 'Sign up failed.', 'signup-email');
+        btn.disabled = false; btn.innerHTML = original;
+      }
+    });
 
     /* ── Scoring accordion ──────────────────────────────────── */
     function toggleAccordion(btn) {

@@ -1,18 +1,8 @@
-// Serves the main app HTML, but only after validating the access cookie.
-// Without a valid cookie, returns 302 to /index.html.
+// Serves the main app HTML, but only after validating the user session cookie.
+// Without a valid session, returns 302 to /index.html.
 import fs from 'node:fs';
 import path from 'node:path';
-import { accessToken, ACCESS_COOKIE } from './_db.js';
-
-function readCookie(req, name) {
-  const raw = req.headers.cookie || '';
-  for (const part of raw.split(/;\s*/)) {
-    const eq = part.indexOf('=');
-    if (eq === -1) continue;
-    if (part.slice(0, eq) === name) return part.slice(eq + 1);
-  }
-  return null;
-}
+import { getSessionUser } from './_db.js';
 
 let cachedHtml = null;
 function loadHtml() {
@@ -23,9 +13,8 @@ function loadHtml() {
 }
 
 export default async function handler(req, res) {
-  const provided = readCookie(req, ACCESS_COOKIE);
-  const expected = accessToken();
-  if (!provided || provided !== expected) {
+  const user = getSessionUser(req);
+  if (!user) {
     res.statusCode = 302;
     res.setHeader('Location', '/index.html');
     res.end();

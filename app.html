@@ -312,6 +312,53 @@
     border-left-color: var(--blue-primary);
   }
   .team-row.pick-2nd .team-tag { background: var(--blue-primary); color: var(--white); }
+  .team-row.pick-3rd {
+    background: rgba(0,200,255,0.1);
+    border-left-color: #00c8ff;
+  }
+  .team-row.pick-3rd .team-tag { background: #00c8ff; color: var(--blue-dark); }
+  .tp-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .tp-card {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .tp-card:hover { background: rgba(199,185,255,0.1); }
+  .tp-card.tp-selected {
+    background: rgba(0,200,255,0.12);
+    border-color: #00c8ff;
+  }
+  .tp-group-label {
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: #00c8ff;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .tp-count-pill {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 4px 14px;
+    border-radius: 20px;
+    background: rgba(0,200,255,0.15);
+    color: #00c8ff;
+    border: 1px solid rgba(0,200,255,0.3);
+    letter-spacing: 0.04em;
+  }
 
   /* ── Bracket ───────────────────────────────────────────────── */
   .bracket-wrap { overflow-x: auto; padding-bottom: 0.5rem; }
@@ -355,15 +402,17 @@
   .match-slot .team-flag { font-size: 0.95rem; width: 20px; }
   .match-slot .team-name { font-size: 0.78rem; }
   .champion-card {
-    background: #ffffff;
+    background: #0631A5;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 2px solid var(--lime);
     border-radius: var(--radius);
     padding: 1.25rem;
     text-align: center;
-    box-shadow: 0 0 32px rgba(222,255,77,0.25);
+    box-shadow: 0 0 32px rgba(222,255,77,0.18);
   }
-  .champion-card h3 { font-size: 0.75rem; margin: 0 0 0.4rem; letter-spacing: 0.15em; color: #0a1a4a; }
-  .champion-team { font-size: 1.25rem; font-weight: 800; color: #0a1a4a; }
+  .champion-card h3 { font-size: 0.75rem; margin: 0 0 0.4rem; letter-spacing: 0.15em; color: var(--lime); }
+  .champion-team { font-size: 1.25rem; font-weight: 800; color: var(--white); }
 
   /* ── Schedule ──────────────────────────────────────────────── */
   .schedule-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
@@ -386,10 +435,11 @@
     border-radius: 10px;
     padding: 0.75rem 1rem;
     display: grid;
-    grid-template-columns: 86px 1fr auto 1fr 100px;
+    grid-template-columns: 100px 1fr auto 1fr 120px;
     gap: 0.75rem;
     align-items: center;
     margin-bottom: 0.5rem;
+    width: 100%;
   }
   .match-row .date-cell { font-size: 0.75rem; color: var(--muted); border-right: 1px solid var(--border); padding-right: 0.75rem; }
   .match-row .date-cell .day { font-weight: 700; color: var(--white); font-size: 0.85rem; }
@@ -412,6 +462,9 @@
     .match-row { grid-template-columns: 1fr; gap: 0.35rem; }
     .match-row .date-cell, .match-row .venue { border: none; padding: 0; text-align: left; }
   }
+
+  /* ── Section list containers ──────────────────────────────── */
+  #scheduleList, #leaderboardWrap { width: 100%; }
 
   /* ── Leaderboard ───────────────────────────────────────────── */
   .leaderboard-table {
@@ -700,7 +753,7 @@
     <div class="stat-tile"><div class="num" id="statTeams">48</div><div class="label">Teams</div></div>
     <div class="stat-tile"><div class="num" id="statGroups">12</div><div class="label">Groups</div></div>
     <div class="stat-tile"><div class="num" id="statMatches">104</div><div class="label">Matches</div></div>
-    <div class="stat-tile"><div class="num" id="statMaxPts">184</div><div class="label">Max Points</div></div>
+    <div class="stat-tile"><div class="num" id="statMaxPts">204</div><div class="label">Max Points</div></div>
     <div class="stat-tile"><div class="num" id="statPlayers">0</div><div class="label">Players</div></div>
   </div>
 
@@ -708,13 +761,14 @@
     <h3>How scoring works</h3>
     <p class="muted" style="margin-bottom:0.75rem">You earn points whenever a team you picked advances correctly. Later rounds are worth more.</p>
     <table class="scoring-table-inline">
-      <tr><td>Group stage finishers (1st &amp; 2nd per group)</td><td>1 pt each</td></tr>
+      <tr><td>Group stage finishers (1st, 2nd &amp; 3rd per group)</td><td>1 pt each</td></tr>
+      <tr><td>Third-place qualifiers (best 8 of 12 advance)</td><td>1 pt each</td></tr>
       <tr><td>Round of 32 winners</td><td>2 pts each</td></tr>
       <tr><td>Round of 16 winners</td><td>4 pts each</td></tr>
       <tr><td>Quarterfinal winners</td><td>8 pts each</td></tr>
       <tr><td>Semifinal winners</td><td>16 pts each</td></tr>
       <tr><td>Champion</td><td>32 pts</td></tr>
-      <tr style="border-top:1px solid rgba(199,185,255,0.3)"><td style="font-weight:700">Maximum possible</td><td style="color:var(--cyan)">184 pts</td></tr>
+      <tr style="border-top:1px solid rgba(199,185,255,0.3)"><td style="font-weight:700">Maximum possible</td><td style="color:var(--cyan)">204 pts</td></tr>
     </table>
   </div>
 
@@ -722,42 +776,41 @@
 
 <!-- ── MY PICKS ──────────────────────────────────────────────── -->
 <section id="picks" class="panel">
-  <div class="picks-header-grid">
-    <div>
-      <h2 style="margin-top:0">Make Your Picks</h2>
-      <p class="muted" style="margin-bottom:1rem;color:#fff">Click a team to mark your prediction. Group stage first, then the bracket fills in from your picks. You can edit your picks anytime until <b>June 10, 2026 at 11:59 PM ET</b> — after that they're locked.</p>
-      <p class="muted" style="margin-top:1rem;color:#fff"><strong>Group Stage — pick 1st &amp; 2nd in each group. Click once for 1st, click again for 2nd, click again to clear.</strong></p>
-    </div>
-    <div>
-      <div class="champion-card">
-        <h3>🏆 WORLD CHAMPIONS 🏆</h3>
-        <div class="champion-team" id="championDisplay" style="margin-bottom:0.75rem">— select your champion below —</div>
-        <select id="championSelect" onchange="pickChampion(this.value)" style="width:100%;padding:0.6rem 0.75rem;border-radius:10px;border:1px solid rgba(10,26,74,0.25);background:#f4f6ff;color:#0a1a4a;font-size:0.95rem;font-weight:600"></select>
-      </div>
-    </div>
-  </div>
+  <h2 style="margin-top:0">Make Your Picks</h2>
+  <p style="margin-top:0.75rem;margin-bottom:0.5rem;color:#fff;font-size:0.95rem"><b>Click a team once for 1st, again for 2nd, a third click for 3rd.</b> You must pick all three positions in every group.</p>
+  <p class="muted" style="margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">⏰ You can edit your picks anytime until <b style="color:var(--lime)">June 10, 2026 at 11:59 PM ET</b> — after that they're locked.</p>
 
   <div id="picksLockBanner"></div>
 
   <div class="actions-row">
-    <button class="btn gold" onclick="sharePicks()">💾 Submit my picks</button>
-    <button class="btn secondary" onclick="clearPicks()">Clear all</button>
     <button class="btn secondary" onclick="autoPick()">🎲 Random picks</button>
+    <button class="btn secondary" onclick="clearPicks()">Clear all</button>
   </div>
 
   <div class="groups-grid" id="groupsGrid"></div>
 
+  <div id="thirdPlaceSection" style="margin-top:2rem">
+    <h3 style="margin-top:0;color:var(--lavender)">Best Third-Place Qualifiers</h3>
+    <p class="muted" style="margin-top:0;margin-bottom:0.75rem;color:#DED6FF;font-size:0.95rem">The 8 best third-place teams also advance to the Round of 32. Pick 3rd in each group above — they'll appear here. Then select which 8 you think make it through.</p>
+    <div style="margin-bottom:0.75rem"><span class="tp-count-pill" id="tpCount">0 / 8 advancing</span></div>
+    <div class="tp-pills" id="thirdPlaceGrid"></div>
+  </div>
+
   <h3 style="margin-top:2rem;color:var(--lavender)">Knockout Bracket</h3>
-  <p class="muted" style="margin-top:0;margin-bottom:1rem">Matchups populate from your group picks. Click a team to advance them.</p>
+  <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">Matchups fill automatically from your group and third-place picks. Click the team you think wins each match to advance them round by round — all the way to your champion.</p>
   <div class="bracket-wrap">
     <div class="bracket" id="bracketWrap"></div>
   </div>
+
+  <div id="championSection" style="margin-top:2rem"></div>
+
+  <div id="submitSection" style="margin-top:1.5rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:1.5rem"></div>
 </section>
 
 <!-- ── SCHEDULE ──────────────────────────────────────────────── -->
 <section id="schedule" class="panel">
   <h2>Match Schedule</h2>
-  <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#fff">All times Eastern. Use Admin → Edit Teams &amp; Schedule to update with the official draw.</p>
+  <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">All times Eastern. Grab your laptop 💻, popcorn 🍿 and enjoy the game!</p>
   <div class="schedule-filters" id="scheduleFilters"></div>
   <div id="scheduleList"></div>
 </section>
@@ -765,7 +818,7 @@
 <!-- ── LEADERBOARD ───────────────────────────────────────────── -->
 <section id="leaderboard" class="panel">
   <h2>Leaderboard</h2>
-  <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#fff">Don't forget to complete the <a href="https://twodegrees1-my.sharepoint.com/:x:/g/personal/carla_bellido_slalom_com/IQAcYJ8HWJlHRY4FiT4XuyhFAf9hzapCzs6osyy0_f8KOMo?e=Dxqv79" target="_blank" rel="noreferrer" style="color:var(--lime);font-weight:700;text-decoration:underline">Open registration sheet</a>.</p>
+  <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">Special prizes for 1st and 2nd place, along with surprise rewards! 🎁</p>
   <div class="actions-row">
     <button class="btn secondary" onclick="refreshLeaderboard()">🔄 Refresh</button>
     <button class="btn gold" onclick="sharePicks()">Submit my picks</button>
@@ -806,8 +859,14 @@
 
   <div class="card">
     <h3>Enter Group Stage Results</h3>
-    <p class="muted" style="margin-bottom:0.75rem">Select the 1st and 2nd place finisher in each group as it becomes official.</p>
+    <p class="muted" style="margin-bottom:0.75rem">Click teams to mark 1st, 2nd, and 3rd place finishers in each group as results come in.</p>
     <div id="adminGroups"></div>
+  </div>
+
+  <div class="card">
+    <h3>Third-Place Qualifiers (Actual)</h3>
+    <p class="muted" style="margin-bottom:0.75rem">Once all group results are entered, select the 8 third-place teams that actually advanced to the Round of 32.</p>
+    <div id="adminThirdPlace"></div>
   </div>
 
   <div class="card">
@@ -942,88 +1001,88 @@ const VENUES = {
 };
 
 // Official FIFA World Cup 2026 schedule (June 11 – July 19, 2026).
-// Kickoff times are TBD until FIFA publishes the local match times.
+// Kickoff times are in ET (Eastern Time). June 25-27 times TBD.
 function buildSchedule(/* groups */) {
   let id = 1;
   const V = (k) => VENUES[k] || k;
   const G = (L) => 'Group ' + L;
-  // [date, group, home, away, venueCode]
+  // [date, group, home, away, venueCode, kickoffET]
   const groupFixtures = [
-    ['2026-06-11','A','MEX','RSA','MEX'],
-    ['2026-06-11','A','KOR','CZE','GDL'],
-    ['2026-06-12','B','CAN','BIH','TOR'],
-    ['2026-06-12','D','USA','PAR','LA'],
-    ['2026-06-13','C','HAI','SCO','BOS'],
-    ['2026-06-13','D','AUS','TUR','VAN'],
-    ['2026-06-13','C','BRA','MAR','NY'],
-    ['2026-06-13','B','QAT','SUI','SF'],
-    ['2026-06-14','E','CIV','ECU','PHI'],
-    ['2026-06-14','E','GER','CUW','HOU'],
-    ['2026-06-14','F','NED','JPN','DAL'],
-    ['2026-06-14','F','SWE','TUN','MTY'],
-    ['2026-06-15','H','KSA','URU','MIA'],
-    ['2026-06-15','H','ESP','CPV','ATL'],
-    ['2026-06-15','G','IRN','NZL','LA'],
-    ['2026-06-15','G','BEL','EGY','SEA'],
-    ['2026-06-16','I','FRA','SEN','NY'],
-    ['2026-06-16','I','IRQ','NOR','BOS'],
-    ['2026-06-16','J','ARG','ALG','KC'],
-    ['2026-06-16','J','AUT','JOR','SF'],
-    ['2026-06-17','L','GHA','PAN','TOR'],
-    ['2026-06-17','L','ENG','CRO','DAL'],
-    ['2026-06-17','K','POR','COD','HOU'],
-    ['2026-06-17','K','UZB','COL','MEX'],
-    ['2026-06-18','A','CZE','RSA','ATL'],
-    ['2026-06-18','B','SUI','BIH','LA'],
-    ['2026-06-18','B','CAN','QAT','VAN'],
-    ['2026-06-18','A','MEX','KOR','GDL'],
-    ['2026-06-19','C','BRA','HAI','PHI'],
-    ['2026-06-19','C','SCO','MAR','BOS'],
-    ['2026-06-19','D','TUR','PAR','SF'],
-    ['2026-06-19','D','USA','AUS','SEA'],
-    ['2026-06-20','E','GER','CIV','TOR'],
-    ['2026-06-20','E','ECU','CUW','KC'],
-    ['2026-06-20','F','NED','SWE','HOU'],
-    ['2026-06-20','F','TUN','JPN','MTY'],
-    ['2026-06-21','H','URU','CPV','MIA'],
-    ['2026-06-21','H','ESP','KSA','ATL'],
-    ['2026-06-21','G','BEL','IRN','LA'],
-    ['2026-06-21','G','NZL','EGY','VAN'],
-    ['2026-06-22','I','NOR','SEN','NY'],
-    ['2026-06-22','I','FRA','IRQ','PHI'],
-    ['2026-06-22','J','ARG','AUT','DAL'],
-    ['2026-06-22','J','JOR','ALG','SF'],
-    ['2026-06-23','L','ENG','GHA','BOS'],
-    ['2026-06-23','L','PAN','CRO','TOR'],
-    ['2026-06-23','K','POR','UZB','HOU'],
-    ['2026-06-23','K','COL','COD','GDL'],
-    ['2026-06-24','C','SCO','BRA','MIA'],
-    ['2026-06-24','C','MAR','HAI','ATL'],
-    ['2026-06-24','B','SUI','CAN','VAN'],
-    ['2026-06-24','B','BIH','QAT','SEA'],
-    ['2026-06-24','A','CZE','MEX','MEX'],
-    ['2026-06-24','A','RSA','KOR','MTY'],
-    ['2026-06-25','E','CUW','CIV','PHI'],
-    ['2026-06-25','E','ECU','GER','NY'],
-    ['2026-06-25','F','JPN','SWE','DAL'],
-    ['2026-06-25','F','TUN','NED','KC'],
-    ['2026-06-25','D','TUR','USA','LA'],
-    ['2026-06-25','D','PAR','AUS','SF'],
-    ['2026-06-26','I','NOR','FRA','BOS'],
-    ['2026-06-26','I','SEN','IRQ','TOR'],
-    ['2026-06-26','G','EGY','IRN','SEA'],
-    ['2026-06-26','G','NZL','BEL','VAN'],
-    ['2026-06-26','H','CPV','KSA','HOU'],
-    ['2026-06-26','H','URU','ESP','GDL'],
-    ['2026-06-27','L','PAN','ENG','NY'],
-    ['2026-06-27','L','CRO','GHA','PHI'],
-    ['2026-06-27','J','ALG','AUT','KC'],
-    ['2026-06-27','J','JOR','ARG','DAL'],
-    ['2026-06-27','K','COL','POR','MIA'],
-    ['2026-06-27','K','COD','UZB','ATL'],
+    ['2026-06-11','A','MEX','RSA','MEX','3:00 PM ET'],
+    ['2026-06-11','A','KOR','CZE','GDL','10:00 PM ET'],
+    ['2026-06-12','B','CAN','BIH','TOR','3:00 PM ET'],
+    ['2026-06-12','D','USA','PAR','LA','9:00 PM ET'],
+    ['2026-06-13','C','HAI','SCO','BOS','9:00 PM ET'],
+    ['2026-06-13','D','AUS','TUR','VAN','12:00 AM ET'],
+    ['2026-06-13','C','BRA','MAR','NY','6:00 PM ET'],
+    ['2026-06-13','B','QAT','SUI','SF','3:00 PM ET'],
+    ['2026-06-14','E','CIV','ECU','PHI','7:00 PM ET'],
+    ['2026-06-14','E','GER','CUW','HOU','1:00 PM ET'],
+    ['2026-06-14','F','NED','JPN','DAL','4:00 PM ET'],
+    ['2026-06-14','F','SWE','TUN','MTY','10:00 PM ET'],
+    ['2026-06-15','H','KSA','URU','MIA','6:00 PM ET'],
+    ['2026-06-15','H','ESP','CPV','ATL','12:00 PM ET'],
+    ['2026-06-15','G','IRN','NZL','LA','9:00 PM ET'],
+    ['2026-06-15','G','BEL','EGY','SEA','3:00 PM ET'],
+    ['2026-06-16','I','FRA','SEN','NY','3:00 PM ET'],
+    ['2026-06-16','I','IRQ','NOR','BOS','6:00 PM ET'],
+    ['2026-06-16','J','ARG','ALG','KC','9:00 PM ET'],
+    ['2026-06-16','J','AUT','JOR','SF','12:00 AM ET'],
+    ['2026-06-17','L','GHA','PAN','TOR','7:00 PM ET'],
+    ['2026-06-17','L','ENG','CRO','DAL','4:00 PM ET'],
+    ['2026-06-17','K','POR','COD','HOU','1:00 PM ET'],
+    ['2026-06-17','K','UZB','COL','MEX','10:00 PM ET'],
+    ['2026-06-18','A','CZE','RSA','ATL','12:00 PM ET'],
+    ['2026-06-18','B','SUI','BIH','LA','3:00 PM ET'],
+    ['2026-06-18','B','CAN','QAT','VAN','6:00 PM ET'],
+    ['2026-06-18','A','MEX','KOR','GDL','9:00 PM ET'],
+    ['2026-06-19','C','BRA','HAI','PHI','8:30 PM ET'],
+    ['2026-06-19','C','SCO','MAR','BOS','6:00 PM ET'],
+    ['2026-06-19','D','TUR','PAR','SF','11:00 PM ET'],
+    ['2026-06-19','D','USA','AUS','SEA','3:00 PM ET'],
+    ['2026-06-20','E','GER','CIV','TOR','4:00 PM ET'],
+    ['2026-06-20','E','ECU','CUW','KC','8:00 PM ET'],
+    ['2026-06-20','F','NED','SWE','HOU','1:00 PM ET'],
+    ['2026-06-20','F','TUN','JPN','MTY','12:00 AM ET'],
+    ['2026-06-21','H','URU','CPV','MIA','6:00 PM ET'],
+    ['2026-06-21','H','ESP','KSA','ATL','12:00 PM ET'],
+    ['2026-06-21','G','BEL','IRN','LA','3:00 PM ET'],
+    ['2026-06-21','G','NZL','EGY','VAN','9:00 PM ET'],
+    ['2026-06-22','I','NOR','SEN','NY','8:00 PM ET'],
+    ['2026-06-22','I','FRA','IRQ','PHI','5:00 PM ET'],
+    ['2026-06-22','J','ARG','AUT','DAL','1:00 PM ET'],
+    ['2026-06-22','J','JOR','ALG','SF','11:00 PM ET'],
+    ['2026-06-23','L','ENG','GHA','BOS','4:00 PM ET'],
+    ['2026-06-23','L','PAN','CRO','TOR','7:00 PM ET'],
+    ['2026-06-23','K','POR','UZB','HOU','1:00 PM ET'],
+    ['2026-06-23','K','COL','COD','GDL','10:00 PM ET'],
+    ['2026-06-24','C','SCO','BRA','MIA','6:00 PM ET'],
+    ['2026-06-24','C','MAR','HAI','ATL','6:00 PM ET'],
+    ['2026-06-24','B','SUI','CAN','VAN','3:00 PM ET'],
+    ['2026-06-24','B','BIH','QAT','SEA','3:00 PM ET'],
+    ['2026-06-24','A','CZE','MEX','MEX','9:00 PM ET'],
+    ['2026-06-24','A','RSA','KOR','MTY','9:00 PM ET'],
+    ['2026-06-25','E','CUW','CIV','PHI','4:00 PM ET'],
+    ['2026-06-25','E','ECU','GER','NY','4:00 PM ET'],
+    ['2026-06-25','F','JPN','SWE','DAL','7:00 PM ET'],
+    ['2026-06-25','F','TUN','NED','KC','7:00 PM ET'],
+    ['2026-06-25','D','TUR','USA','LA','10:00 PM ET'],
+    ['2026-06-25','D','PAR','AUS','SF','10:00 PM ET'],
+    ['2026-06-26','I','NOR','FRA','BOS','3:00 PM ET'],
+    ['2026-06-26','I','SEN','IRQ','TOR','3:00 PM ET'],
+    ['2026-06-26','G','EGY','IRN','SEA','11:00 PM ET'],
+    ['2026-06-26','G','NZL','BEL','VAN','11:00 PM ET'],
+    ['2026-06-26','H','CPV','KSA','HOU','8:00 PM ET'],
+    ['2026-06-26','H','URU','ESP','GDL','8:00 PM ET'],
+    ['2026-06-27','L','PAN','ENG','NY','5:00 PM ET'],
+    ['2026-06-27','L','CRO','GHA','PHI','5:00 PM ET'],
+    ['2026-06-27','J','ALG','AUT','KC','10:00 PM ET'],
+    ['2026-06-27','J','JOR','ARG','DAL','10:00 PM ET'],
+    ['2026-06-27','K','COL','POR','MIA','7:30 PM ET'],
+    ['2026-06-27','K','COD','UZB','ATL','7:30 PM ET'],
   ];
-  const sched = groupFixtures.map(([d,L,h,a,v]) => ({
-    id: id++, stage: G(L), date: d, time: 'TBD', home: h, away: a, venue: V(v),
+  const sched = groupFixtures.map(([d,L,h,a,v,t]) => ({
+    id: id++, stage: G(L), date: d, time: t||'TBD', home: h, away: a, venue: V(v),
   }));
   // Knockout fixtures (matchups determined after group stage finishes).
   const ko = [
@@ -1066,13 +1125,14 @@ function deadlineLabel() {
 const state = {
   user: null, email: null, mustChangePassword: false,
   groups: null, schedule: null,
-  myPicks: { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null },
-  results: { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null },
+  myPicks: { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null },
+  results: { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   players: [],
 };
 function picksHaveContent(p) {
   if (!p) return false;
   const g = p.group || {}; if (Object.values(g).some(a => Array.isArray(a) && a.length)) return true;
+  if (p.thirdPlace && p.thirdPlace.length) return true;
   for (const k of ['r32','r16','qf','sf']) if (p[k] && Object.keys(p[k]).length) return true;
   if (p.final) return true;
   return false;
@@ -1087,9 +1147,11 @@ function save() {
 function load() {
   try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) Object.assign(state, JSON.parse(raw)); } catch(e) {}
   if (!state.groups) state.groups = DEFAULT_GROUPS;
-  if (!state.schedule) state.schedule = buildSchedule(state.groups);
-  if (!state.myPicks) state.myPicks = { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null };
-  if (!state.results) state.results = { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null };
+  state.schedule = buildSchedule(state.groups);
+  if (!state.myPicks) state.myPicks = { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null };
+  if (!state.myPicks.thirdPlace) state.myPicks.thirdPlace = [];
+  if (!state.results) state.results = { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null };
+  if (!state.results.thirdPlace) state.results.thirdPlace = [];
   if (!state.players) state.players = [];
   refreshLeaderboard();
 }
@@ -1105,7 +1167,8 @@ async function refreshLeaderboard() {
     if (d.results && typeof d.results === 'object') {
       const r2 = d.results;
       state.results = {
-        group: r2.group || {}, r32: r2.r32 || {}, r16: r2.r16 || {},
+        group: r2.group || {}, thirdPlace: r2.thirdPlace || [],
+        r32: r2.r32 || {}, r16: r2.r16 || {},
         qf: r2.qf || {}, sf: r2.sf || {}, final: r2.final || null,
       };
     }
@@ -1288,14 +1351,14 @@ function renderPicks() {
   if (banner) {
     banner.innerHTML = locked
       ? `<div class="picks-locked-banner">\u{1F512} Picks closed on ${deadlineLabel()}. Good luck! \u26BD</div>`
-      : `<div class="picks-locked-banner" style="color:var(--cyan);border-color:rgba(27,225,242,0.4);background:linear-gradient(90deg,rgba(27,225,242,0.12),rgba(199,185,255,0.08))">\u23F0 Picks close ${deadlineLabel()}. You can edit anytime until then.</div>`;
+      : '';
   }
   document.querySelectorAll('#picks .actions-row .btn').forEach(b => {
     b.disabled = locked;
     b.style.opacity = locked ? '0.45' : '';
     b.style.cursor = locked ? 'not-allowed' : '';
   });
-  renderGroupPicks(); renderBracket(); updatePicksProgress();
+  renderGroupPicks(); renderThirdPlace(); renderBracket(); renderSubmitSection(); updatePicksProgress();
 }
 function renderGroupPicks() {
   const wrap = document.getElementById('groupsGrid');
@@ -1307,8 +1370,8 @@ function renderGroupPicks() {
         <div class="group-title">Group ${L}</div>
         ${teams.map(code => {
           const idx=picks.indexOf(code);
-          const cls=idx===0?'pick-1st':idx===1?'pick-2nd':'';
-          const tag=idx===0?'1st':idx===1?'2nd':'';
+          const cls=idx===0?'pick-1st':idx===1?'pick-2nd':idx===2?'pick-3rd':'';
+          const tag=idx===0?'1st':idx===1?'2nd':idx===2?'3rd':'';
           return `<div class="team-row ${cls}" onclick="cycleGroupPick('${L}','${code}')">
             ${teamTag(code)}<span class="team-tag">${tag}</span>
           </div>`;
@@ -1320,22 +1383,61 @@ function cycleGroupPick(L, code) {
   if (enforceLock()) return;
   let picks = state.myPicks.group[L] || [];
   const idx = picks.indexOf(code);
-  if (idx===0) {
-    picks = picks.filter(c=>c!==code); picks.push(code);
-    if (picks.length>2) picks=picks.slice(-2);
-    if (picks.length===2&&picks[0]===code) picks=[picks[1],picks[0]];
-  } else if (idx===1) {
-    picks = picks.filter(c=>c!==code);
+  if (idx !== -1) {
+    picks = picks.filter(c => c !== code);
+  } else if (picks.length < 3) {
+    picks = [...picks, code];
   } else {
-    picks = picks.filter(c=>c!==code);
-    if (picks.length===0) picks=[code];
-    else if (picks.length===1) picks=[code,picks[0]];
-    else picks=[code,picks[1]];
+    picks = [picks[0], picks[1], code];
   }
   state.myPicks.group[L]=picks;
   invalidateBracketPicks(); save(); renderPicks();
 }
+function getThirdPlaceCandidates() {
+  const out=[];
+  for (const [L,teams] of Object.entries(state.groups)) {
+    const picks=state.myPicks.group[L]||[];
+    if (picks[2]) out.push({L,code:picks[2]});
+  }
+  return out;
+}
+function cycleThirdPlacePick(code) {
+  if (enforceLock()) return;
+  let tp=state.myPicks.thirdPlace||[];
+  const idx=tp.indexOf(code);
+  if (idx!==-1) {
+    tp=tp.filter(c=>c!==code);
+  } else if (tp.length<8) {
+    tp=[...tp,code];
+  } else {
+    showToast('Already 8 advancing — remove one first'); return;
+  }
+  state.myPicks.thirdPlace=tp;
+  state.myPicks.r32={}; state.myPicks.r16={}; state.myPicks.qf={}; state.myPicks.sf={}; state.myPicks.final=null;
+  save(); renderThirdPlace(); renderBracket();
+}
+function renderThirdPlace() {
+  const grid=document.getElementById('thirdPlaceGrid');
+  const countEl=document.getElementById('tpCount');
+  if (!grid) return;
+  const tp=state.myPicks.thirdPlace||[];
+  const tpSet=new Set(tp);
+  if (countEl) countEl.textContent=`${tp.length} / 8 advancing`;
+  const candidates=getThirdPlaceCandidates().sort((a,b)=>a.L.localeCompare(b.L));
+  if (candidates.length===0) {
+    grid.innerHTML='<div style="color:#DED6FF;font-size:0.9rem;opacity:0.7">Pick 3rd place in the group cards above — they\'ll appear here.</div>';
+    return;
+  }
+  grid.innerHTML=candidates.map(({L,code})=>{
+    const sel=tpSet.has(code);
+    return `<div class="tp-card${sel?' tp-selected':''}" onclick="cycleThirdPlacePick('${code}')">
+      <span class="tp-group-label">Grp ${L}</span>${teamTag(code)}
+    </div>`;
+  }).join('');
+}
 function invalidateBracketPicks() {
+  const valid3rd=new Set(Object.values(state.myPicks.group||{}).map(p=>p[2]).filter(Boolean));
+  state.myPicks.thirdPlace=(state.myPicks.thirdPlace||[]).filter(c=>valid3rd.has(c));
   state.myPicks.r32={}; state.myPicks.r16={}; state.myPicks.qf={}; state.myPicks.sf={}; state.myPicks.final=null;
 }
 
@@ -1351,7 +1453,9 @@ function getAdvancers() {
 function getR32Matchups() {
   const adv=getAdvancers(), slots=[];
   for (let i=0;i<24;i++) slots.push(adv[i]?.code||null);
-  for (let i=0;i<8;i++) slots.push(null);
+  const picked12=new Set(adv.map(a=>a.code).filter(Boolean));
+  const tp=(state.myPicks.thirdPlace||[]).filter(c=>!picked12.has(c));
+  for (let i=0;i<8;i++) slots.push(tp[i]||null);
   const matches=[];
   for (let i=0;i<16;i++) matches.push({a:slots[i*2],b:slots[i*2+1]});
   return matches;
@@ -1393,26 +1497,35 @@ function renderBracket() {
     });
     col.innerHTML=html; wrap.appendChild(col);
   }
-  const final=state.myPicks.final;
-  document.getElementById('championDisplay').innerHTML=final
-    ?`${TEAMS[final]?.flag||'⚪'} ${TEAMS[final]?.name||final}`
-    :'— select your champion below —';
-  renderChampionSelect();
+  // Champion column — sits to the right of Final
+  const champion=state.myPicks.final;
+  const locked=picksLocked();
+  const fm=getFinalMatchup();
+  const champCol=document.createElement('div'); champCol.className='bracket-round';
+  let champHtml=`<div class="round-label" style="color:rgba(222,255,77,0.85)">🏆 Champion</div>`;
+  if (champion) {
+    const t=TEAMS[champion]||{};
+    champHtml+=`<div style="background:rgba(0,200,80,0.12);border:2px solid var(--lime);border-radius:8px;padding:1rem 0.75rem;text-align:center;cursor:${locked?'default':'pointer'};transition:background 0.15s;" ${locked?'':` onclick="pickBracket('f',0,'${champion}')"`}>
+      <div style="font-size:1.75rem;margin-bottom:0.3rem">${t.flag||'⚪'}</div>
+      <div style="font-size:0.85rem;font-weight:800;color:#DED6FF">${t.name||champion}</div>
+      <div style="font-size:0.6rem;color:var(--lime);font-weight:800;letter-spacing:0.07em;margin-top:0.3rem">⭐ YOUR PICK</div>
+    </div>`;
+  } else if (fm.a||fm.b) {
+    champHtml+=`<div style="border:1.5px dashed rgba(222,255,77,0.22);border-radius:8px;padding:1rem 0.75rem;text-align:center;color:rgba(255,255,255,0.35);font-size:0.78rem;line-height:1.5;">← click a finalist<br>to pick your<br>champion</div>`;
+  } else {
+    champHtml+=`<div style="border:1.5px dashed rgba(255,255,255,0.1);border-radius:8px;padding:1rem 0.75rem;text-align:center;color:rgba(255,255,255,0.2);font-size:0.78rem;">TBD</div>`;
+  }
+  champCol.innerHTML=champHtml; wrap.appendChild(champCol);
+  renderChampionSection();
 }
-function renderChampionSelect() {
-  const sel=document.getElementById('championSelect'); if (!sel) return;
-  const cur=state.myPicks.final||'';
-  const teams=Object.entries(TEAMS).map(([code,t])=>({code,name:t.name,flag:t.flag||'⚪'}))
-    .sort((a,b)=>a.name.localeCompare(b.name));
-  let html='<option value="">— pick a champion —</option>';
-  for (const t of teams) html+=`<option value="${t.code}" ${t.code===cur?'selected':''}>${t.flag} ${t.name}</option>`;
-  sel.innerHTML=html;
-  sel.disabled=picksLocked();
+function renderChampionSection() {
+  const sec=document.getElementById('championSection'); if(!sec) return;
+  sec.innerHTML=''; sec.style.margin='0';
 }
 function pickChampion(code) {
-  if (enforceLock()) { renderChampionSelect(); return; }
-  state.myPicks.final = code || null;
-  save(); renderBracket(); updatePicksProgress();
+  if (enforceLock()) return;
+  state.myPicks.final=(state.myPicks.final===code)?null:code;
+  save(); renderBracket(); updatePicksProgress(); renderSubmitSection();
 }
 function slotHtml(code,pickedCode,roundKey,matchIdx) {
   const disabled=!code, picked=code&&pickedCode===code;
@@ -1430,7 +1543,7 @@ function pickBracket(roundKey,matchIdx,code) {
     const order=['r32','r16','qf','sf'], i=order.indexOf(roundKey);
     if (i>=0) { for (let j=i+1;j<order.length;j++) state.myPicks[order[j]]={}; state.myPicks.final=null; }
   }
-  save(); renderBracket(); updatePicksProgress();
+  save(); renderBracket(); updatePicksProgress(); renderSubmitSection();
 }
 function updatePicksProgress() {
   const gp=Object.values(state.myPicks.group).reduce((n,a)=>n+(a?.length||0),0);
@@ -1444,16 +1557,18 @@ function updatePicksProgress() {
 function clearPicks() {
   if (enforceLock()) return;
   if (!confirm('Clear all your picks?')) return;
-  state.myPicks={group:{},r32:{},r16:{},qf:{},sf:{},final:null};
+  state.myPicks={group:{},thirdPlace:[],r32:{},r16:{},qf:{},sf:{},final:null};
   save(); renderPicks(); showToast('All picks cleared');
 }
 function autoPick() {
   if (enforceLock()) return;
-  state.myPicks={group:{},r32:{},r16:{},qf:{},sf:{},final:null};
+  state.myPicks={group:{},thirdPlace:[],r32:{},r16:{},qf:{},sf:{},final:null};
   for (const [L,teams] of Object.entries(state.groups)) {
     const shuf=[...teams].sort(()=>Math.random()-0.5);
-    state.myPicks.group[L]=[shuf[0],shuf[1]];
+    state.myPicks.group[L]=[shuf[0],shuf[1],shuf[2]];
   }
+  const tpCandidates=getThirdPlaceCandidates().sort(()=>Math.random()-0.5);
+  state.myPicks.thirdPlace=tpCandidates.slice(0,8).map(c=>c.code);
   for (const round of ['r32','r16','qf','sf']) {
     const fn={r32:getR32Matchups,r16:getR16Matchups,qf:getQFMatchups,sf:getSFMatchups}[round];
     fn().forEach((m,i)=>{const c=[m.a,m.b].filter(Boolean);if(c.length)state.myPicks[round][i]=c[Math.floor(Math.random()*c.length)];});
@@ -1466,9 +1581,64 @@ function autoPick() {
 /* =====================================================
    SHARE / IMPORT
 ===================================================== */
+function bracketComplete() {
+  const p=state.myPicks, letters=Object.keys(state.groups||{});
+  if (letters.length<12) return false;
+  for (const L of letters) { if((p.group[L]||[]).length<3) return false; }
+  if ((p.thirdPlace||[]).length<8) return false;
+  if (Object.keys(p.r32||{}).length<16) return false;
+  if (Object.keys(p.r16||{}).length<8) return false;
+  if (Object.keys(p.qf||{}).length<4) return false;
+  if (Object.keys(p.sf||{}).length<2) return false;
+  if (!p.final) return false;
+  return true;
+}
+function renderSubmitSection() {
+  const sec=document.getElementById('submitSection'); if(!sec) return;
+  const locked=picksLocked(), p=state.myPicks;
+  const letters=Object.keys(state.groups||{}).sort();
+  const gDone=letters.every(L=>(p.group[L]||[]).length>=3);
+  const tpDone=(p.thirdPlace||[]).length>=8;
+  const r32d=Object.keys(p.r32||{}).length>=16;
+  const r16d=Object.keys(p.r16||{}).length>=8;
+  const qfd=Object.keys(p.qf||{}).length>=4;
+  const sfd=Object.keys(p.sf||{}).length>=2;
+  const fd=!!p.final;
+  const complete=gDone&&tpDone&&r32d&&r16d&&qfd&&sfd&&fd;
+  const steps=[
+    [gDone,'Groups'],
+    [tpDone,'3rd Place'],
+    [r32d,'Round of 32'],
+    [r16d,'Round of 16'],
+    [qfd,'Quarters'],
+    [sfd,'Semis'],
+    [fd,'Champion'],
+  ];
+  const stepsHtml=`<div style="display:flex;align-items:flex-start;">`+steps.map(([done,label],i)=>{
+    const isLast=i===steps.length-1;
+    const lineColor=done?'rgba(0,200,80,0.3)':'rgba(255,255,255,0.1)';
+    return `<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;">
+      <div style="display:flex;align-items:center;width:100%;">
+        <div style="flex:1;height:2px;background:${i===0?'transparent':lineColor};"></div>
+        <div style="width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:${done?'0.65':'0.7'}rem;font-weight:800;border:1.5px solid ${done?'var(--lime)':'rgba(255,255,255,0.18)'};background:${done?'rgba(0,200,80,0.18)':'rgba(255,255,255,0.04)'};color:${done?'var(--lime)':'rgba(255,255,255,0.28)'};">${done?'✓':(i+1)}</div>
+        <div style="flex:1;height:2px;background:${isLast?'transparent':lineColor};"></div>
+      </div>
+      <div style="margin-top:0.45rem;text-align:center;font-size:0.7rem;color:${done?'#DED6FF':'rgba(222,214,255,0.35)'};line-height:1.3;padding:0 0.15rem;">${label}</div>
+    </div>`;
+  }).join('')+`</div>`;
+  sec.innerHTML=`
+    <h3 style="margin-top:0;margin-bottom:1.1rem;color:var(--lavender)">Ready to Submit?</h3>
+    <div style="margin-bottom:1.5rem">${stepsHtml}</div>
+    ${!complete&&!locked?'<p style="font-size:0.83rem;color:rgba(222,214,255,0.5);margin:0 0 0.75rem">Complete all steps above to unlock submission.</p>':''}
+    <button class="btn gold" onclick="sharePicks()" style="width:100%;font-size:1rem;padding:0.85rem" ${!complete||locked?'disabled':''}>
+      ${locked?'🔒 Picks closed':'💾 Submit my picks'}
+    </button>`;
+  const btn=sec.querySelector('.btn.gold');
+  if(btn){btn.style.opacity=(!complete||locked)?'0.45':'';btn.style.cursor=(!complete||locked)?'not-allowed':'';}
+}
 async function sharePicks() {
   if (picksLocked()) { showToast('\u{1F512} Picks closed on ' + deadlineLabel()); return; }
-  if (!picksHaveContent(state.myPicks)) { showToast('Make at least one pick first'); return; }
+  if (!bracketComplete()) { showToast('Complete your full bracket before submitting'); return; }
   if (!confirm('Save your picks? You can keep editing until ' + deadlineLabel() + '.')) return;
   try {
     const res = await fetch('/api/submit-picks', {
@@ -1499,6 +1669,10 @@ function scorePicks(picks) {
   for (const [L,actual] of Object.entries(r.group||{})) {
     const mine=g[L]||[], actualSet=new Set(actual||[]);
     mine.forEach(c=>{ if(actualSet.has(c)) pts+=1; });
+  }
+  if (r.thirdPlace&&r.thirdPlace.length) {
+    const actualTp=new Set(r.thirdPlace);
+    (picks.thirdPlace||[]).forEach(c=>{ if(actualTp.has(c)) pts+=1; });
   }
   const weights={r32:2,r16:4,qf:8,sf:16};
   for (const [round,w] of Object.entries(weights)) {
@@ -1692,8 +1866,8 @@ function renderAdmin() {
       <b style="color:var(--lavender)">Group ${L}</b><br>
       ${teams.map(code=>{
         const idx=actual.indexOf(code);
-        const cls=idx===0?'pick-1st':idx===1?'pick-2nd':'';
-        const tag=idx===0?'1st':idx===1?'2nd':'';
+        const cls=idx===0?'pick-1st':idx===1?'pick-2nd':idx===2?'pick-3rd':'';
+        const tag=idx===0?'1st':idx===1?'2nd':idx===2?'3rd':'';
         return `<div class="team-row ${cls}" style="margin-bottom:2px" onclick="cycleGroupResult('${L}','${code}')">
           ${teamTag(code)}<span class="team-tag">${tag}</span>
         </div>`;
@@ -1701,7 +1875,7 @@ function renderAdmin() {
     </div>`;
   }).join('');
 
-  renderAdminBracket();
+  renderAdminThirdPlace(); renderAdminBracket();
   renderAllPicksTable();
 }
 
@@ -1761,11 +1935,44 @@ function renderAllPicksTable() {
     </table>`;
 }
 async function cycleGroupResult(L, code) {
-  let arr=state.results.group[L]||[], idx=arr.indexOf(code);
-  if (idx===0) { arr=arr.filter(c=>c!==code); arr.push(code); if(arr.length===2&&arr[0]===code)arr=[arr[1],arr[0]]; }
-  else if (idx===1) { arr=arr.filter(c=>c!==code); }
-  else { arr=arr.filter(c=>c!==code); if(arr.length===0)arr=[code]; else if(arr.length===1)arr=[code,arr[0]]; else arr=[code,arr[1]]; }
+  let arr=state.results.group[L]||[];
+  const idx=arr.indexOf(code);
+  if (idx!==-1) { arr=arr.filter(c=>c!==code); }
+  else if (arr.length<3) { arr=[...arr,code]; }
+  else { arr=[arr[0],arr[1],code]; }
   state.results.group[L]=arr;
+  const valid3rd=new Set(Object.values(state.results.group).map(p=>p[2]).filter(Boolean));
+  state.results.thirdPlace=(state.results.thirdPlace||[]).filter(c=>valid3rd.has(c));
+  state.results.r32={}; state.results.r16={}; state.results.qf={}; state.results.sf={}; state.results.final=null;
+  save(); renderAdmin(); renderLeaderboard();
+  try { await adminPost('/api/results', { results: state.results }); }
+  catch (e) { showToast(e.message); }
+}
+function renderAdminThirdPlace() {
+  const wrap=document.getElementById('adminThirdPlace'); if(!wrap) return;
+  const tp=state.results.thirdPlace||[], tpSet=new Set(tp);
+  const candidates=Object.entries(state.groups).sort().map(([L])=>{
+    const p=state.results.group[L]||[]; return p[2]?{L,code:p[2]}:null;
+  }).filter(Boolean);
+  if (candidates.length===0) {
+    wrap.innerHTML='<p class="muted" style="margin:0;font-size:0.9rem">Enter group results above first — 3rd-place finishers will appear here.</p>'; return;
+  }
+  const countPill=`<span class="tp-count-pill" style="margin-bottom:0.75rem;display:inline-block">${tp.length} / 8 advancing</span>`;
+  const pills=candidates.map(({L,code})=>{
+    const sel=tpSet.has(code);
+    return `<div class="tp-card${sel?' tp-selected':''}" onclick="cycleThirdPlaceResult('${code}')">
+      <span class="tp-group-label">Grp ${L}</span>${teamTag(code)}
+    </div>`;
+  }).join('');
+  wrap.innerHTML=countPill+`<div class="tp-pills">${pills}</div>`;
+}
+async function cycleThirdPlaceResult(code) {
+  let tp=state.results.thirdPlace||[];
+  const idx=tp.indexOf(code);
+  if (idx!==-1) { tp=tp.filter(c=>c!==code); }
+  else if (tp.length<8) { tp=[...tp,code]; }
+  else { showToast('Already 8 advancing — remove one first'); return; }
+  state.results.thirdPlace=tp;
   state.results.r32={}; state.results.r16={}; state.results.qf={}; state.results.sf={}; state.results.final=null;
   save(); renderAdmin(); renderLeaderboard();
   try { await adminPost('/api/results', { results: state.results }); }
@@ -1777,7 +1984,8 @@ function renderAdminBracket() {
   const adv=[];
   for (const L of letters){const p=state.results.group[L];adv.push(p&&p[0]?p[0]:null);}
   for (const L of letters){const p=state.results.group[L];adv.push(p&&p[1]?p[1]:null);}
-  const slots=[...adv]; while(slots.length<32)slots.push(null);
+  const rtp=state.results.thirdPlace||[];
+  const slots=[...adv,...Array.from({length:8},(_,i)=>rtp[i]||null)];
   const r32=[];for(let i=0;i<16;i++)r32.push({a:slots[i*2],b:slots[i*2+1]});
   const r32w=r32.map((_,i)=>state.results.r32[i]||null);
   const r16=[];for(let i=0;i<8;i++)r16.push({a:r32w[i*2],b:r32w[i*2+1]});

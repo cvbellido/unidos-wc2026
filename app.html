@@ -1885,7 +1885,7 @@ async function wipeAllPlayers() {
   if (!confirm('Remove ALL players from the leaderboard? This cannot be undone.')) return;
   if (!confirm('Are you absolutely sure? Every registered player and their picks will be permanently deleted.')) return;
   try {
-    const r = await adminPost('/api/wipe-players', {});
+    const r = await adminPost('/api/remove-player', { all: true });
     state.players = []; save(); renderAdmin(); renderLeaderboard();
     showToast('Removed '+(r?.removed ?? 'all')+' players');
   } catch (e) { showToast(e.message); }

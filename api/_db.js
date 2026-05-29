@@ -30,10 +30,18 @@ export async function initDb() {
     await sql`ALTER TABLE players ADD COLUMN IF NOT EXISTS password_hash TEXT;`;
     await sql`ALTER TABLE players ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN NOT NULL DEFAULT FALSE;`;
     await sql`ALTER TABLE players ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ;`;
+    await sql`ALTER TABLE players ADD COLUMN IF NOT EXISTS full_name TEXT;`;
     await sql`CREATE UNIQUE INDEX IF NOT EXISTS players_email_uniq ON players (LOWER(email));`;
     await sql`ALTER TABLE players DROP CONSTRAINT IF EXISTS players_alias_key;`;
   })();
   return initPromise;
+}
+
+export function normalizeFullName(raw) {
+  const s = String(raw || '').trim();
+  if (!s || s.length < 2) return null;
+  if (s.length > 100) return null;
+  return s;
 }
 
 export function normalizeAlias(raw) {

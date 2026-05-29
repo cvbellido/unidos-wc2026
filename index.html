@@ -376,14 +376,20 @@
         <div class="auth-pane" id="pane-signup">
           <form class="reg-form" id="signup-form" novalidate>
             <div class="form-group">
-              <label for="signup-name">Display name</label>
-              <input type="text" id="signup-name" placeholder="How you'll appear on the leaderboard"
-                     autocomplete="name" maxlength="40" required />
+              <label for="signup-fullname">Full name</label>
+              <input type="text" id="signup-fullname" placeholder="Your first and last name"
+                     autocomplete="name" maxlength="100" required />
             </div>
             <div class="form-group">
-              <label for="signup-email">Email</label>
+              <label for="signup-name">Display name <span style="font-weight:400;color:rgba(199,185,255,0.6)">(shown on leaderboard)</span></label>
+              <input type="text" id="signup-name" placeholder="Nickname or alias"
+                     autocomplete="off" maxlength="40" required />
+            </div>
+            <div class="form-group">
+              <label for="signup-email">Slalom email</label>
               <input type="email" id="signup-email" placeholder="you@slalom.com"
                      autocomplete="email" required />
+              <span class="field-hint">Must be a @slalom.com address</span>
             </div>
             <div class="form-group">
               <label for="signup-password">Password</label>
@@ -399,7 +405,7 @@
             <button type="submit" class="btn-register" id="signup-btn">
               Create account &rarr;
             </button>
-            <p class="form-footer-note">Your picks will be tied to this email. You can edit them any time before kickoff.</p>
+            <p class="form-footer-note">For Slalom employees only. Your picks will be tied to this email.</p>
           </form>
         </div>
 
@@ -457,7 +463,7 @@
         document.querySelectorAll('.auth-pane').forEach(p =>
           p.classList.toggle('active', p.id === 'pane-' + target));
         clearError('signin-error', 'signin-email', 'signin-password');
-        clearError('signup-error', 'signup-name', 'signup-email', 'signup-password', 'signup-confirm');
+        clearError('signup-error', 'signup-fullname', 'signup-name', 'signup-email', 'signup-password', 'signup-confirm');
       });
     });
 
@@ -509,18 +515,25 @@
     /* ── Sign up ───────────────────────────────────────────── */
     document.getElementById('signup-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      clearError('signup-error', 'signup-name', 'signup-email', 'signup-password', 'signup-confirm');
+      clearError('signup-error', 'signup-fullname', 'signup-name', 'signup-email', 'signup-password', 'signup-confirm');
+      const fullName = document.getElementById('signup-fullname').value.trim();
       const displayName = document.getElementById('signup-name').value.trim();
-      const email = document.getElementById('signup-email').value.trim();
+      const email = document.getElementById('signup-email').value.trim().toLowerCase();
       const password = document.getElementById('signup-password').value;
       const confirm = document.getElementById('signup-confirm').value;
       const btn = document.getElementById('signup-btn');
 
+      if (!fullName) {
+        showError('signup-error', 'Please enter your full name.', 'signup-fullname'); return;
+      }
       if (!displayName) {
         showError('signup-error', 'Please enter your display name.', 'signup-name'); return;
       }
       if (!email) {
         showError('signup-error', 'Please enter your email.', 'signup-email'); return;
+      }
+      if (!email.endsWith('@slalom.com')) {
+        showError('signup-error', 'Please use your @slalom.com email address.', 'signup-email'); return;
       }
       if (!password || password.length < 8) {
         showError('signup-error', 'Password must be at least 8 characters.', 'signup-password'); return;
@@ -535,7 +548,7 @@
         const res = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, displayName }),
+          body: JSON.stringify({ email, password, displayName, fullName }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || `Sign up failed (HTTP ${res.status})`);

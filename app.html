@@ -832,7 +832,7 @@
 <!-- ── SCHEDULE ──────────────────────────────────────────────── -->
 <section id="schedule" class="panel">
   <h2>Match Schedule</h2>
-  <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">All times Eastern. Grab your laptop 💻, popcorn 🍿 and enjoy the game!</p>
+  <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">Grab your laptop 💻, popcorn 🍿 and enjoy the game!</p>
   <div class="schedule-filters" id="scheduleFilters"></div>
   <div id="scheduleList"></div>
 </section>
@@ -843,7 +843,6 @@
   <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">Special prizes for 1st and 2nd place, along with surprise rewards! 🎁</p>
   <div class="actions-row">
     <button class="btn secondary" onclick="refreshLeaderboard()">🔄 Refresh</button>
-    <button class="btn gold" onclick="sharePicks()">Submit my picks</button>
   </div>
   <div id="bonusAwards" class="bonus-awards"></div>
   <div id="leaderboardWrap"></div>
@@ -1473,13 +1472,26 @@ function getAdvancers() {
   return adv;
 }
 function getR32Matchups() {
-  const adv=getAdvancers(), slots=[];
-  for (let i=0;i<24;i++) slots.push(adv[i]?.code||null);
+  // Interleaved grouping: every 4 slots = one group-pair section
+  // Match 2i:   (GroupA_of_pair) 1st vs (GroupB_of_pair) 1st
+  // Match 2i+1: (GroupA_of_pair) 2nd vs (GroupB_of_pair) 2nd
+  // This means the two connected R32 matches for each bracket-pair come
+  // from the same two groups, making it obvious which groups feed which slot.
+  const adv=getAdvancers(); // [A1,B1,...,L1, A2,B2,...,L2]
+  const slots=[], labels=[];
+  const letters=Object.keys(state.groups).sort();
+  for (let i=0;i<6;i++) {
+    const g0=2*i, g1=2*i+1;
+    slots.push(adv[g0]?.code||null);    labels.push(letters[g0]+'1'); // A1
+    slots.push(adv[g1]?.code||null);    labels.push(letters[g1]+'1'); // B1
+    slots.push(adv[12+g0]?.code||null); labels.push(letters[g0]+'2'); // A2
+    slots.push(adv[12+g1]?.code||null); labels.push(letters[g1]+'2'); // B2
+  }
   const picked12=new Set(adv.map(a=>a.code).filter(Boolean));
   const tp=(state.myPicks.thirdPlace||[]).filter(c=>!picked12.has(c));
-  for (let i=0;i<8;i++) slots.push(tp[i]||null);
+  for (let i=0;i<8;i++) { slots.push(tp[i]||null); labels.push('3rd'); }
   const matches=[];
-  for (let i=0;i<16;i++) matches.push({a:slots[i*2],b:slots[i*2+1]});
+  for (let i=0;i<16;i++) matches.push({a:slots[i*2],b:slots[i*2+1],aLabel:labels[i*2],bLabel:labels[i*2+1]});
   return matches;
 }
 function getR16Matchups() {
@@ -1528,7 +1540,10 @@ function renderBracket() {
           const m=r.matches[j], idx=j;
           const picked=(state.myPicks[r.key]||{})[idx];
           const matchDiv=document.createElement('div'); matchDiv.className='match';
-          matchDiv.innerHTML=slotHtml(m.a,picked,r.key,idx)+slotHtml(m.b,picked,r.key,idx);
+          // R32 matches carry group-position labels (e.g. 'A1', 'B2', '3rd')
+          const aLabel=r.key==='r32'?(m.aLabel||''):'';
+          const bLabel=r.key==='r32'?(m.bLabel||''):'';
+          matchDiv.innerHTML=slotHtml(m.a,picked,r.key,idx,aLabel)+slotHtml(m.b,picked,r.key,idx,bLabel);
           pairDiv.appendChild(matchDiv);
         }
         col.appendChild(pairDiv);
@@ -1566,10 +1581,11 @@ function pickChampion(code) {
   state.myPicks.final=(state.myPicks.final===code)?null:code;
   save(); renderBracket(); updatePicksProgress(); renderSubmitSection();
 }
-function slotHtml(code,pickedCode,roundKey,matchIdx) {
+function slotHtml(code,pickedCode,roundKey,matchIdx,label='') {
   const disabled=!code, picked=code&&pickedCode===code;
   const onclick=disabled?'':`onclick="pickBracket('${roundKey}',${matchIdx},'${code}')"`;
-  return `<div class="match-slot ${disabled?'disabled':''} ${picked?'picked':''}" ${onclick}>${teamTag(code)}</div>`;
+  const labelHtml=label?`<span style="font-size:0.58rem;font-weight:800;color:rgba(199,185,255,0.5);min-width:22px;flex-shrink:0">${label}</span>`:'';
+  return `<div class="match-slot ${disabled?'disabled':''} ${picked?'picked':''}" ${onclick}>${labelHtml}${teamTag(code)}</div>`;
 }
 function pickBracket(roundKey,matchIdx,code) {
   if (enforceLock()) return;

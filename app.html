@@ -1123,7 +1123,7 @@ function deadlineLabel() {
   return 'June 10, 2026 \u2014 11:59 PM ET';
 }
 const state = {
-  user: null, email: null, mustChangePassword: false,
+  user: null, email: null, mustChangePassword: false, submitted: false,
   groups: null, schedule: null,
   myPicks: { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   results: { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null },
@@ -1633,6 +1633,16 @@ function renderSubmitSection() {
     <button class="btn gold" onclick="sharePicks()" style="width:100%;font-size:1rem;padding:0.85rem" ${!complete||locked?'disabled':''}>
       ${locked?'🔒 Picks closed':'💾 Submit my picks'}
     </button>`;
+  if (state.submitted && complete && !locked) {
+    sec.innerHTML=`
+      <div style="text-align:center;padding:0.25rem 0 0.5rem">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem">\u2705</div>
+        <h3 style="margin-top:0;margin-bottom:0.4rem;color:var(--lime)">Picks Submitted!</h3>
+        <p style="font-size:0.88rem;color:rgba(222,214,255,0.75);margin:0 0 1.25rem">Your picks are saved. You can update them any time before ${deadlineLabel()}.</p>
+        <button class="btn" onclick="state.submitted=false;save();renderSubmitSection();" style="font-size:0.9rem;padding:0.7rem 1.5rem;">\u270f\ufe0f Edit my picks</button>
+      </div>`;
+    return;
+  }
   const btn=sec.querySelector('.btn.gold');
   if(btn){btn.style.opacity=(!complete||locked)?'0.45':'';btn.style.cursor=(!complete||locked)?'not-allowed':'';}
 }
@@ -1652,9 +1662,9 @@ async function sharePicks() {
       showToast(d.error || 'Could not save picks');
       return;
     }
+    state.submitted = true;
     save();
-    renderPicks();
-    showToast('Picks saved! \u2705 Edit anytime before ' + deadlineLabel() + '.');
+    renderSubmitSection();
     refreshLeaderboard();
   } catch (e) { showToast('Network error \u2014 picks not saved'); }
 }
@@ -2137,10 +2147,11 @@ if (location.hash==='#admin') document.querySelector('[data-tab="admin"]').style
     window.location.replace('/index.html');
     return;
   }
+  load();
+  // Session always wins over stale localStorage
   state.user = me.displayName || me.email;
   state.email = me.email;
   state.mustChangePassword = !!me.mustChangePassword;
-  load();
   // Server picks win over any stale local picks
   if (me.picks && picksHaveContent(me.picks)) {
     state.myPicks = me.picks;

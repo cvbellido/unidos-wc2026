@@ -1117,7 +1117,7 @@ function deadlineLabel() {
   return 'June 10, 2026 \u2014 11:59 PM ET';
 }
 const state = {
-  user: null, groups: null, schedule: null,
+  user: null, groups: null, schedule: null, submitted: false,
   myPicks: { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   results: { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   players: [],
@@ -1263,7 +1263,7 @@ function renderWelcome() {
   const userArea = document.getElementById('userArea');
   const welcomeBox = document.getElementById('welcomeBox');
   if (state.user) {
-    userArea.innerHTML = `<div class="user-pill">👋 Welcome back, ${escapeHtml(state.user)}!</div>`;
+    userArea.innerHTML = `<div class="user-pill" style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;"><span>👋 Welcome back, <b>${escapeHtml(state.user)}</b>!</span><button onclick="logout()" style="background:rgba(255,77,95,0.12);border:1px solid rgba(255,77,95,0.35);color:rgba(255,100,115,0.9);border-radius:6px;padding:0.2rem 0.6rem;font-size:0.73rem;font-weight:700;cursor:pointer;font-family:inherit;">Log out</button></div>`;
     welcomeBox.innerHTML = `
       <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap">
         <button class="btn" onclick="switchTab('picks')">Make my picks →</button>
@@ -1582,6 +1582,16 @@ function renderSubmitSection() {
       <div style="margin-top:0.45rem;text-align:center;font-size:0.7rem;color:${done?'#DED6FF':'rgba(222,214,255,0.35)'};line-height:1.3;padding:0 0.15rem;">${label}</div>
     </div>`;
   }).join('')+`</div>`;
+  if (state.submitted && complete && !locked) {
+    sec.innerHTML=`
+      <div style="text-align:center;padding:0.25rem 0 0.5rem">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem">✅</div>
+        <h3 style="margin-top:0;margin-bottom:0.4rem;color:var(--lime)">Picks Submitted!</h3>
+        <p style="font-size:0.88rem;color:rgba(222,214,255,0.75);margin:0 0 1.25rem">Your picks are saved. You can update them any time before ${deadlineLabel()}.</p>
+        <button class="btn" onclick="state.submitted=false;save();renderSubmitSection();" style="font-size:0.9rem;padding:0.7rem 1.5rem;">✏️ Edit my picks</button>
+      </div>`;
+    return;
+  }
   sec.innerHTML=`
     <h3 style="margin-top:0;margin-bottom:1.1rem;color:var(--lavender)">Ready to Submit?</h3>
     <div style="margin-bottom:1.5rem">${stepsHtml}</div>
@@ -1593,7 +1603,7 @@ function renderSubmitSection() {
   if(btn){btn.style.opacity=(!complete||locked)?'0.45':'';btn.style.cursor=(!complete||locked)?'not-allowed':'';}
 }
 async function sharePicks() {
-  if (!state.user) { showToast('Enter your alias first'); switchTab('home'); return; }
+  if (!state.user) { showToast('Please sign in to submit picks'); window.location.href = '/'; return; }
   if (picksLocked()) { showToast('\u{1F512} Picks closed on ' + deadlineLabel()); return; }
   if (!bracketComplete()) { showToast('Complete your full bracket before submitting'); return; }
   if (!confirm('Save your picks? You can keep editing until ' + deadlineLabel() + '.')) return;
@@ -1601,16 +1611,17 @@ async function sharePicks() {
     const res = await fetch('/api/submit-picks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ alias: state.user, picks: state.myPicks }),
+      body: JSON.stringify({ picks: state.myPicks }),
     });
     const d = await res.json().catch(()=>({}));
     if (!res.ok) {
+      if (res.status === 401) { showToast('Session expired \u2014 please sign in again'); window.location.href = '/'; return; }
       showToast(d.error || 'Could not save picks');
       return;
     }
+    state.submitted = true;
     save();
-    renderPicks();
-    showToast('Picks saved! \u2705 Edit anytime before ' + deadlineLabel() + '.');
+    renderSubmitSection();
     refreshLeaderboard();
   } catch (e) { showToast('Network error \u2014 picks not saved'); }
 }
@@ -1982,6 +1993,11 @@ function resetAll() {
   if (!confirm('Really? This cannot be undone.')) return;
   localStorage.removeItem(STORAGE_KEY); location.reload();
 }
+async function logout() {
+  try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {}
+  localStorage.removeItem(STORAGE_KEY);
+  window.location.href = '/';
+}
 
 /* =====================================================
    ADMIN UNLOCK
@@ -1996,10 +2012,26 @@ if (location.hash==='#admin') document.querySelector('[data-tab="admin"]').style
 /* =====================================================
    INIT
 ===================================================== */
-load();
-renderWelcome();
-renderPicks();
-renderSchedule();
+(async () => {
+  load();
+  try {
+    const r = await fetch('/api/me', { cache: 'no-store' });
+    if (r.status === 401) { window.location.replace('/'); return; }
+    if (r.ok) {
+      const d = await r.json();
+      state.user = d.displayName || d.email || null;
+      if (picksHaveContent(d.picks) && !picksHaveContent(state.myPicks)) {
+        state.myPicks = d.picks;
+      }
+      save();
+    }
+  } catch (e) {
+    console.warn('Session check failed:', e);
+  }
+  renderWelcome();
+  renderPicks();
+  renderSchedule();
+})();
 </script>
 </body>
 </html>

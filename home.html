@@ -1117,7 +1117,7 @@ function deadlineLabel() {
   return 'June 10, 2026 \u2014 11:59 PM ET';
 }
 const state = {
-  user: null, groups: null, schedule: null, submitted: false,
+  user: null, groups: null, schedule: null, submitted: false, everSubmitted: false,
   myPicks: { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   results: { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null },
   players: [],
@@ -1407,14 +1407,31 @@ function getAdvancers() {
   return adv;
 }
 function getR32Matchups() {
-  const adv=getAdvancers(), slots=[];
-  for (let i=0;i<24;i++) slots.push(adv[i]?.code||null);
-  const picked12=new Set(adv.map(a=>a.code).filter(Boolean));
-  const tp=(state.myPicks.thirdPlace||[]).filter(c=>!picked12.has(c));
-  for (let i=0;i<8;i++) slots.push(tp[i]||null);
-  const matches=[];
-  for (let i=0;i<16;i++) matches.push({a:slots[i*2],b:slots[i*2+1]});
-  return matches;
+  // Official FIFA WC 2026 R32 bracket slot pairings
+  // Source: play.fifa.com/bracket-predictor
+  const get=(L,i)=>(state.myPicks.group[L]||[])[i]||null;
+  const all12=new Set();
+  for (const L of Object.keys(state.groups)){const p=state.myPicks.group[L]||[];if(p[0])all12.add(p[0]);if(p[1])all12.add(p[1]);}
+  const tp=(state.myPicks.thirdPlace||[]).filter(c=>!all12.has(c));
+  const t=i=>tp[i]||null;
+  return [
+    {a:get('E',0),b:t(0),       aLabel:'E1',bLabel:'3rd'},
+    {a:get('I',0),b:t(1),       aLabel:'I1',bLabel:'3rd'},
+    {a:get('A',1),b:get('B',1), aLabel:'A2',bLabel:'B2' },
+    {a:get('F',0),b:get('C',1), aLabel:'F1',bLabel:'C2' },
+    {a:get('K',1),b:get('L',1), aLabel:'K2',bLabel:'L2' },
+    {a:get('H',0),b:get('J',1), aLabel:'H1',bLabel:'J2' },
+    {a:get('D',0),b:t(2),       aLabel:'D1',bLabel:'3rd'},
+    {a:get('G',0),b:t(3),       aLabel:'G1',bLabel:'3rd'},
+    {a:get('C',0),b:get('F',1), aLabel:'C1',bLabel:'F2' },
+    {a:get('E',1),b:get('I',1), aLabel:'E2',bLabel:'I2' },
+    {a:get('A',0),b:t(4),       aLabel:'A1',bLabel:'3rd'},
+    {a:get('L',0),b:t(5),       aLabel:'L1',bLabel:'3rd'},
+    {a:get('J',0),b:get('H',1), aLabel:'J1',bLabel:'H2' },
+    {a:get('D',1),b:get('G',1), aLabel:'D2',bLabel:'G2' },
+    {a:get('B',0),b:t(6),       aLabel:'B1',bLabel:'3rd'},
+    {a:get('K',0),b:t(7),       aLabel:'K1',bLabel:'3rd'},
+  ];
 }
 function getR16Matchups() {
   const r32=getR32Matchups(), winners=r32.map((_,i)=>state.myPicks.r32[i]||null), matches=[];
@@ -1457,7 +1474,7 @@ function renderBracket() {
   const champion=state.myPicks.final;
   const locked=picksLocked();
   const fm=getFinalMatchup();
-  const champCol=document.createElement('div'); champCol.className='bracket-round';
+  const champCol=document.createElement('div'); champCol.className='bracket-round'; champCol.style.justifyContent='center';
   let champHtml=`<div class="round-label" style="color:rgba(222,255,77,0.85)">🏆 Champion</div>`;
   if (champion) {
     const t=TEAMS[champion]||{};
@@ -1597,7 +1614,7 @@ function renderSubmitSection() {
     <div style="margin-bottom:1.5rem">${stepsHtml}</div>
     ${!complete&&!locked?'<p style="font-size:0.83rem;color:rgba(222,214,255,0.5);margin:0 0 0.75rem">Complete all steps above to unlock submission.</p>':''}
     <button class="btn gold" onclick="sharePicks()" style="width:100%;font-size:1rem;padding:0.85rem" ${!complete||locked?'disabled':''}>
-      ${locked?'🔒 Picks closed':'💾 Submit my picks'}
+      ${locked?'🔒 Picks closed':state.everSubmitted?'💾 Save my picks':'💾 Submit my picks'}
     </button>`;
   const btn=sec.querySelector('.btn.gold');
   if(btn){btn.style.opacity=(!complete||locked)?'0.45':'';btn.style.cursor=(!complete||locked)?'not-allowed':'';}
@@ -1620,6 +1637,7 @@ async function sharePicks() {
       return;
     }
     state.submitted = true;
+    state.everSubmitted = true;
     save();
     renderSubmitSection();
     refreshLeaderboard();
@@ -2023,7 +2041,7 @@ if (location.hash==='#admin') document.querySelector('[data-tab="admin"]').style
       if (picksHaveContent(d.picks) && !picksHaveContent(state.myPicks)) {
         state.myPicks = d.picks;
       }
-      if (picksHaveContent(d.picks)) state.submitted = true;
+      if (picksHaveContent(d.picks)) { state.submitted = true; state.everSubmitted = true; }
       save();
     }
   } catch (e) {

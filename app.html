@@ -774,7 +774,7 @@
     <div class="stat-tile"><div class="num" id="statTeams">48</div><div class="label">Teams</div></div>
     <div class="stat-tile"><div class="num" id="statGroups">12</div><div class="label">Groups</div></div>
     <div class="stat-tile"><div class="num" id="statMatches">104</div><div class="label">Matches</div></div>
-    <div class="stat-tile"><div class="num" id="statMaxPts">204</div><div class="label">Max Points</div></div>
+    <div class="stat-tile"><div class="num" id="statMaxPts">264</div><div class="label">Max Points</div></div>
     <div class="stat-tile"><div class="num" id="statPlayers">0</div><div class="label">Players</div></div>
   </div>
 
@@ -783,13 +783,14 @@
     <p class="muted" style="margin-bottom:0.75rem">You earn points whenever a team you picked advances correctly. Later rounds are worth more.</p>
     <table class="scoring-table-inline">
       <tr><td>Group stage finishers (1st, 2nd &amp; 3rd per group)</td><td>1 pt each</td></tr>
+      <tr><td>Entire group correct (all 3 positions in order)</td><td>+5 pts bonus</td></tr>
       <tr><td>Third-place qualifiers (best 8 of 12 advance)</td><td>1 pt each</td></tr>
       <tr><td>Round of 32 winners</td><td>2 pts each</td></tr>
       <tr><td>Round of 16 winners</td><td>4 pts each</td></tr>
       <tr><td>Quarterfinal winners</td><td>8 pts each</td></tr>
       <tr><td>Semifinal winners</td><td>16 pts each</td></tr>
       <tr><td>Champion</td><td>32 pts</td></tr>
-      <tr style="border-top:1px solid rgba(199,185,255,0.3)"><td style="font-weight:700">Maximum possible</td><td style="color:var(--cyan)">204 pts</td></tr>
+      <tr style="border-top:1px solid rgba(199,185,255,0.3)"><td style="font-weight:700">Maximum possible</td><td style="color:var(--cyan)">264 pts</td></tr>
     </table>
   </div>
 
@@ -1755,6 +1756,8 @@ function scorePicks(picks) {
   for (const [L,actual] of Object.entries(r.group||{})) {
     const mine=g[L]||[], actualSet=new Set(actual||[]);
     mine.forEach(c=>{ if(actualSet.has(c)) pts+=1; });
+    // Bonus: entire group predicted in correct order (1st, 2nd, 3rd all right)
+    if (actual&&actual.length>=3&&mine.length>=3&&mine[0]===actual[0]&&mine[1]===actual[1]&&mine[2]===actual[2]) pts+=5;
   }
   if (r.thirdPlace&&r.thirdPlace.length) {
     const actualTp=new Set(r.thirdPlace);

@@ -822,7 +822,7 @@
   <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">Make picks. Earn points. Win prizes. Claim bragging rights 🎉</p>
   <div class="actions-row">
     <button class="btn secondary" onclick="refreshLeaderboard()">🔄 Refresh</button>
-    <button class="btn gold" onclick="sharePicks()">Submit my picks</button>
+    <button id="lbSubmitBtn" class="btn gold" onclick="sharePicks()">Submit my picks</button>
   </div>
   <div id="bonusAwards" class="bonus-awards"></div>
   <div id="leaderboardWrap"></div>
@@ -1701,6 +1701,8 @@ function scorePicks(picks) {
 ===================================================== */
 function renderLeaderboard() {
   renderBonusAwards();
+  const lbBtn=document.getElementById('lbSubmitBtn');
+  if (lbBtn) lbBtn.style.display=state.everSubmitted?'none':'';
   const wrap=document.getElementById('leaderboardWrap');
   const everyone=[...state.players];
   const emptyPicks = { group:{}, r32:{}, r16:{}, qf:{}, sf:{}, final:null };
@@ -2075,6 +2077,8 @@ if (location.hash==='#admin') document.querySelector('[data-tab="admin"]').style
   } catch (e) {
     console.warn('Session check failed:', e);
   }
+  const lbBtn=document.getElementById('lbSubmitBtn');
+  if (lbBtn) lbBtn.style.display=state.everSubmitted?'none':'';
   renderWelcome();
   renderPicks();
   renderSchedule();

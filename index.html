@@ -305,7 +305,6 @@
   .scoring-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
     font-size: 0.82rem;
     color: rgba(255, 255, 255, 0.9);
     padding: 0 2.25rem 1.25rem;
@@ -313,12 +312,12 @@
   .scoring-table tr { border-bottom: 1px solid rgba(199, 185, 255, 0.15); }
   .scoring-table tr:last-child { border-bottom: none; }
   .scoring-table td { padding: 0.42rem 0; }
-  .scoring-table td:first-child { width: 100%; padding-right: 1rem; }
   .scoring-table td:last-child {
     text-align: right;
     font-weight: 700;
     color: var(--lime);
     white-space: nowrap;
+    padding-left: 1rem;
   }
   .scoring-table .total-row td {
     padding-top: 0.6rem;

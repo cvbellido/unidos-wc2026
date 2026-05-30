@@ -1541,7 +1541,7 @@ function renderBracket() {
     ms.forEach((m,idx)=>{
       const cellH=UNIT*r.mult, mid=idx*cellH+cellH/2;
       const picked=r.key==='f'?state.myPicks.final:(state.myPicks[r.key]||{})[idx];
-      const aL=r.key==='r32'?(m.aLabel||''):'', bL=r.key==='r32'?(m.bLabel||''):'';
+      const aL='', bL='';
       const card=document.createElement('div'); card.className='match';
       card.style.cssText=`position:absolute;left:0;width:${CW}px;top:${mid}px;transform:translateY(-50%);`;
       card.innerHTML=slotHtml(m.a,picked,r.key,idx,aL)+slotHtml(m.b,picked,r.key,idx,bL);

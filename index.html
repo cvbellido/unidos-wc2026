@@ -305,14 +305,15 @@
   .scoring-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
     font-size: 0.82rem;
     color: rgba(255, 255, 255, 0.9);
-    display: block;
     padding: 0 2.25rem 1.25rem;
   }
   .scoring-table tr { border-bottom: 1px solid rgba(199, 185, 255, 0.15); }
   .scoring-table tr:last-child { border-bottom: none; }
   .scoring-table td { padding: 0.42rem 0; }
+  .scoring-table td:first-child { width: 100%; padding-right: 1rem; }
   .scoring-table td:last-child {
     text-align: right;
     font-weight: 700;
@@ -438,7 +439,7 @@
             <button type="submit" class="btn-register" id="signup-btn">
               Create account &rarr;
             </button>
-            <p class="form-footer-note">For Slalom employees only. Your picks will be tied to this email.</p>
+            <p class="form-footer-note">For DC-Slalom employees only. Your picks will be tied to this email.</p>
           </form>
         </div>
 
@@ -474,7 +475,7 @@
       </div>
 
       <div class="card-footer">
-        &copy; 2026 Slalom &middot; Unidos &bull; For Slalom employees only
+        &copy; 2026 Slalom &middot; Unidos &bull; For DC-Slalom employees only
       </div>
 
     </div><!-- /.card -->

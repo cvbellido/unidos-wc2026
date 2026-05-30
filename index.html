@@ -147,6 +147,23 @@
     transition: border-color 0.2s, box-shadow 0.2s;
     width: 100%;
   }
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 2.75rem; }
+  .pw-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.2rem;
+    color: rgba(199, 185, 255, 0.55);
+    display: flex;
+    align-items: center;
+    transition: color 0.15s;
+  }
+  .pw-toggle:hover { color: rgba(199, 185, 255, 0.9); }
   input::placeholder { color: rgba(199, 185, 255, 0.5); }
   input:focus {
     border-color: var(--lavender);
@@ -361,8 +378,13 @@
             </div>
             <div class="form-group">
               <label for="signin-password">Password</label>
-              <input type="password" id="signin-password" placeholder="Your password"
-                     autocomplete="current-password" required />
+              <div class="pw-wrap">
+                <input type="password" id="signin-password" placeholder="Your password"
+                       autocomplete="current-password" required />
+                <button type="button" class="pw-toggle" aria-label="Show password" onclick="togglePw('signin-password',this)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
               <span class="field-error" id="signin-error"></span>
             </div>
             <button type="submit" class="btn-register" id="signin-btn">
@@ -381,7 +403,7 @@
                      autocomplete="name" maxlength="100" required />
             </div>
             <div class="form-group">
-              <label for="signup-name">Display name <span style="font-weight:400;color:rgba(199,185,255,0.6)">(shown on leaderboard)</span></label>
+              <label for="signup-name">Display name <span style="font-weight:400;color:rgba(199,185,255,0.6)">how you want to appear on leaderboard</span></label>
               <input type="text" id="signup-name" placeholder="Nickname or alias"
                      autocomplete="off" maxlength="40" required />
             </div>
@@ -393,13 +415,23 @@
             </div>
             <div class="form-group">
               <label for="signup-password">Password</label>
-              <input type="password" id="signup-password" placeholder="At least 8 characters"
-                     autocomplete="new-password" required />
+              <div class="pw-wrap">
+                <input type="password" id="signup-password" placeholder="At least 8 characters"
+                       autocomplete="new-password" required />
+                <button type="button" class="pw-toggle" aria-label="Show password" onclick="togglePw('signup-password',this)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
             </div>
             <div class="form-group">
               <label for="signup-confirm">Confirm password</label>
-              <input type="password" id="signup-confirm" placeholder="Re-enter password"
-                     autocomplete="new-password" required />
+              <div class="pw-wrap">
+                <input type="password" id="signup-confirm" placeholder="Re-enter password"
+                       autocomplete="new-password" required />
+                <button type="button" class="pw-toggle" aria-label="Show password" onclick="togglePw('signup-confirm',this)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
               <span class="field-error" id="signup-error"></span>
             </div>
             <button type="submit" class="btn-register" id="signup-btn">
@@ -425,13 +457,15 @@
             <span class="scoring-intro">You earn points whenever a team you picked advances correctly. Later rounds are worth more.</span>
             <table class="scoring-table">
               <tbody>
-                <tr><td>Group stage finishers (1st &amp; 2nd per group)</td><td>1 pt each</td></tr>
+                <tr><td>Group stage finishers (1st, 2nd &amp; 3rd per group)</td><td>1 pt each</td></tr>
+                <tr><td>Entire group correct (all 3 positions in order)</td><td>+5 pts bonus</td></tr>
+                <tr><td>Third-place qualifiers (best 8 of 12 advance)</td><td>1 pt each</td></tr>
                 <tr><td>Round of 32 winners</td><td>2 pts each</td></tr>
                 <tr><td>Round of 16 winners</td><td>4 pts each</td></tr>
                 <tr><td>Quarterfinal winners</td><td>8 pts each</td></tr>
                 <tr><td>Semifinal winners</td><td>16 pts each</td></tr>
                 <tr><td>Champion</td><td>32 pts</td></tr>
-                <tr class="total-row"><td>Maximum possible</td><td>184 pts</td></tr>
+                <tr class="total-row"><td>Maximum possible</td><td>264 pts</td></tr>
               </tbody>
             </table>
           </div>
@@ -466,6 +500,17 @@
         clearError('signup-error', 'signup-fullname', 'signup-name', 'signup-email', 'signup-password', 'signup-confirm');
       });
     });
+
+    /* ── Password show/hide toggle ────────────────────────────── */
+    const EYE_OPEN = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    const EYE_CLOSED = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+    function togglePw(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      const show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      btn.innerHTML = show ? EYE_CLOSED : EYE_OPEN;
+      btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    }
 
     function clearError(errId, ...inputIds) {
       const errEl = document.getElementById(errId);

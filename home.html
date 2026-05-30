@@ -1454,42 +1454,63 @@ function getFinalMatchup() {
   return {a:winners[0],b:winners[1]};
 }
 function renderBracket() {
-  const wrap=document.getElementById('bracketWrap'); wrap.innerHTML='';
-  const rounds=[
-    {key:'r32',label:'Round of 32',matches:getR32Matchups()},
-    {key:'r16',label:'Round of 16',matches:getR16Matchups()},
-    {key:'qf', label:'Quarterfinals',matches:getQFMatchups()},
-    {key:'sf', label:'Semifinals',matches:getSFMatchups()},
-    {key:'f',  label:'Final',matches:[getFinalMatchup()]},
+  const wrap=document.getElementById('bracketWrap'); wrap.innerHTML=''; wrap.style.gap='0';
+  const UNIT=80, TOTAL=16*UNIT, CW=175, AW=14;
+  const rds=[
+    {key:'r32',label:'Round of 32',  fn:getR32Matchups,          mult:1},
+    {key:'r16',label:'Round of 16',  fn:getR16Matchups,          mult:2},
+    {key:'qf', label:'Quarterfinals',fn:getQFMatchups,           mult:4},
+    {key:'sf', label:'Semifinals',   fn:getSFMatchups,           mult:8},
+    {key:'f',  label:'Final',        fn:()=>[getFinalMatchup()], mult:16},
   ];
-  for (const r of rounds) {
-    const col=document.createElement('div'); col.className='bracket-round';
-    let html=`<div class="round-label">${r.label}</div>`;
-    r.matches.forEach((m,idx) => {
+  for (const r of rds) {
+    const ms=r.fn(), isFinal=r.key==='f';
+    const col=document.createElement('div');
+    col.style.cssText=`display:flex;flex-direction:column;flex-shrink:0;`;
+    const lbl=document.createElement('div'); lbl.className='round-label'; lbl.textContent=r.label;
+    col.appendChild(lbl);
+    const body=document.createElement('div');
+    body.style.cssText=`position:relative;height:${TOTAL}px;width:${CW+(isFinal?0:AW)}px;flex-shrink:0;`;
+    ms.forEach((m,idx)=>{
+      const cellH=UNIT*r.mult, mid=idx*cellH+cellH/2;
       const picked=r.key==='f'?state.myPicks.final:(state.myPicks[r.key]||{})[idx];
-      html+=`<div class="match">${slotHtml(m.a,picked,r.key,idx)}${slotHtml(m.b,picked,r.key,idx)}</div>`;
+      const aL=r.key==='r32'?(m.aLabel||''):'', bL=r.key==='r32'?(m.bLabel||''):'';
+      const card=document.createElement('div'); card.className='match';
+      card.style.cssText=`position:absolute;left:0;width:${CW}px;top:${mid}px;transform:translateY(-50%);`;
+      card.innerHTML=slotHtml(m.a,picked,r.key,idx,aL)+slotHtml(m.b,picked,r.key,idx,bL);
+      body.appendChild(card);
+      if (!isFinal) {
+        body.insertAdjacentHTML('beforeend',`<div style="position:absolute;left:${CW}px;top:${mid}px;transform:translateY(-50%);width:${AW}px;height:1.5px;background:rgba(199,185,255,0.28);pointer-events:none;"></div>`);
+        if (idx%2===0) {
+          const nm=(idx+1)*cellH+cellH/2;
+          body.insertAdjacentHTML('beforeend',`<div style="position:absolute;left:${CW+AW-1.5}px;top:${mid}px;width:1.5px;height:${nm-mid}px;background:rgba(199,185,255,0.28);pointer-events:none;"></div>`);
+        }
+      }
     });
-    col.innerHTML=html; wrap.appendChild(col);
+    col.appendChild(body); wrap.appendChild(col);
   }
-  // Champion column — sits to the right of Final
-  const champion=state.myPicks.final;
-  const locked=picksLocked();
-  const fm=getFinalMatchup();
-  const champCol=document.createElement('div'); champCol.className='bracket-round'; champCol.style.justifyContent='center';
-  let champHtml=`<div class="round-label" style="color:rgba(222,255,77,0.85)">🏆 Champion</div>`;
+  // Champion column
+  const champion=state.myPicks.final, locked=picksLocked(), fm=getFinalMatchup();
+  const champCol=document.createElement('div');
+  champCol.style.cssText=`display:flex;flex-direction:column;flex-shrink:0;min-width:160px;`;
+  const champLblSpacer=document.createElement('div'); champLblSpacer.className='round-label'; champLblSpacer.innerHTML='&nbsp;';
+  champCol.appendChild(champLblSpacer);
+  const champBody=document.createElement('div');
+  champBody.style.cssText=`height:${TOTAL}px;display:flex;flex-direction:column;justify-content:center;gap:0.5rem;padding:0 0.25rem;`;
+  let champInner=`<div class="round-label" style="color:rgba(222,255,77,0.85);text-align:center">🏆 Champion</div>`;
   if (champion) {
     const t=TEAMS[champion]||{};
-    champHtml+=`<div style="background:rgba(0,200,80,0.12);border:2px solid var(--lime);border-radius:8px;padding:1rem 0.75rem;text-align:center;cursor:${locked?'default':'pointer'};transition:background 0.15s;" ${locked?'':` onclick="pickBracket('f',0,'${champion}')"`}>
+    champInner+=`<div style="background:rgba(0,200,80,0.12);border:2px solid var(--lime);border-radius:8px;padding:1rem 0.75rem;text-align:center;cursor:${locked?'default':'pointer'};transition:background 0.15s;" ${locked?'':` onclick="pickBracket('f',0,'${champion}')"`}>
       <div style="font-size:1.75rem;margin-bottom:0.3rem">${t.flag||'⚪'}</div>
       <div style="font-size:0.85rem;font-weight:800;color:#DED6FF">${t.name||champion}</div>
       <div style="font-size:0.6rem;color:var(--lime);font-weight:800;letter-spacing:0.07em;margin-top:0.3rem">⭐ YOUR PICK</div>
     </div>`;
   } else if (fm.a||fm.b) {
-    champHtml+=`<div style="border:1.5px dashed rgba(222,255,77,0.22);border-radius:8px;padding:1rem 0.75rem;text-align:center;color:rgba(255,255,255,0.35);font-size:0.78rem;line-height:1.5;">← click a finalist<br>to pick your<br>champion</div>`;
+    champInner+=`<div style="border:1.5px dashed rgba(222,255,77,0.22);border-radius:8px;padding:1rem 0.75rem;text-align:center;color:rgba(255,255,255,0.35);font-size:0.78rem;line-height:1.5;">← click a finalist<br>to pick your<br>champion</div>`;
   } else {
-    champHtml+=`<div style="border:1.5px dashed rgba(255,255,255,0.1);border-radius:8px;padding:1rem 0.75rem;text-align:center;color:rgba(255,255,255,0.2);font-size:0.78rem;">TBD</div>`;
+    champInner+=`<div style="border:1.5px dashed rgba(255,255,255,0.1);border-radius:8px;padding:1rem 0.75rem;text-align:center;color:rgba(255,255,255,0.2);font-size:0.78rem;">TBD</div>`;
   }
-  champCol.innerHTML=champHtml; wrap.appendChild(champCol);
+  champBody.innerHTML=champInner; champCol.appendChild(champBody); wrap.appendChild(champCol);
   renderChampionSection();
 }
 function renderChampionSection() {
@@ -1501,10 +1522,11 @@ function pickChampion(code) {
   state.myPicks.final=(state.myPicks.final===code)?null:code;
   save(); renderBracket(); updatePicksProgress(); renderSubmitSection();
 }
-function slotHtml(code,pickedCode,roundKey,matchIdx) {
+function slotHtml(code,pickedCode,roundKey,matchIdx,label='') {
   const disabled=!code, picked=code&&pickedCode===code;
   const onclick=disabled?'':`onclick="pickBracket('${roundKey}',${matchIdx},'${code}')"`;
-  return `<div class="match-slot ${disabled?'disabled':''} ${picked?'picked':''}" ${onclick}>${teamTag(code)}</div>`;
+  const labelHtml=label?`<span style="font-size:0.58rem;font-weight:800;color:rgba(199,185,255,0.5);min-width:22px;flex-shrink:0">${label}</span>`:'';
+  return `<div class="match-slot ${disabled?'disabled':''} ${picked?'picked':''}" ${onclick}>${labelHtml}${teamTag(code)}</div>`;
 }
 function pickBracket(roundKey,matchIdx,code) {
   if (enforceLock()) return;

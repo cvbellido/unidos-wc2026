@@ -1309,20 +1309,40 @@ function renderWelcome() {
   }
   document.getElementById('statPlayers').textContent = state.players.length;
 }
-async function changeAlias() {
+function changeAlias() {
   const current = state.user || '';
-  const input = prompt('Enter your new display name:', current);
-  if (!input || input.trim() === current) return;
+  showModal(`
+    <h2 style="margin-top:0;margin-bottom:0.25rem;color:var(--lavender);font-size:1.1rem">Change display name</h2>
+    <p style="margin:0 0 1.25rem;font-size:0.85rem;color:rgba(199,185,255,0.7)">This is how you appear on the leaderboard.</p>
+    <input id="aliasInput" type="text" maxlength="40"
+      value="${escapeHtml(current)}"
+      placeholder="Your display name"
+      style="width:100%;box-sizing:border-box;padding:0.72rem 1rem;border:1.5px solid rgba(199,185,255,0.35);border-radius:10px;font-size:0.95rem;font-family:inherit;color:#fff;background:rgba(255,255,255,0.08);outline:none;margin-bottom:1rem;"
+      onkeydown="if(event.key==='Enter')submitAliasChange()"
+    />
+    <div style="display:flex;gap:0.6rem;justify-content:flex-end">
+      <button onclick="closeModal()" style="padding:0.6rem 1.2rem;border-radius:8px;border:1px solid rgba(199,185,255,0.3);background:transparent;color:rgba(199,185,255,0.8);font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;">Cancel</button>
+      <button onclick="submitAliasChange()" style="padding:0.6rem 1.2rem;border-radius:8px;border:none;background:var(--blue-primary);color:#fff;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;">Save</button>
+    </div>
+  `);
+  setTimeout(() => { const el = document.getElementById('aliasInput'); if (el) { el.focus(); el.select(); } }, 50);
+}
+async function submitAliasChange() {
+  const el = document.getElementById('aliasInput');
+  if (!el) return;
+  const val = el.value.trim();
+  if (!val || val === state.user) { closeModal(); return; }
   try {
     const res = await fetch('/api/me', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ alias: input.trim() }),
+      body: JSON.stringify({ alias: val }),
     });
     const d = await res.json().catch(() => ({}));
     if (!res.ok) { showToast(d.error || 'Could not update name'); return; }
     state.user = d.alias;
     save();
+    closeModal();
     renderWelcome();
     showToast('Display name updated ✓');
   } catch { showToast('Network error — name not saved'); }

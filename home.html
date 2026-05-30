@@ -2046,7 +2046,7 @@ async function changeAlias() {
   const input = prompt('Enter your new display name:', current);
   if (!input || input.trim() === current) return;
   try {
-    const res = await fetch('/api/auth/change-alias', {
+    const res = await fetch('/api/me', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ alias: input.trim() }),

@@ -1294,7 +1294,7 @@ function renderWelcome() {
   if (state.user) {
     userArea.innerHTML = `
       <div class="user-pill" style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
-        <span>👋 ${escapeHtml(state.user)}</span>
+        <span>👋 <span title="Click to change display name" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;" onclick="changeAlias()"><b>${escapeHtml(state.user)}</b></span></span>
         <button class="btn secondary" style="padding:0.25rem 0.6rem;font-size:0.72rem" onclick="openChangePassword()">Change password</button>
         <button class="btn secondary" style="padding:0.25rem 0.6rem;font-size:0.72rem" onclick="logout()">Log out</button>
       </div>`;
@@ -1308,6 +1308,24 @@ function renderWelcome() {
     welcomeBox.innerHTML = '';
   }
   document.getElementById('statPlayers').textContent = state.players.length;
+}
+async function changeAlias() {
+  const current = state.user || '';
+  const input = prompt('Enter your new display name:', current);
+  if (!input || input.trim() === current) return;
+  try {
+    const res = await fetch('/api/auth/change-alias', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alias: input.trim() }),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) { showToast(d.error || 'Could not update name'); return; }
+    state.user = d.alias;
+    save();
+    renderWelcome();
+    showToast('Display name updated ✓');
+  } catch { showToast('Network error — name not saved'); }
 }
 async function logout() {
   try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}

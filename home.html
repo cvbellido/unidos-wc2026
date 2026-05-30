@@ -1264,7 +1264,7 @@ function renderWelcome() {
   const userArea = document.getElementById('userArea');
   const welcomeBox = document.getElementById('welcomeBox');
   if (state.user) {
-    userArea.innerHTML = `<div class="user-pill" style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;"><span>👋 Welcome back, <b>${escapeHtml(state.user)}</b>!</span><button onclick="logout()" style="background:rgba(255,77,95,0.12);border:1px solid rgba(255,77,95,0.35);color:rgba(255,100,115,0.9);border-radius:6px;padding:0.2rem 0.6rem;font-size:0.73rem;font-weight:700;cursor:pointer;font-family:inherit;">Log out</button></div>`;
+    userArea.innerHTML = `<div class="user-pill" style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;"><span>👋 Welcome back, <b title="Click to change display name" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;" onclick="changeAlias()">${escapeHtml(state.user)}</b>!</span><button onclick="logout()" style="background:rgba(255,77,95,0.12);border:1px solid rgba(255,77,95,0.35);color:rgba(255,100,115,0.9);border-radius:6px;padding:0.2rem 0.6rem;font-size:0.73rem;font-weight:700;cursor:pointer;font-family:inherit;">Log out</button></div>`;
     welcomeBox.innerHTML = `
       <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap">
         <button class="btn" onclick="switchTab('picks')">Make my picks →</button>
@@ -2040,6 +2040,24 @@ function resetAll() {
   if (!confirm('Erase all picks, results, and players?')) return;
   if (!confirm('Really? This cannot be undone.')) return;
   localStorage.removeItem(STORAGE_KEY); location.reload();
+}
+async function changeAlias() {
+  const current = state.user || '';
+  const input = prompt('Enter your new display name:', current);
+  if (!input || input.trim() === current) return;
+  try {
+    const res = await fetch('/api/auth/change-alias', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alias: input.trim() }),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) { showToast(d.error || 'Could not update name'); return; }
+    state.user = d.alias;
+    save();
+    renderWelcome();
+    showToast('Display name updated ✓');
+  } catch { showToast('Network error — name not saved'); }
 }
 async function logout() {
   try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {}

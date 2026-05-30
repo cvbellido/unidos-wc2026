@@ -841,7 +841,7 @@
 <!-- ── LEADERBOARD ───────────────────────────────────────────── -->
 <section id="leaderboard" class="panel">
   <h2>Leaderboard</h2>
-  <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">Special prizes for 1st and 2nd place, along with surprise rewards! 🎁</p>
+  <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">Make picks. Earn points. Win prizes. Claim bragging rights 🎉</p>
   <div class="actions-row">
     <button class="btn secondary" onclick="refreshLeaderboard()">🔄 Refresh</button>
   </div>
@@ -1413,6 +1413,7 @@ function cycleGroupPick(L, code) {
     picks = [picks[0], picks[1], code];
   }
   state.myPicks.group[L]=picks;
+  state.submitted=false;
   invalidateBracketPicks(); save(); renderPicks();
 }
 function getThirdPlaceCandidates() {
@@ -1436,7 +1437,8 @@ function cycleThirdPlacePick(code) {
   }
   state.myPicks.thirdPlace=tp;
   state.myPicks.r32={}; state.myPicks.r16={}; state.myPicks.qf={}; state.myPicks.sf={}; state.myPicks.final=null;
-  save(); renderThirdPlace(); renderBracket();
+  state.submitted=false;
+  save(); renderThirdPlace(); renderBracket(); renderSubmitSection(); updatePicksProgress();
 }
 function renderThirdPlace() {
   const grid=document.getElementById('thirdPlaceGrid');
@@ -1585,6 +1587,7 @@ function renderChampionSection() {
 function pickChampion(code) {
   if (enforceLock()) return;
   state.myPicks.final=(state.myPicks.final===code)?null:code;
+  state.submitted=false;
   save(); renderBracket(); updatePicksProgress(); renderSubmitSection();
 }
 function slotHtml(code,pickedCode,roundKey,matchIdx,label='') {
@@ -1604,6 +1607,7 @@ function pickBracket(roundKey,matchIdx,code) {
     const order=['r32','r16','qf','sf'], i=order.indexOf(roundKey);
     if (i>=0) { for (let j=i+1;j<order.length;j++) state.myPicks[order[j]]={}; state.myPicks.final=null; }
   }
+  state.submitted=false;
   save(); renderBracket(); updatePicksProgress(); renderSubmitSection();
 }
 function updatePicksProgress() {
@@ -1715,8 +1719,7 @@ function renderSubmitSection() {
       <div style="text-align:center;padding:0.25rem 0 0.5rem">
         <div style="font-size:2.5rem;margin-bottom:0.5rem">\u2705</div>
         <h3 style="margin-top:0;margin-bottom:0.4rem;color:var(--lime)">Picks Submitted!</h3>
-        <p style="font-size:0.88rem;color:rgba(222,214,255,0.75);margin:0 0 1.25rem">Your picks are saved. You can update them any time before ${deadlineLabel()}.</p>
-        <button class="btn" onclick="state.submitted=false;save();renderSubmitSection();" style="font-size:0.9rem;padding:0.7rem 1.5rem;">\u270f\ufe0f Edit my picks</button>
+        <p style="font-size:0.88rem;color:rgba(222,214,255,0.75);margin:0">Your picks are saved. Make any change above to unlock re-saving before ${deadlineLabel()}.</p>
       </div>`;
     return;
   }

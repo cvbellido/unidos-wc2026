@@ -144,6 +144,7 @@
   .card h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--white); }
   .card h3 { font-size: 1rem; margin-bottom: 0.75rem; color: var(--lavender); }
   .muted { color: var(--muted); font-size: 0.88rem; }
+  .panel p.muted { max-width: 600px; }
 
   /* ── Welcome hero ──────────────────────────────────────────── */
   .welcome-hero {
@@ -1587,10 +1588,20 @@ function pickBracket(roundKey,matchIdx,code) {
     state.myPicks.final=(state.myPicks.final===code)?null:code;
   } else {
     const cur=state.myPicks[roundKey]||{};
+    const oldWinner=cur[matchIdx]||null;
     if (cur[matchIdx]===code) delete cur[matchIdx]; else cur[matchIdx]=code;
     state.myPicks[roundKey]=cur;
+    // Cascade only the single path that depended on the old winner
     const order=['r32','r16','qf','sf'], i=order.indexOf(roundKey);
-    if (i>=0) { for (let j=i+1;j<order.length;j++) state.myPicks[order[j]]={}; state.myPicks.final=null; }
+    if (i>=0 && oldWinner) {
+      let nextIdx=Math.floor(matchIdx/2), cascading=true;
+      for (let j=i+1;j<order.length&&cascading;j++) {
+        const rd=state.myPicks[order[j]]||{};
+        if (rd[nextIdx]===oldWinner) { delete rd[nextIdx]; state.myPicks[order[j]]=rd; nextIdx=Math.floor(nextIdx/2); }
+        else cascading=false;
+      }
+      if (cascading && state.myPicks.final===oldWinner) state.myPicks.final=null;
+    }
   }
   state.submitted=false;
   save(); renderBracket(); updatePicksProgress(); renderSubmitSection();

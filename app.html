@@ -373,7 +373,7 @@
   }
 
   /* ── Bracket ───────────────────────────────────────────────── */
-  .bracket-wrap { overflow-x: auto; padding-bottom: 0.5rem; }
+  .bracket-wrap { overflow-x: auto; padding-bottom: 0.5rem; width: 100%; }
   .bracket { display: flex; gap: 1rem; min-width: max-content; }
   .bracket-round {
     display: flex;
@@ -799,6 +799,12 @@
     .leaderboard-table td { padding: 0.65rem 0.5rem; font-size: 0.82rem; }
     .leaderboard-table th { padding: 0.5rem; }
     .leaderboard-table .rank { width: 36px; }
+
+    /* Hide award cards on mobile leaderboard */
+    .bonus-awards { display: none; }
+
+    /* Contain bracket overflow so picks page text stays at viewport width */
+    #picks { overflow-x: hidden; }
   }
 </style>
 </head>

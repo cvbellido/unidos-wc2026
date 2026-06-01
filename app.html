@@ -763,6 +763,11 @@
   .ab-4 { background: var(--lime); }
   .ab-5 { background: var(--lavender); }
 
+  /* ── Nav: always single scrollable row ─────────────────────── */
+  nav.tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs button { flex-shrink: 0; white-space: nowrap; }
+
   /* ── Responsive ────────────────────────────────────────────── */
   @media (max-width: 600px) {
     main { padding: 1rem; }
@@ -770,6 +775,30 @@
     nav.tabs { padding: 0 1rem 0.5rem; }
     .brand-wc-logo { height: 34px; }
     .brand-slalom-logo { display: none; }
+
+    /* Match schedule: date on left, match info on right */
+    .match-row {
+      grid-template-columns: 72px 1fr;
+      gap: 0 0.6rem;
+    }
+    .match-row .date-cell {
+      grid-row: 1 / 5;
+      border-right: 1px solid var(--border);
+      border-bottom: none;
+      padding: 0 0.5rem 0 0;
+      text-align: left;
+      align-self: start;
+    }
+    .match-row .home-team { flex-direction: row; justify-content: flex-start; }
+    .match-row .away-team { flex-direction: row; justify-content: flex-start; }
+    .match-row .venue { border: none; padding: 0; text-align: left; }
+
+    /* Leaderboard: hide champion column, tighten padding */
+    .leaderboard-table th:nth-child(3),
+    .leaderboard-table td:nth-child(3) { display: none; }
+    .leaderboard-table td { padding: 0.65rem 0.5rem; font-size: 0.82rem; }
+    .leaderboard-table th { padding: 0.5rem; }
+    .leaderboard-table .rank { width: 36px; }
   }
 </style>
 </head>

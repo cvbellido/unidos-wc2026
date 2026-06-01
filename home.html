@@ -349,6 +349,16 @@
     text-transform: uppercase;
     white-space: nowrap;
   }
+  .tp-rank-badge {
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: var(--lime);
+    background: rgba(0,200,80,0.18);
+    border-radius: 4px;
+    padding: 1px 5px;
+    white-space: nowrap;
+    margin-left: auto;
+  }
   .tp-count-pill {
     display: inline-block;
     font-size: 0.8rem;
@@ -793,8 +803,8 @@
 
   <div id="thirdPlaceSection" style="margin-top:2rem">
     <h3 style="margin-top:0;color:var(--lavender)">Best Third-Place Qualifiers</h3>
-    <p class="muted" style="margin-top:0;margin-bottom:0.75rem;color:#DED6FF;font-size:0.95rem">The 8 best third-place teams also advance to the Round of 32. Pick 3rd in each group above — they'll appear here. Then select which 8 you think make it through.</p>
-    <div style="margin-bottom:0.75rem"><span class="tp-count-pill" id="tpCount">0 / 8 advancing</span></div>
+    <p class="muted" style="margin-top:0;margin-bottom:0.75rem;color:#DED6FF;font-size:0.95rem">The 8 best third-place teams advance to the Round of 32. Pick 3rd in each group above — they'll appear here. <b style="color:#fff;">Click in order from strongest (TP1) to weakest (TP8)</b> — the ranking determines their bracket seeding.</p>
+    <div style="margin-bottom:0.75rem"><span class="tp-count-pill" id="tpCount">0 / 8 ranked</span></div>
     <div class="tp-pills" id="thirdPlaceGrid"></div>
   </div>
 
@@ -1369,7 +1379,7 @@ function cycleThirdPlacePick(code) {
   } else if (tp.length<8) {
     tp=[...tp,code];
   } else {
-    showToast('Already 8 advancing — remove one first'); return;
+    showToast('Already 8 ranked — remove one first'); return;
   }
   state.myPicks.thirdPlace=tp;
   state.myPicks.r32={}; state.myPicks.r16={}; state.myPicks.qf={}; state.myPicks.sf={}; state.myPicks.final=null;
@@ -1382,18 +1392,32 @@ function renderThirdPlace() {
   if (!grid) return;
   const tp=state.myPicks.thirdPlace||[];
   const tpSet=new Set(tp);
-  if (countEl) countEl.textContent=`${tp.length} / 8 advancing`;
+  if (countEl) countEl.textContent=`${tp.length} / 8 ranked`;
   const candidates=getThirdPlaceCandidates().sort((a,b)=>a.L.localeCompare(b.L));
   if (candidates.length===0) {
     grid.innerHTML='<div style="color:#DED6FF;font-size:0.9rem;opacity:0.7">Pick 3rd place in the group cards above — they\'ll appear here.</div>';
     return;
   }
-  grid.innerHTML=candidates.map(({L,code})=>{
+  const poolHtml=candidates.map(({L,code})=>{
     const sel=tpSet.has(code);
+    const rank=sel?tp.indexOf(code)+1:null;
     return `<div class="tp-card${sel?' tp-selected':''}" onclick="cycleThirdPlacePick('${code}')">
-      <span class="tp-group-label">Grp ${L}</span>${teamTag(code)}
+      <span class="tp-group-label">Grp ${L}</span>${teamTag(code)}${sel?`<span class="tp-rank-badge">TP${rank}</span>`:''}
     </div>`;
   }).join('');
+  const rankHtml=tp.length>0?`
+    <div style="margin-top:1rem;width:100%;flex-basis:100%;">
+      <div style="font-size:0.7rem;font-weight:700;color:rgba(199,185,255,0.55);margin-bottom:0.4rem;letter-spacing:0.05em;text-transform:uppercase;">Your ranking — click to remove</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.35rem;">
+        ${tp.map((code,i)=>{const t=TEAMS[code]||{};return `<div onclick="cycleThirdPlacePick('${code}')" style="display:flex;align-items:center;gap:0.35rem;background:rgba(0,200,80,0.1);border:1px solid rgba(0,200,80,0.28);border-radius:6px;padding:0.28rem 0.6rem;cursor:pointer;font-size:0.78rem;transition:background 0.15s;" onmouseover="this.style.background='rgba(0,200,80,0.2)'" onmouseout="this.style.background='rgba(0,200,80,0.1)'">
+          <span style="color:var(--lime);font-weight:800;font-size:0.68rem;min-width:26px;">TP${i+1}</span>
+          <span>${t.flag||'⚪'}</span>
+          <span style="color:#DED6FF;">${escapeHtml(t.name||code)}</span>
+          <span style="color:rgba(255,100,115,0.7);margin-left:0.2rem;font-size:0.65rem;">✕</span>
+        </div>`;}).join('')}
+      </div>
+    </div>`:'';
+  grid.innerHTML=poolHtml+rankHtml;
 }
 function invalidateBracketPicks() {
   const valid3rd=new Set(Object.values(state.myPicks.group||{}).map(p=>p[2]).filter(Boolean));
@@ -1411,30 +1435,29 @@ function getAdvancers() {
   return adv;
 }
 function getR32Matchups() {
-  // Official FIFA WC 2026 R32 bracket slot pairings
-  // Source: play.fifa.com/bracket-predictor
+  // tp[0]=TP1 (strongest) … tp[7]=TP8 (weakest)
   const get=(L,i)=>(state.myPicks.group[L]||[])[i]||null;
   const all12=new Set();
   for (const L of Object.keys(state.groups)){const p=state.myPicks.group[L]||[];if(p[0])all12.add(p[0]);if(p[1])all12.add(p[1]);}
   const tp=(state.myPicks.thirdPlace||[]).filter(c=>!all12.has(c));
   const t=i=>tp[i]||null;
   return [
-    {a:get('E',0),b:t(0),       aLabel:'E1',bLabel:'3rd'},
-    {a:get('I',0),b:t(1),       aLabel:'I1',bLabel:'3rd'},
-    {a:get('A',1),b:get('B',1), aLabel:'A2',bLabel:'B2' },
-    {a:get('F',0),b:get('C',1), aLabel:'F1',bLabel:'C2' },
-    {a:get('K',1),b:get('L',1), aLabel:'K2',bLabel:'L2' },
-    {a:get('H',0),b:get('J',1), aLabel:'H1',bLabel:'J2' },
-    {a:get('D',0),b:t(2),       aLabel:'D1',bLabel:'3rd'},
-    {a:get('G',0),b:t(3),       aLabel:'G1',bLabel:'3rd'},
-    {a:get('C',0),b:get('F',1), aLabel:'C1',bLabel:'F2' },
-    {a:get('E',1),b:get('I',1), aLabel:'E2',bLabel:'I2' },
-    {a:get('A',0),b:t(4),       aLabel:'A1',bLabel:'3rd'},
-    {a:get('L',0),b:t(5),       aLabel:'L1',bLabel:'3rd'},
-    {a:get('J',0),b:get('H',1), aLabel:'J1',bLabel:'H2' },
-    {a:get('D',1),b:get('G',1), aLabel:'D2',bLabel:'G2' },
-    {a:get('B',0),b:t(6),       aLabel:'B1',bLabel:'3rd'},
-    {a:get('K',0),b:t(7),       aLabel:'K1',bLabel:'3rd'},
+    {a:get('A',0),b:t(7)},          // M1  A1 vs TP8
+    {a:get('B',1),b:get('C',1)},    // M2  B2 vs C2
+    {a:get('D',0),b:t(6)},          // M3  D1 vs TP7
+    {a:get('E',1),b:get('F',1)},    // M4  E2 vs F2
+    {a:get('G',0),b:t(5)},          // M5  G1 vs TP6
+    {a:get('H',1),b:get('I',1)},    // M6  H2 vs I2
+    {a:get('J',0),b:t(4)},          // M7  J1 vs TP5
+    {a:get('K',1),b:get('L',1)},    // M8  K2 vs L2
+    {a:get('B',0),b:t(3)},          // M9  B1 vs TP4
+    {a:get('A',1),b:get('D',1)},    // M10 A2 vs D2
+    {a:get('C',0),b:t(2)},          // M11 C1 vs TP3
+    {a:get('E',0),b:get('F',0)},    // M12 E1 vs F1
+    {a:get('H',0),b:t(1)},          // M13 H1 vs TP2
+    {a:get('G',1),b:get('J',1)},    // M14 G2 vs J2
+    {a:get('K',0),b:t(0)},          // M15 K1 vs TP1
+    {a:get('I',0),b:get('L',0)},    // M16 I1 vs L1
   ];
 }
 function getR16Matchups() {
@@ -1919,7 +1942,7 @@ async function cycleThirdPlaceResult(code) {
   const idx=tp.indexOf(code);
   if (idx!==-1) { tp=tp.filter(c=>c!==code); }
   else if (tp.length<8) { tp=[...tp,code]; }
-  else { showToast('Already 8 advancing — remove one first'); return; }
+  else { showToast('Already 8 ranked — remove one first'); return; }
   state.results.thirdPlace=tp;
   state.results.r32={}; state.results.r16={}; state.results.qf={}; state.results.sf={}; state.results.final=null;
   save(); renderAdmin(); renderLeaderboard();

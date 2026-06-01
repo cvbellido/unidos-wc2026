@@ -545,6 +545,10 @@
         showError('signin-error', 'Email and password are required.', 'signin-email', 'signin-password');
         return;
       }
+      if (!email.toLowerCase().endsWith('@slalom.com')) {
+        showError('signin-error', 'Please use your Slalom email address (@slalom.com) to sign in.', 'signin-email');
+        return;
+      }
       const original = btn.innerHTML;
       btn.disabled = true; btn.innerHTML = 'Signing in…';
       try {

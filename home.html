@@ -1539,18 +1539,23 @@ function renderBracket() {
   champCol.appendChild(champLblSpacer);
   const champBody=document.createElement('div');
   champBody.style.cssText=`height:${TOTAL}px;display:flex;flex-direction:column;justify-content:center;gap:0.5rem;padding:0 0.25rem;`;
-  let champInner=`<div class="round-label" style="color:rgba(222,255,77,0.85);text-align:center">🏆 Champion</div>`;
+  let champInner='';
   if (champion) {
     const t=TEAMS[champion]||{};
-    champInner+=`<div style="background:rgba(0,200,80,0.12);border:2px solid var(--lime);border-radius:8px;padding:1rem 0.75rem;text-align:center;cursor:${locked?'default':'pointer'};transition:background 0.15s;" ${locked?'':` onclick="pickBracket('f',0,'${champion}')"`}>
+    champInner=`<div style="background:rgba(0,200,80,0.12);border:2px solid var(--lime);border-radius:8px;padding:1rem 0.75rem;text-align:center;cursor:${locked?'default':'pointer'};transition:background 0.15s;" ${locked?'':` onclick="pickBracket('f',0,'${champion}')"`}>
+      <div style="font-size:0.65rem;font-weight:800;color:rgba(222,255,77,0.85);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.5rem">🏆 Champion</div>
       <div style="font-size:1.75rem;margin-bottom:0.3rem">${t.flag||'⚪'}</div>
       <div style="font-size:0.85rem;font-weight:800;color:#DED6FF">${t.name||champion}</div>
       <div style="font-size:0.6rem;color:var(--lime);font-weight:800;letter-spacing:0.07em;margin-top:0.3rem">⭐ YOUR PICK</div>
     </div>`;
   } else if (fm.a||fm.b) {
-    champInner+=`<div style="border:1.5px dashed rgba(222,255,77,0.22);border-radius:8px;padding:1rem 0.75rem;text-align:center;color:rgba(255,255,255,0.35);font-size:0.78rem;line-height:1.5;">← click a finalist<br>to pick your<br>champion</div>`;
+    champInner=`<div style="border:1.5px dashed rgba(222,255,77,0.22);border-radius:8px;padding:1rem 0.75rem;text-align:center;color:rgba(255,255,255,0.35);font-size:0.78rem;line-height:1.5;">
+      <div style="font-size:0.65rem;font-weight:800;color:rgba(222,255,77,0.6);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.5rem">🏆 Champion</div>
+      ← click a finalist<br>to pick your<br>champion</div>`;
   } else {
-    champInner+=`<div style="border:1.5px dashed rgba(255,255,255,0.1);border-radius:8px;padding:1rem 0.75rem;text-align:center;color:rgba(255,255,255,0.2);font-size:0.78rem;">TBD</div>`;
+    champInner=`<div style="border:1.5px dashed rgba(255,255,255,0.1);border-radius:8px;padding:1rem 0.75rem;text-align:center;color:rgba(255,255,255,0.2);font-size:0.78rem;">
+      <div style="font-size:0.65rem;font-weight:800;color:rgba(222,255,77,0.35);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.5rem">🏆 Champion</div>
+      TBD</div>`;
   }
   champBody.innerHTML=champInner; champCol.appendChild(champBody); wrap.appendChild(champCol);
   renderChampionSection();

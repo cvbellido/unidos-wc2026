@@ -542,11 +542,14 @@
   /* ── Bonus awards ─────────────────────────────── */
   .bonus-awards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.75rem;
     margin-bottom: 1.25rem;
   }
-  @media (max-width: 720px) {
+  @media (max-width: 900px) {
+    .bonus-awards { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 520px) {
     .bonus-awards { grid-template-columns: 1fr; }
   }
   .bonus-card {
@@ -1948,9 +1951,18 @@ function renderBonusAwards() {
   // Champion's Champion: picked the actual final winner
   const championScore = (p) => (r.final && p.picks?.final === r.final) ? 1 : 0;
 
+  // TP Whisperer: most correct best-8 third-place qualifiers
+  const actualTp = new Set((r.thirdPlace || []).filter(Boolean));
+  const tpScore = (p) => {
+    let n = 0;
+    (p.picks?.thirdPlace || []).forEach(c => { if (actualTp.has(c)) n++; });
+    return n;
+  };
+
   const guru = computeAwardWinners(guruScore, players);
   const oracle = computeAwardWinners(oracleScore, players);
   const champ = computeAwardWinners(championScore, players);
+  const tp = computeAwardWinners(tpScore, players);
 
   const card = ({ icon, title, sub, unlocked, winners, count, countLabel }) => {
     const locked = !unlocked;
@@ -1978,6 +1990,8 @@ function renderBonusAwards() {
            unlocked: qfWinners.length>0, winners: oracle.winners, count: oracle.count, countLabel:'/4' }),
     card({ icon:'\ud83c\udfc6', title:"Champion's Champion", sub:'Picked the World Cup winner',
            unlocked: !!r.final, winners: champ.winners, count: champ.winners.length, countLabel:champ.winners.length===1?' pick':' picks' }),
+    card({ icon:'\ud83c\udfaf', title:'TP Whisperer', sub:'Most correct best-8 third-place picks',
+           unlocked: actualTp.size>0, winners: tp.winners, count: tp.count, countLabel:'/8' }),
   ].join('');
 }
 

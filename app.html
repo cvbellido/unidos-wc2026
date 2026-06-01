@@ -1909,10 +1909,20 @@ function renderSubmitSection() {
   const btn=sec.querySelector('.btn.gold');
   if(btn){btn.style.opacity=(!complete||locked)?'0.45':'';btn.style.cursor=(!complete||locked)?'not-allowed':'';}
 }
-async function sharePicks() {
+function sharePicks() {
   if (picksLocked()) { showToast('\u{1F512} Picks closed on ' + deadlineLabel()); return; }
   if (!bracketComplete()) { showToast('Complete your full bracket before submitting'); return; }
-  if (!confirm('Save your picks? You can keep editing until ' + deadlineLabel() + '.')) return;
+  showModal(`
+    <h2 style="margin-top:0;margin-bottom:0.25rem;color:var(--lavender);font-size:1.1rem">Save your picks?</h2>
+    <p style="margin:0 0 1.5rem;font-size:0.85rem;color:rgba(199,185,255,0.7)">You can keep editing until <b style="color:var(--lime)">${deadlineLabel()}</b>.</p>
+    <div style="display:flex;gap:0.6rem;justify-content:flex-end">
+      <button onclick="closeModal()" style="padding:0.6rem 1.2rem;border-radius:8px;border:1px solid rgba(199,185,255,0.3);background:transparent;color:rgba(199,185,255,0.8);font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;">Cancel</button>
+      <button onclick="doSubmitPicks()" style="padding:0.6rem 1.2rem;border-radius:8px;border:none;background:var(--blue-primary);color:#fff;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;">Save picks</button>
+    </div>
+  `);
+}
+async function doSubmitPicks() {
+  closeModal();
   try {
     const res = await fetch('/api/submit-picks', {
       method: 'POST',
@@ -1921,10 +1931,7 @@ async function sharePicks() {
     });
     if (res.status === 401) { window.location.replace('/index.html'); return; }
     const d = await res.json().catch(()=>({}));
-    if (!res.ok) {
-      showToast(d.error || 'Could not save picks');
-      return;
-    }
+    if (!res.ok) { showToast(d.error || 'Could not save picks'); return; }
     state.submitted = true;
     state.everSubmitted = true;
     save();

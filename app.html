@@ -659,6 +659,19 @@
   details.help li { margin-bottom: 0.3rem; }
   details.help code { background: rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem; }
 
+  /* ── Collapsible card ──────────────────────────────────────── */
+  .card-collapsible { cursor: pointer; user-select: none; }
+  .card-collapsible .card-toggle-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .card-collapsible .card-toggle-header h3 { margin: 0; }
+  .card-collapsible .chevron { font-size: 0.75rem; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
+  .card-collapsible.open .chevron { transform: rotate(180deg); }
+  .card-collapsible .card-body { overflow: hidden; max-height: 0; transition: max-height 0.3s ease, margin-top 0.2s; }
+  .card-collapsible.open .card-body { max-height: 1200px; margin-top: 0.85rem; }
+  .faq-item { padding: 0.65rem 0; border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .faq-q { font-size: 0.88rem; font-weight: 700; color: var(--lavender); margin-bottom: 0.3rem; }
+  .faq-a { font-size: 0.83rem; color: rgba(199,185,255,0.8); line-height: 1.55; }
+
   /* ── Scoring table ─────────────────────────────────────────── */
   .scoring-table-inline {
     width: 100%;
@@ -791,7 +804,7 @@
     <div class="stat-tile"><div class="num" id="statTeams">48</div><div class="label">Teams</div></div>
     <div class="stat-tile"><div class="num" id="statGroups">12</div><div class="label">Groups</div></div>
     <div class="stat-tile"><div class="num" id="statMatches">104</div><div class="label">Matches</div></div>
-    <div class="stat-tile"><div class="num" id="statMaxPts">264</div><div class="label">Max Points</div></div>
+    <div class="stat-tile"><div class="num" id="statMaxPts">316</div><div class="label">Max Points</div></div>
     <div class="stat-tile"><div class="num" id="statPlayers">0</div><div class="label">Players</div></div>
   </div>
 
@@ -811,6 +824,39 @@
       <tr><td>Champion</td><td>32 pts</td></tr>
       <tr style="border-top:1px solid rgba(199,185,255,0.3)"><td style="font-weight:700">Maximum possible</td><td style="color:var(--cyan)">316 pts</td></tr>
     </table>
+  </div>
+
+  <div class="card card-collapsible" onclick="this.classList.toggle('open')">
+    <div class="card-toggle-header">
+      <h3>How the World Cup bracket works</h3>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="faq-item">
+        <div class="faq-q">How many teams are in the 2026 World Cup?</div>
+        <div class="faq-a">48 teams compete across 12 groups. It's the first World Cup with this expanded format — more teams, more matches, more chaos.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How does the Group Stage work?</div>
+        <div class="faq-a">Each group has 4 teams playing round-robin (3 matches per team). The top 2 from each group advance automatically. The 4 best 3rd-place finishers from each pod (8 total) also advance as wild cards.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What's the "Best 8 Third-Place" rule?</div>
+        <div class="faq-a">12 teams finish 3rd in their group. Only the 8 best (ranked by points, then goal difference, then goals scored) advance to the Round of 32. That's why you rank them TP1–TP8 — your ranking determines their bracket seeding.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the Round of 32?</div>
+        <div class="faq-a">The Round of 32 is the first knockout round — 32 teams, 16 matches. Win and you advance; lose and you're out. The 32 entrants are: 12 group winners, 12 runners-up, and the 8 best third-place teams.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do the knockout rounds progress?</div>
+        <div class="faq-a">After R32 comes the Round of 16 (16 teams), then Quarterfinals (8), Semifinals (4), and the Final (2). Each round eliminates half the field until one champion is crowned.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is there a 3rd place match?</div>
+        <div class="faq-a">Yes — the two teams that lose in the Semifinals play a 3rd place match. This doesn't affect bracket scoring.</div>
+      </div>
+    </div>
   </div>
 
 </section>

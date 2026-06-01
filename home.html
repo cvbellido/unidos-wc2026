@@ -772,15 +772,17 @@
     <h3>How scoring works</h3>
     <p class="muted" style="margin-bottom:0.75rem">You earn points whenever a team you picked advances correctly. Later rounds are worth more.</p>
     <table class="scoring-table-inline">
-      <tr><td>Group stage finishers (1st, 2nd &amp; 3rd per group)</td><td>1 pt each</td></tr>
-      <tr><td>Entire group correct (all 3 positions in order)</td><td>+5 pts bonus</td></tr>
-      <tr><td>Third-place qualifiers (best 8 of 12 advance)</td><td>1 pt each</td></tr>
-      <tr><td>Round of 32 winners</td><td>2 pts each</td></tr>
-      <tr><td>Round of 16 winners</td><td>4 pts each</td></tr>
-      <tr><td>Quarterfinal winners</td><td>8 pts each</td></tr>
-      <tr><td>Semifinal winners</td><td>16 pts each</td></tr>
+      <tr><td>Group winner (1st place, per group)</td><td>5 pts each</td></tr>
+      <tr><td>Group runner-up (2nd place, per group)</td><td>3 pts each</td></tr>
+      <tr><td>Group 3rd place (per group)</td><td>1 pt each</td></tr>
+      <tr><td>Best 8 third-place teams advancing</td><td>2 pts each</td></tr>
+      <tr><td>Round of 32 qualifiers (all 32 teams)</td><td>1 pt each</td></tr>
+      <tr><td>Round of 16 qualifiers (R32 winners)</td><td>2 pts each</td></tr>
+      <tr><td>Quarterfinalists (R16 winners)</td><td>4 pts each</td></tr>
+      <tr><td>Semifinalists (QF winners)</td><td>8 pts each</td></tr>
+      <tr><td>Finalists (SF winners)</td><td>16 pts each</td></tr>
       <tr><td>Champion</td><td>32 pts</td></tr>
-      <tr style="border-top:1px solid rgba(199,185,255,0.3)"><td style="font-weight:700">Maximum possible</td><td style="color:var(--cyan)">264 pts</td></tr>
+      <tr style="border-top:1px solid rgba(199,185,255,0.3)"><td style="font-weight:700">Maximum possible</td><td style="color:var(--cyan)">316 pts</td></tr>
     </table>
   </div>
 
@@ -803,9 +805,9 @@
 
   <div id="thirdPlaceSection" style="margin-top:2rem">
     <h3 style="margin-top:0;color:var(--lavender)">Best Third-Place Qualifiers</h3>
-    <p class="muted" style="margin-top:0;margin-bottom:0.75rem;color:#DED6FF;font-size:0.95rem">The 8 best third-place teams advance to the Round of 32. Pick 3rd in each group above — they'll appear here. <b style="color:#fff;">Click in order from strongest (TP1) to weakest (TP8)</b> — the ranking determines their bracket seeding.</p>
+    <p class="muted" style="margin-top:0;margin-bottom:0.75rem;font-size:0.88rem">Pick 3rd place in each group above, then click teams to rank them — <b style="color:#fff;">TP1 = strongest, TP8 = weakest</b>. Click a ranked team to remove it.</p>
     <div style="margin-bottom:0.75rem"><span class="tp-count-pill" id="tpCount">0 / 8 ranked</span></div>
-    <div class="tp-pills" id="thirdPlaceGrid"></div>
+    <div id="thirdPlaceGrid"></div>
   </div>
 
   <h3 style="margin-top:2rem;color:var(--lavender)">Knockout Bracket</h3>
@@ -1395,29 +1397,43 @@ function renderThirdPlace() {
   if (countEl) countEl.textContent=`${tp.length} / 8 ranked`;
   const candidates=getThirdPlaceCandidates().sort((a,b)=>a.L.localeCompare(b.L));
   if (candidates.length===0) {
+    grid.style.cssText='';
     grid.innerHTML='<div style="color:#DED6FF;font-size:0.9rem;opacity:0.7">Pick 3rd place in the group cards above — they\'ll appear here.</div>';
     return;
   }
-  const poolHtml=candidates.map(({L,code})=>{
-    const sel=tpSet.has(code);
-    const rank=sel?tp.indexOf(code)+1:null;
-    return `<div class="tp-card${sel?' tp-selected':''}" onclick="cycleThirdPlacePick('${code}')">
-      <span class="tp-group-label">Grp ${L}</span>${teamTag(code)}${sel?`<span class="tp-rank-badge">TP${rank}</span>`:''}
-    </div>`;
-  }).join('');
-  const rankHtml=tp.length>0?`
-    <div style="margin-top:1rem;width:100%;flex-basis:100%;">
-      <div style="font-size:0.7rem;font-weight:700;color:rgba(199,185,255,0.55);margin-bottom:0.4rem;letter-spacing:0.05em;text-transform:uppercase;">Your ranking — click to remove</div>
-      <div style="display:flex;flex-wrap:wrap;gap:0.35rem;">
-        ${tp.map((code,i)=>{const t=TEAMS[code]||{};return `<div onclick="cycleThirdPlacePick('${code}')" style="display:flex;align-items:center;gap:0.35rem;background:rgba(0,200,80,0.1);border:1px solid rgba(0,200,80,0.28);border-radius:6px;padding:0.28rem 0.6rem;cursor:pointer;font-size:0.78rem;transition:background 0.15s;" onmouseover="this.style.background='rgba(0,200,80,0.2)'" onmouseout="this.style.background='rgba(0,200,80,0.1)'">
-          <span style="color:var(--lime);font-weight:800;font-size:0.68rem;min-width:26px;">TP${i+1}</span>
-          <span>${t.flag||'⚪'}</span>
-          <span style="color:#DED6FF;">${escapeHtml(t.name||code)}</span>
-          <span style="color:rgba(255,100,115,0.7);margin-left:0.2rem;font-size:0.65rem;">✕</span>
-        </div>`;}).join('')}
-      </div>
-    </div>`:'';
-  grid.innerHTML=poolHtml+rankHtml;
+  const poolCol=`<div style="flex:1;min-width:200px">
+    <div style="font-size:0.68rem;font-weight:700;color:rgba(199,185,255,0.5);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.5rem">Team Pool — click to rank</div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.4rem">
+      ${candidates.map(({L,code})=>{
+        const sel=tpSet.has(code);
+        const rank=sel?tp.indexOf(code)+1:null;
+        return `<div class="tp-card${sel?' tp-selected':''}" onclick="cycleThirdPlacePick('${code}')">
+          <span class="tp-group-label">Grp ${L}</span>${teamTag(code)}${sel?`<span class="tp-rank-badge">TP${rank}</span>`:''}
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+  const rankCol=`<div style="width:210px;flex-shrink:0">
+    <div style="font-size:0.68rem;font-weight:700;color:rgba(199,185,255,0.5);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.5rem">Your Ranking</div>
+    <div style="display:flex;flex-direction:column;gap:0.3rem">
+      ${Array.from({length:8},(_,i)=>{
+        const code=tp[i]; const t=code?TEAMS[code]||{}:null;
+        return t
+          ?`<div onclick="cycleThirdPlacePick('${code}')" style="display:flex;align-items:center;gap:0.4rem;background:rgba(0,200,80,0.1);border:1px solid rgba(0,200,80,0.28);border-radius:8px;padding:0.3rem 0.65rem;cursor:pointer;font-size:0.82rem;transition:background 0.15s" onmouseover="this.style.background='rgba(0,200,80,0.2)'" onmouseout="this.style.background='rgba(0,200,80,0.1)'">
+              <span style="color:var(--lime);font-weight:800;font-size:0.68rem;min-width:28px">TP${i+1}</span>
+              <span>${t.flag||'⚪'}</span>
+              <span style="color:#DED6FF;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(t.name||code)}</span>
+              <span style="color:rgba(255,100,115,0.7);font-size:0.65rem">✕</span>
+            </div>`
+          :`<div style="display:flex;align-items:center;gap:0.4rem;border:1px dashed rgba(199,185,255,0.18);border-radius:8px;padding:0.3rem 0.65rem;font-size:0.82rem">
+              <span style="color:rgba(199,185,255,0.4);font-weight:800;font-size:0.68rem;min-width:28px">TP${i+1}</span>
+              <span style="color:rgba(199,185,255,0.3);font-style:italic">empty</span>
+            </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+  grid.style.cssText='display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap';
+  grid.innerHTML=poolCol+rankCol;
 }
 function invalidateBracketPicks() {
   const valid3rd=new Set(Object.values(state.myPicks.group||{}).map(p=>p[2]).filter(Boolean));
@@ -1700,17 +1716,28 @@ async function sharePicks() {
 function scorePicks(picks) {
   picks = picks || {};
   const r=state.results; let pts=0;
-  const g = picks.group || {};
+  // Group stage: positional (5 for winner, 3 for runner-up, 1 for 3rd)
   for (const [L,actual] of Object.entries(r.group||{})) {
-    const mine=g[L]||[], actualSet=new Set(actual||[]);
-    mine.forEach(c=>{ if(actualSet.has(c)) pts+=1; });
-    // Bonus: entire group predicted in correct order (1st, 2nd, 3rd all right)
-    if (actual&&actual.length>=3&&mine.length>=3&&mine[0]===actual[0]&&mine[1]===actual[1]&&mine[2]===actual[2]) pts+=5;
+    const mine=(picks.group||{})[L]||[];
+    if (mine[0]&&mine[0]===actual[0]) pts+=5;
+    if (mine[1]&&mine[1]===actual[1]) pts+=3;
+    if (mine[2]&&mine[2]===actual[2]) pts+=1;
   }
-  if (r.thirdPlace&&r.thirdPlace.length) {
-    const actualTp=new Set(r.thirdPlace);
-    (picks.thirdPlace||[]).forEach(c=>{ if(actualTp.has(c)) pts+=1; });
+  // Best 8 third-place teams advancing: 2 pts each
+  const actualTpSet=r.thirdPlace&&r.thirdPlace.length?new Set(r.thirdPlace):null;
+  if (actualTpSet) {
+    (picks.thirdPlace||[]).forEach(c=>{ if(actualTpSet.has(c)) pts+=2; });
   }
+  // R32 qualifiers: 1 pt per correctly predicted entrant (group 1sts, 2nds, TP qualifiers)
+  for (const [L,actual] of Object.entries(r.group||{})) {
+    const mine=(picks.group||{})[L]||[];
+    if (mine[0]&&mine[0]===actual[0]) pts+=1;
+    if (mine[1]&&mine[1]===actual[1]) pts+=1;
+  }
+  if (actualTpSet) {
+    (picks.thirdPlace||[]).forEach(c=>{ if(actualTpSet.has(c)) pts+=1; });
+  }
+  // Knockout: R16 qualifiers (2), QF (4), SF (8), Finalists (16)
   const weights={r32:2,r16:4,qf:8,sf:16};
   for (const [round,w] of Object.entries(weights)) {
     const actuals=new Set(Object.values(r[round]||{}));

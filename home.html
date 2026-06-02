@@ -427,7 +427,36 @@
   .champion-team { font-size: 1.25rem; font-weight: 800; color: var(--white); }
 
   /* ── Schedule ──────────────────────────────────────────────── */
-  .schedule-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .schedule-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+  .schedule-search-row { display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap; align-items:center; }
+  .sched-search-input {
+    flex:1; min-width:140px; max-width:220px;
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(199,185,255,0.25);
+    border-radius:20px;
+    color:var(--white);
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:0.35rem 0.9rem;
+    outline:none;
+    transition:border-color 0.15s, background 0.15s;
+  }
+  .sched-search-input:focus { border-color:rgba(199,185,255,0.5); background:rgba(255,255,255,0.11); }
+  .sched-search-input::placeholder { color:rgba(199,185,255,0.4); }
+  .sched-search-select {
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(199,185,255,0.25);
+    border-radius:20px;
+    color:var(--white);
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:0.35rem 0.9rem;
+    outline:none;
+    cursor:pointer;
+    transition:border-color 0.15s;
+  }
+  .sched-search-select:focus { border-color:rgba(199,185,255,0.5); }
+  .sched-search-select option { background:#0d1b5e; color:#fff; }
   .filter-chip {
     background: rgba(255,255,255,0.07);
     border: 1px solid var(--card-border);
@@ -476,7 +505,7 @@
   }
 
   /* ── Section list containers ──────────────────────────────── */
-  #scheduleList, #scheduleFilters { width: 100%; }
+  #scheduleList, #scheduleFilters, #scheduleSearch { width: 100%; }
   #leaderboardWrap { width: 100%; }
 
   /* ── Leaderboard ───────────────────────────────────────────── */
@@ -919,6 +948,7 @@
   <h2>Match Schedule</h2>
   <p class="muted" style="margin-top:0;margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">Grab your laptop 💻, popcorn 🍿 and enjoy the game!</p>
   <div class="schedule-filters" id="scheduleFilters"></div>
+  <div id="scheduleSearch" class="schedule-search-row"></div>
   <div id="scheduleList"></div>
 </section>
 
@@ -1998,22 +2028,64 @@ const SCHED_FILTERS=[
   {id:'qf',label:'QF'},{id:'sf',label:'SF'},{id:'final',label:'3rd / Final'},
 ];
 let scheduleFilter='all';
+let scheduleTeamSearch='';
+let scheduleDateFilter='all';
+let scheduleVenueFilter='all';
+
 function renderSchedule() {
+  renderScheduleControls();
+  renderScheduleList();
+}
+function renderScheduleControls() {
+  const sched=state.schedule||[];
+  const uniqueDates=[...new Set(sched.map(m=>m.date))].sort();
+  const uniqueVenues=[...new Set(sched.map(m=>m.venue).filter(Boolean))].sort();
+  const hasSecondary=scheduleTeamSearch||scheduleDateFilter!=='all'||scheduleVenueFilter!=='all';
   document.getElementById('scheduleFilters').innerHTML=SCHED_FILTERS.map(f=>
     `<button class="filter-chip ${scheduleFilter===f.id?'active':''}" onclick="setSchedFilter('${f.id}')">${f.label}</button>`
   ).join('');
+  document.getElementById('scheduleSearch').innerHTML=`
+    <input id="schedTeamInput" type="text" class="sched-search-input" placeholder="🔍 Search team…"
+      value="${escapeHtml(scheduleTeamSearch)}"
+      oninput="scheduleTeamSearch=this.value;renderScheduleList()">
+    <select class="sched-search-select" onchange="setSchedDate(this.value)">
+      <option value="all">📅 All dates</option>
+      ${uniqueDates.map(d=>{
+        const dt=new Date(d+'T12:00:00');
+        const label=dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+        return `<option value="${d}" ${scheduleDateFilter===d?'selected':''}>${label}</option>`;
+      }).join('')}
+    </select>
+    <select class="sched-search-select" onchange="setSchedVenue(this.value)">
+      <option value="all">📍 All locations</option>
+      ${uniqueVenues.map(v=>`<option value="${v}" ${scheduleVenueFilter===v?'selected':''}>${v}</option>`).join('')}
+    </select>
+    ${hasSecondary?`<button class="filter-chip" onclick="resetSchedSearch()" style="border-color:rgba(255,120,130,0.4);color:rgba(255,160,170,0.9)">✕ Clear</button>`:''}
+  `;
+}
+function renderScheduleList() {
   const list=document.getElementById('scheduleList');
-  const matches=state.schedule.filter(m=>{
-    if (scheduleFilter==='all') return true;
-    if (scheduleFilter==='group') return m.stage.startsWith('Group');
-    if (scheduleFilter==='r32') return m.stage==='Round of 32';
-    if (scheduleFilter==='r16') return m.stage==='Round of 16';
-    if (scheduleFilter==='qf') return m.stage==='Quarterfinal';
-    if (scheduleFilter==='sf') return m.stage==='Semifinal';
-    if (scheduleFilter==='final') return m.stage==='Final'||m.stage==='3rd Place';
+  const sched=state.schedule||[];
+  const matches=sched.filter(m=>{
+    if (scheduleFilter!=='all') {
+      if (scheduleFilter==='group'&&!m.stage.startsWith('Group')) return false;
+      if (scheduleFilter==='r32'&&m.stage!=='Round of 32') return false;
+      if (scheduleFilter==='r16'&&m.stage!=='Round of 16') return false;
+      if (scheduleFilter==='qf'&&m.stage!=='Quarterfinal') return false;
+      if (scheduleFilter==='sf'&&m.stage!=='Semifinal') return false;
+      if (scheduleFilter==='final'&&m.stage!=='Final'&&m.stage!=='3rd Place') return false;
+    }
+    if (scheduleTeamSearch) {
+      const q=scheduleTeamSearch.toLowerCase();
+      const homeN=(m.home?(TEAMS[m.home]?.name||m.home):'').toLowerCase();
+      const awayN=(m.away?(TEAMS[m.away]?.name||m.away):'').toLowerCase();
+      if (!homeN.includes(q)&&!awayN.includes(q)) return false;
+    }
+    if (scheduleDateFilter!=='all'&&m.date!==scheduleDateFilter) return false;
+    if (scheduleVenueFilter!=='all'&&m.venue!==scheduleVenueFilter) return false;
     return true;
   });
-  if (!matches.length) { list.innerHTML='<div class="empty">No matches.</div>'; return; }
+  if (!matches.length) { list.innerHTML='<div class="empty">No matches found.</div>'; return; }
   list.innerHTML=matches.map(m=>{
     const d=new Date(m.date+'T12:00:00');
     const day=d.toLocaleDateString('en-US',{weekday:'short'});
@@ -2027,7 +2099,10 @@ function renderSchedule() {
     </div>`;
   }).join('');
 }
-function setSchedFilter(id) { scheduleFilter=id; renderSchedule(); }
+function setSchedFilter(id) { scheduleFilter=id; renderScheduleControls(); renderScheduleList(); }
+function setSchedDate(v) { scheduleDateFilter=v; renderScheduleList(); }
+function setSchedVenue(v) { scheduleVenueFilter=v; renderScheduleList(); }
+function resetSchedSearch() { scheduleTeamSearch=''; scheduleDateFilter='all'; scheduleVenueFilter='all'; renderScheduleControls(); renderScheduleList(); }
 
 /* =====================================================
    ADMIN

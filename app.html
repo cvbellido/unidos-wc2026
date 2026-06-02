@@ -845,22 +845,27 @@
     <div class="stat-tile"><div class="num" id="statPlayers">0</div><div class="label">Players</div></div>
   </div>
 
-  <div class="card">
-    <h3>How scoring works</h3>
-    <p class="muted" style="margin-bottom:0.75rem">You earn points whenever a team you picked advances correctly. Later rounds are worth more.</p>
-    <table class="scoring-table-inline">
-      <tr><td>Group winner (1st place, per group)</td><td>5 pts each</td></tr>
-      <tr><td>Group runner-up (2nd place, per group)</td><td>3 pts each</td></tr>
-      <tr><td>Group 3rd place (per group)</td><td>1 pt each</td></tr>
-      <tr><td>Best 8 third-place teams advancing</td><td>2 pts each</td></tr>
-      <tr><td>Round of 32 qualifiers (all 32 teams)</td><td>1 pt each</td></tr>
-      <tr><td>Round of 16 qualifiers (R32 winners)</td><td>2 pts each</td></tr>
-      <tr><td>Quarterfinalists (R16 winners)</td><td>4 pts each</td></tr>
-      <tr><td>Semifinalists (QF winners)</td><td>8 pts each</td></tr>
-      <tr><td>Finalists (SF winners)</td><td>16 pts each</td></tr>
-      <tr><td>Champion</td><td>32 pts</td></tr>
-      <tr style="border-top:1px solid rgba(199,185,255,0.3)"><td style="font-weight:700">Maximum possible</td><td style="color:var(--cyan)">316 pts</td></tr>
-    </table>
+  <div class="card card-collapsible" onclick="this.classList.toggle('open')">
+    <div class="card-toggle-header">
+      <h3>How scoring works</h3>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <p class="muted" style="margin-bottom:0.75rem">You earn points whenever a team you picked advances correctly. Later rounds are worth more.</p>
+      <table class="scoring-table-inline">
+        <tr><td>Group winner (1st place, per group)</td><td>5 pts each</td></tr>
+        <tr><td>Group runner-up (2nd place, per group)</td><td>3 pts each</td></tr>
+        <tr><td>Group 3rd place (per group)</td><td>1 pt each</td></tr>
+        <tr><td>Best 8 third-place teams advancing</td><td>2 pts each</td></tr>
+        <tr><td>Round of 32 qualifiers (all 32 teams)</td><td>1 pt each</td></tr>
+        <tr><td>Round of 16 qualifiers (R32 winners)</td><td>2 pts each</td></tr>
+        <tr><td>Quarterfinalists (R16 winners)</td><td>4 pts each</td></tr>
+        <tr><td>Semifinalists (QF winners)</td><td>8 pts each</td></tr>
+        <tr><td>Finalists (SF winners)</td><td>16 pts each</td></tr>
+        <tr><td>Champion</td><td>32 pts</td></tr>
+        <tr style="border-top:1px solid rgba(199,185,255,0.3)"><td style="font-weight:700">Maximum possible</td><td style="color:var(--cyan)">316 pts</td></tr>
+      </table>
+    </div>
   </div>
 
   <div class="card card-collapsible" onclick="this.classList.toggle('open')">

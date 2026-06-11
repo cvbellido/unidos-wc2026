@@ -1,7 +1,7 @@
 import { sql, initDb, requireUser } from './_db.js';
 
-// Picks close at end of day June 10, 2026 ET (23:59:59 EDT = 03:59:59 UTC June 11).
-const PICKS_DEADLINE_MS = Date.UTC(2026, 5, 11, 3, 59, 59);
+// Picks close at 12:00 PM ET June 11, 2026 (16:00:00 UTC June 11).
+const PICKS_DEADLINE_MS = Date.UTC(2026, 5, 11, 16, 0, 0);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     if (!picks || typeof picks !== 'object') return res.status(400).json({ error: 'Invalid picks' });
 
     if (Date.now() >= PICKS_DEADLINE_MS) {
-      return res.status(409).json({ error: 'Picks closed on June 10, 2026 at 11:59 PM ET.', locked: true });
+      return res.status(409).json({ error: 'Picks closed on June 11, 2026 at 12:00 PM ET.', locked: true });
     }
 
     const result = await sql`

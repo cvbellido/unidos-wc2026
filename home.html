@@ -914,7 +914,7 @@
 <section id="picks" class="panel">
   <h2 style="margin-top:0">Make Your Picks</h2>
   <p class="muted" style="margin-top:0.75rem;margin-bottom:0.5rem;color:#DED6FF;font-size:0.95rem">Select your 1st, 2nd, and 3rd place predictions within each group. Click a team within a group once for 1st, again for 2nd, and a third time for 3rd place. You must pick all three positions in every group.</p>
-  <p class="muted" style="margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">⏰ You can edit your picks anytime until <b style="color:var(--lime)">June 2, 2026 at 12:00 PM ET</b> — after that they're locked.</p>
+  <p class="muted" style="margin-bottom:1rem;color:#DED6FF;font-size:0.95rem">⏰ You can edit your picks anytime until <b style="color:var(--lime)">June 11, 2026 at 12:00 PM ET</b> — after that they're locked.</p>
 
   <div id="picksLockBanner"></div>
 
@@ -1247,11 +1247,11 @@ function buildSchedule(/* groups */) {
    STATE
 ===================================================== */
 const STORAGE_KEY = 'wc2026-bracket-v2';
-// Picks close at 12:00 PM ET on June 2, 2026.
-const PICKS_DEADLINE = new Date('2026-06-02T16:00:00Z').getTime(); // 12:00 PM EDT June 2
+// Picks close at 12:00 PM ET on June 11, 2026.
+const PICKS_DEADLINE = new Date('2026-06-11T16:00:00Z').getTime(); // 12:00 PM EDT June 11
 function picksLocked() { return Date.now() >= PICKS_DEADLINE; }
 function deadlineLabel() {
-  return 'June 2, 2026 \u2014 12:00 PM ET';
+  return 'June 11, 2026 \u2014 12:00 PM ET';
 }
 const state = {
   user: null, groups: null, schedule: null, submitted: false, everSubmitted: false,

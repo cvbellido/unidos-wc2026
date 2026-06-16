@@ -2109,8 +2109,11 @@ function renderAdmin() {
     ?'<p class="muted">No players added yet.</p>'
     :'<h4 style="margin:0.5rem 0;color:var(--lavender)">Players ('+state.players.length+')</h4>'
     +state.players.map((p,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border)">
-      <span>${escapeHtml(playerAlias(p))}</span>
-      <button class="btn secondary" style="padding:0.25rem 0.65rem;font-size:0.75rem" onclick="removePlayer(${i})">Remove</button>
+      <span>${escapeHtml(playerAlias(p))} <span class="muted" style="font-size:0.85rem">(${escapeHtml(p.email||'')})</span></span>
+      <div style="display:flex;gap:0.5rem">
+        <button class="btn secondary" style="padding:0.25rem 0.65rem;font-size:0.75rem" onclick="resetPlayerPassword(${i})">Reset Password</button>
+        <button class="btn secondary" style="padding:0.25rem 0.65rem;font-size:0.75rem;background:rgba(255,77,95,0.18);border-color:rgba(255,77,95,0.4);color:#ffb3bb" onclick="removePlayer(${i})">Remove</button>
+      </div>
     </div>`).join('');
 
   // Group results
@@ -2236,6 +2239,28 @@ async function removePlayer(i) {
     await adminPost('/api/remove-player', { alias });
     state.players.splice(i,1); save(); renderAdmin(); renderLeaderboard();
     showToast('Removed '+alias);
+  } catch (e) { showToast(e.message); }
+}
+async function resetPlayerPassword(i) {
+  const p = state.players[i]; if (!p) return;
+  const alias = playerAlias(p);
+  const email = p.email;
+  if (!email) { showToast('No email found for this player'); return; }
+  if (!confirm('Reset password for '+alias+' ('+email+')?')) return;
+  try {
+    const r = await adminPost('/api/auth/admin-reset', { email });
+    showModal(`
+      <h3 style="margin-top:0;color:var(--lime)">Password Reset Successful</h3>
+      <p><b>${escapeHtml(alias)}</b> (${escapeHtml(email)})</p>
+      <p style="margin:1rem 0">Their temporary password is:</p>
+      <div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:8px;font-family:monospace;font-size:1.5rem;letter-spacing:0.1em;text-align:center;color:var(--cyan);border:2px solid var(--cyan)">
+        ${escapeHtml(r.tempPassword)}
+      </div>
+      <p class="muted" style="margin-top:1rem;font-size:0.9rem">⚠️ Copy this password and send it to the user via Slack or email. They'll be prompted to change it when they log in.</p>
+      <button class="btn" onclick="navigator.clipboard.writeText('${escapeHtml(r.tempPassword)}');showToast('Copied to clipboard!')">📋 Copy password</button>
+      <button class="btn secondary" onclick="closeModal()" style="margin-left:0.5rem">Close</button>
+    `);
+    showToast('Password reset for '+alias);
   } catch (e) { showToast(e.message); }
 }
 async function wipeAllPlayers() {

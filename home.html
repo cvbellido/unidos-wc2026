@@ -460,7 +460,9 @@
     min-width: 80px;
   }
   .date-chip:hover { border-color: var(--lavender); transform: translateY(-2px); }
+  .date-chip.active { border-color: var(--cyan); background: rgba(0,200,255,0.15); transform: scale(1.05); }
   .date-chip.today { border-color: var(--lime); background: rgba(135,255,135,0.1); }
+  .date-chip.today.active { border-color: var(--lime); background: rgba(135,255,135,0.2); }
   .date-chip.past { opacity: 0.7; }
   .date-chip-day { font-size: 0.7rem; color: var(--muted); font-weight: 700; text-transform: uppercase; }
   .date-chip-date { font-size: 0.9rem; color: var(--white); font-weight: 700; margin: 0.2rem 0; }
@@ -1363,6 +1365,22 @@ function applyMatchScoresToSchedule(matchScores) {
   });
 }
 
+// Add mock scores for past games (before today)
+function addMockScoresForPastGames() {
+  if (!state.schedule) return;
+  const today = new Date().toISOString().split('T')[0];
+
+  state.schedule.forEach(match => {
+    // Only add scores to past games that don't already have scores
+    if (match.date < today && match.homeScore === undefined && match.away && match.home) {
+      // Generate realistic random scores (0-4 goals, favor 1-2 goals)
+      const scores = [0,0,1,1,1,2,2,2,3,4];
+      match.homeScore = scores[Math.floor(Math.random() * scores.length)];
+      match.awayScore = scores[Math.floor(Math.random() * scores.length)];
+    }
+  });
+}
+
 /* =====================================================
    STATE
 ===================================================== */
@@ -1403,6 +1421,12 @@ function load() {
   if (!state.results) state.results = { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null, matchScores:[] };
   if (!state.results.thirdPlace) state.results.thirdPlace = [];
   if (!state.players) state.players = [];
+
+  // Add mock scores for past games if no real scores exist yet
+  if (!state.results.matchScores || state.results.matchScores.length === 0) {
+    addMockScoresForPastGames();
+  }
+
   refreshLeaderboard();
 }
 
@@ -2149,7 +2173,7 @@ const SCHED_FILTERS=[
 ];
 let scheduleFilter='all';
 let scheduleTeamSearch='';
-let scheduleDateFilter='all';
+let scheduleDateFilter = new Date().toISOString().split('T')[0]; // Default to today
 let scheduleVenueFilter='all';
 
 function renderSchedule() {
@@ -2206,6 +2230,7 @@ function renderScheduleList() {
   });
 
   // Filter matches
+  // Filter matches
   const matches=sorted.filter(m=>{
     if (scheduleFilter!=='all') {
       if (scheduleFilter==='group'&&!m.stage.startsWith('Group')) return false;
@@ -2221,54 +2246,74 @@ function renderScheduleList() {
       const awayN=(m.away?(TEAMS[m.away]?.name||m.away):'').toLowerCase();
       if (!homeN.includes(q)&&!awayN.includes(q)) return false;
     }
+    // NEW: Filter by selected date only (not 'all')
     if (scheduleDateFilter!=='all'&&m.date!==scheduleDateFilter) return false;
     if (scheduleVenueFilter!=='all'&&m.venue!==scheduleVenueFilter) return false;
     return true;
   });
 
-  if (!matches.length) { list.innerHTML='<div class="empty">No matches found.</div>'; return; }
+  if (!matches.length) {
+    const noMatchMsg = scheduleDateFilter !== 'all'
+      ? `<div class="empty">No matches on this date. Select another date from the slider above.</div>`
+      : `<div class="empty">No matches found.</div>`;
+    list.innerHTML = noMatchMsg;
+    return;
+  }
 
-  // Group by date
+  // Group by date (will usually be one date now)
   const byDate = {};
   matches.forEach(m => {
     if (!byDate[m.date]) byDate[m.date] = [];
     byDate[m.date].push(m);
   });
 
-  // Get unique dates in reverse chronological order
-  const dates = Object.keys(byDate).sort((a,b) => b.localeCompare(a));
+  // Get all unique dates from full schedule for slider (not just filtered)
+  const allDates = [...new Set(sched.map(m => m.date))].sort((a,b) => b.localeCompare(a));
   const today = new Date().toISOString().split('T')[0];
 
-  // Build date slider
+  // Build date slider with "All Dates" option
   const dateSlider = `
     <div class="date-slider-wrapper">
       <div class="date-slider" id="dateSlider">
-        ${dates.map(date => {
+        <button class="date-chip ${scheduleDateFilter==='all'?'active':''}"
+                onclick="scheduleDateFilter='all';renderScheduleList()">
+          <div class="date-chip-day">All</div>
+          <div class="date-chip-date">Dates</div>
+          <div class="date-chip-count">${sched.length} games</div>
+        </button>
+        ${allDates.map(date => {
           const d = new Date(date+'T12:00:00');
           const isToday = date === today;
+          const isSelected = date === scheduleDateFilter;
           const isPast = date < today;
           const day = d.toLocaleDateString('en-US',{weekday:'short'});
           const monthDay = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-          const label = isToday ? 'Today' : isPast ? day : day;
-          return `<button class="date-chip ${isToday?'today':''} ${isPast?'past':''}"
-                    onclick="document.getElementById('date-${date}').scrollIntoView({behavior:'smooth',block:'start'})">
+          const label = isToday ? 'Today' : day;
+          const gamesOnDate = sched.filter(m => m.date === date).length;
+          return `<button class="date-chip ${isToday?'today':''} ${isPast?'past':''} ${isSelected?'active':''}"
+                    onclick="scheduleDateFilter='${date}';renderScheduleList()">
             <div class="date-chip-day">${label}</div>
             <div class="date-chip-date">${monthDay}</div>
-            <div class="date-chip-count">${byDate[date].length} ${byDate[date].length===1?'game':'games'}</div>
+            <div class="date-chip-count">${gamesOnDate} ${gamesOnDate===1?'game':'games'}</div>
           </button>`;
         }).join('')}
       </div>
     </div>
   `;
 
+  // Get dates to display (will be just one if filtered, or all if 'all')
+  const datesToShow = scheduleDateFilter === 'all'
+    ? Object.keys(byDate).sort((a,b) => b.localeCompare(a))
+    : [scheduleDateFilter].filter(d => byDate[d]); // Only show if has games
+
   // Build match list grouped by date
-  const matchList = dates.map(date => {
+  const matchList = datesToShow.map(date => {
     const d = new Date(date+'T12:00:00');
     const isToday = date === today;
     const isPast = date < today;
     const dayFull = d.toLocaleDateString('en-US',{weekday:'long'});
     const dateStr = d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-    const header = isToday ? '🔴 Today' : isPast ? dayFull : dayFull;
+    const header = isToday ? '🔴 Today' : dayFull;
 
     return `
       <div class="date-section" id="date-${date}">
@@ -2298,10 +2343,10 @@ function renderScheduleList() {
 
   list.innerHTML = dateSlider + matchList;
 
-  // Auto-scroll to today's date in slider
+  // Auto-scroll to selected date in slider
   setTimeout(() => {
-    const todayChip = document.querySelector('.date-chip.today');
-    if (todayChip) todayChip.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    const selectedChip = document.querySelector('.date-chip.active');
+    if (selectedChip) selectedChip.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
   }, 100);
 }
 function setSchedFilter(id) { scheduleFilter=id; renderScheduleControls(); renderScheduleList(); }

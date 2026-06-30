@@ -487,8 +487,10 @@
   .match-row .home-team, .match-row .away-team { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
   .match-row .away-team { justify-content: flex-end; flex-direction: row-reverse; }
   .match-row .score { font-weight: 800; font-size: 1rem; color: var(--lime); text-align: center; min-width: 40px; }
+  .match-row .match-score { font-weight: 800; font-size: 1.1rem; color: var(--lime); text-align: center; min-width: 50px; letter-spacing: 0.05em; }
   .match-row .vs { color: var(--muted); font-size: 0.75rem; text-align: center; }
   .match-row .venue { font-size: 0.7rem; color: var(--muted); text-align: right; border-left: 1px solid var(--border); padding-left: 0.75rem; }
+  .match-finished { border-color: rgba(135,255,135,0.3); background: linear-gradient(135deg, rgba(135,255,135,0.05) 0%, rgba(0,0,0,0) 50%); }
   .stage-tag {
     display: inline-block;
     font-size: 0.65rem;
@@ -1243,6 +1245,21 @@ function buildSchedule(/* groups */) {
   return sched;
 }
 
+function applyMatchScoresToSchedule(matchScores) {
+  if (!state.schedule || !Array.isArray(matchScores)) return;
+  matchScores.forEach(score => {
+    const match = state.schedule.find(m =>
+      m.date === score.date &&
+      m.home === score.home &&
+      m.away === score.away
+    );
+    if (match) {
+      match.homeScore = score.homeScore;
+      match.awayScore = score.awayScore;
+    }
+  });
+}
+
 /* =====================================================
    STATE
 ===================================================== */
@@ -1280,7 +1297,7 @@ function load() {
   state.schedule = buildSchedule(state.groups);
   if (!state.myPicks) state.myPicks = { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null };
   if (!state.myPicks.thirdPlace) state.myPicks.thirdPlace = [];
-  if (!state.results) state.results = { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null };
+  if (!state.results) state.results = { group:{}, thirdPlace:[], r32:{}, r16:{}, qf:{}, sf:{}, final:null, matchScores:[] };
   if (!state.results.thirdPlace) state.results.thirdPlace = [];
   if (!state.players) state.players = [];
   refreshLeaderboard();
@@ -1300,7 +1317,12 @@ async function refreshLeaderboard() {
         group: r2.group || {}, thirdPlace: r2.thirdPlace || [],
         r32: r2.r32 || {}, r16: r2.r16 || {},
         qf: r2.qf || {}, sf: r2.sf || {}, final: r2.final || null,
+        matchScores: r2.matchScores || [],
       };
+      // Apply match scores to schedule
+      if (r2.matchScores && Array.isArray(r2.matchScores)) {
+        applyMatchScoresToSchedule(r2.matchScores);
+      }
     }
     if (state.user) {
       const mine = state.players.find(p => playerAlias(p).toLowerCase() === state.user.toLowerCase());
@@ -2061,7 +2083,23 @@ function renderScheduleControls() {
 function renderScheduleList() {
   const list=document.getElementById('scheduleList');
   const sched=state.schedule||[];
-  const matches=sched.filter(m=>{
+  // Sort by date and time
+  const sorted = [...sched].sort((a, b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    // Parse time for sorting (convert to 24h)
+    const parseTime = (t) => {
+      if (!t || t === 'TBD') return 0;
+      const match = t.match(/(\d+):(\d+)\s*(AM|PM)/);
+      if (!match) return 0;
+      let h = parseInt(match[1]);
+      const m = parseInt(match[2]);
+      if (match[3] === 'PM' && h !== 12) h += 12;
+      if (match[3] === 'AM' && h === 12) h = 0;
+      return h * 60 + m;
+    };
+    return parseTime(a.time) - parseTime(b.time);
+  });
+  const matches=sorted.filter(m=>{
     if (scheduleFilter!=='all') {
       if (scheduleFilter==='group'&&!m.stage.startsWith('Group')) return false;
       if (scheduleFilter==='r32'&&m.stage!=='Round of 32') return false;
@@ -2085,10 +2123,16 @@ function renderScheduleList() {
     const d=new Date(m.date+'T12:00:00');
     const day=d.toLocaleDateString('en-US',{weekday:'short'});
     const dateStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    return `<div class="match-row">
+    // Check if match has a result (score)
+    const hasResult = m.homeScore !== undefined && m.awayScore !== undefined;
+    const scoreDisplay = hasResult
+      ? `<div class="match-score">${m.homeScore} - ${m.awayScore}</div>`
+      : '<div class="vs">vs</div>';
+    const rowClass = hasResult ? 'match-row match-finished' : 'match-row';
+    return `<div class="${rowClass}">
       <div class="date-cell"><div class="day">${day}</div><div>${dateStr}</div><div>${m.time}</div></div>
       <div class="home-team">${teamTag(m.home)}</div>
-      <div class="vs">vs</div>
+      ${scoreDisplay}
       <div class="away-team">${teamTag(m.away)}</div>
       <div class="venue"><div class="stage-tag">${m.stage}</div>${m.venue}</div>
     </div>`;

@@ -183,6 +183,7 @@ export default async function handler(req, res) {
 
     const unknown = new Set();
     const buckets = { group: [], r32: [], r16: [], qf: [], sf: [], third: [], final: [] };
+    const matchScores = []; // Store individual match scores
     let finishedCount = 0;
 
     for (const m of events) {
@@ -194,6 +195,16 @@ export default async function handler(req, res) {
       if (!w.home) unknown.add(m.strHomeTeam);
       if (!w.away) unknown.add(m.strAwayTeam);
       buckets[stage].push(w);
+      // Store match score for schedule display
+      if (w.home && w.away) {
+        matchScores.push({
+          date: m.dateEvent,
+          home: w.home,
+          away: w.away,
+          homeScore: w.h,
+          awayScore: w.a,
+        });
+      }
     }
 
     // Group stage → standings
@@ -217,7 +228,7 @@ export default async function handler(req, res) {
     }
 
     // Persist (and remember groups so cron can run without client input later).
-    const toStore = { ...merged, groups };
+    const toStore = { ...merged, groups, matchScores };
     await sql`
       UPDATE results
       SET data = ${JSON.stringify(toStore)}::jsonb, updated_at = NOW()

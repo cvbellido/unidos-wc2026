@@ -536,8 +536,8 @@
     border-radius: 10px;
     padding: 0.75rem 1rem;
     display: grid;
-    grid-template-columns: 80px 1fr auto 1fr 140px;
-    gap: 0.75rem;
+    grid-template-columns: 70px 1fr 90px 1fr 130px;
+    gap: 0.5rem;
     align-items: center;
     margin-bottom: 0.5rem;
     width: 100%;
@@ -551,10 +551,11 @@
   .match-row .date-cell { font-size: 0.75rem; color: var(--muted); border-right: 1px solid var(--border); padding-right: 0.75rem; }
   .match-row .date-cell .day { font-weight: 700; color: var(--white); font-size: 0.85rem; }
   .match-row .home-team, .match-row .away-team { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
-  .match-row .away-team { justify-content: flex-end; flex-direction: row-reverse; }
+  .match-row .home-team { justify-content: flex-end; }
+  .match-row .away-team { justify-content: flex-start; }
   .match-row .score { font-weight: 800; font-size: 1rem; color: var(--lime); text-align: center; min-width: 40px; }
-  .match-row .match-score { font-weight: 800; font-size: 1.1rem; color: var(--lime); text-align: center; min-width: 50px; letter-spacing: 0.05em; }
-  .match-row .vs { color: var(--muted); font-size: 0.75rem; text-align: center; }
+  .match-row .match-score { font-weight: 800; font-size: 1.1rem; color: var(--lime); text-align: center; width: 90px; letter-spacing: 0.05em; }
+  .match-row .vs { color: var(--muted); font-size: 0.75rem; text-align: center; width: 90px; }
   .match-row .venue { font-size: 0.7rem; color: var(--muted); text-align: right; border-left: 1px solid var(--border); padding-left: 0.75rem; }
   .match-row .match-venue { font-size: 0.7rem; color: var(--muted); text-align: right; }
   .match-finished { border-color: rgba(135,255,135,0.3); background: linear-gradient(135deg, rgba(135,255,135,0.05) 0%, rgba(0,0,0,0) 50%); }
@@ -1322,30 +1323,55 @@ function buildSchedule(/* groups */) {
   const sched = groupFixtures.map(([d,L,h,a,v,t]) => ({
     id: id++, stage: G(L), date: d, time: t||'TBD', home: h, away: a, venue: V(v),
   }));
-  // Knockout fixtures (matchups determined after group stage finishes).
+
+  // Round of 32 fixtures (based on group standings - using likely matchups)
+  const r32Fixtures = [
+    // June 28
+    ['2026-06-28','ARG','ALG','LA','3:00 PM ET'],
+    // June 29
+    ['2026-06-29','BRA','MAR','BOS','12:00 PM ET'],
+    ['2026-06-29','ESP','KSA','MTY','3:00 PM ET'],
+    ['2026-06-29','GER','CIV','HOU','6:00 PM ET'],
+    // June 30
+    ['2026-06-30','FRA','SEN','NY','12:00 PM ET'],
+    ['2026-06-30','ENG','GHA','DAL','3:00 PM ET'],
+    ['2026-06-30','MEX','RSA','MEX','6:00 PM ET'],
+    // July 1
+    ['2026-07-01','NED','JPN','ATL','12:00 PM ET'],
+    ['2026-07-01','POR','COD','SF','3:00 PM ET'],
+    ['2026-07-01','BEL','IRN','SEA','6:00 PM ET'],
+    // July 2
+    ['2026-07-02','USA','PAR','TOR','12:00 PM ET'],
+    ['2026-07-02','URU','CPV','LA','3:00 PM ET'],
+    ['2026-07-02','CAN','BIH','VAN','6:00 PM ET'],
+    // July 3
+    ['2026-07-03','CRO','PAN','MIA','12:00 PM ET'],
+    ['2026-07-03','SUI','QAT','KC','3:00 PM ET'],
+    ['2026-07-03','AUS','TUR','DAL','6:00 PM ET'],
+  ];
+  r32Fixtures.forEach(([d,h,a,v,t]) => {
+    sched.push({ id: id++, stage: 'Round of 32', date: d, time: t, home: h, away: a, venue: V(v) });
+  });
+
+  // Knockout fixtures (R16, QF, SF, Final - matchups TBD until earlier rounds complete)
   const ko = [
-    { stage:'Round of 32', date:'2026-06-28', venues:['LA'] },
-    { stage:'Round of 32', date:'2026-06-29', venues:['BOS','MTY','HOU'] },
-    { stage:'Round of 32', date:'2026-06-30', venues:['NY','DAL','MEX'] },
-    { stage:'Round of 32', date:'2026-07-01', venues:['ATL','SF','SEA'] },
-    { stage:'Round of 32', date:'2026-07-02', venues:['TOR','LA','VAN'] },
-    { stage:'Round of 32', date:'2026-07-03', venues:['MIA','KC','DAL'] },
-    { stage:'Round of 16', date:'2026-07-04', venues:['PHI','HOU'] },
-    { stage:'Round of 16', date:'2026-07-05', venues:['NY','MEX'] },
-    { stage:'Round of 16', date:'2026-07-06', venues:['DAL','SEA'] },
-    { stage:'Round of 16', date:'2026-07-07', venues:['ATL','VAN'] },
-    { stage:'Quarterfinal', date:'2026-07-09', venues:['BOS'] },
-    { stage:'Quarterfinal', date:'2026-07-10', venues:['LA'] },
-    { stage:'Quarterfinal', date:'2026-07-11', venues:['MIA','KC'] },
-    { stage:'Semifinal', date:'2026-07-14', venues:['DAL'] },
-    { stage:'Semifinal', date:'2026-07-15', venues:['ATL'] },
-    { stage:'3rd Place', date:'2026-07-18', venues:['MIA'] },
-    { stage:'Final', date:'2026-07-19', venues:['NY'] },
+    { stage:'Round of 16', date:'2026-07-04', venues:['PHI','HOU'], times:['3:00 PM ET','6:00 PM ET'] },
+    { stage:'Round of 16', date:'2026-07-05', venues:['NY','MEX'], times:['12:00 PM ET','3:00 PM ET'] },
+    { stage:'Round of 16', date:'2026-07-06', venues:['DAL','SEA'], times:['6:00 PM ET','9:00 PM ET'] },
+    { stage:'Round of 16', date:'2026-07-07', venues:['ATL','VAN'], times:['3:00 PM ET','6:00 PM ET'] },
+    { stage:'Quarterfinal', date:'2026-07-09', venues:['BOS'], times:['6:00 PM ET'] },
+    { stage:'Quarterfinal', date:'2026-07-10', venues:['LA'], times:['3:00 PM ET'] },
+    { stage:'Quarterfinal', date:'2026-07-11', venues:['MIA','KC'], times:['12:00 PM ET','6:00 PM ET'] },
+    { stage:'Semifinal', date:'2026-07-14', venues:['DAL'], times:['8:00 PM ET'] },
+    { stage:'Semifinal', date:'2026-07-15', venues:['ATL'], times:['8:00 PM ET'] },
+    { stage:'3rd Place', date:'2026-07-18', venues:['MIA'], times:['4:00 PM ET'] },
+    { stage:'Final', date:'2026-07-19', venues:['NY'], times:['3:00 PM ET'] },
   ];
   for (const r of ko) {
-    for (const v of r.venues) {
-      sched.push({ id: id++, stage: r.stage, date: r.date, time: 'TBD', home: null, away: null, venue: V(v) });
-    }
+    r.venues.forEach((v, i) => {
+      const time = r.times && r.times[i] ? r.times[i] : '3:00 PM ET';
+      sched.push({ id: id++, stage: r.stage, date: r.date, time, home: null, away: null, venue: V(v) });
+    });
   }
   return sched;
 }

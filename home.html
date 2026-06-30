@@ -2223,9 +2223,9 @@ function renderScheduleList() {
     return h * 60 + m;
   };
 
-  // Sort by date (reverse chronological) then time within each date
+  // Sort by date (CHRONOLOGICAL) then time within each date
   const sorted = [...sched].sort((a, b) => {
-    if (a.date !== b.date) return b.date.localeCompare(a.date); // REVERSE: most recent first
+    if (a.date !== b.date) return a.date.localeCompare(b.date); // Chronological: oldest first
     return parseTime(a.time) - parseTime(b.time); // Within date: earliest first
   });
 
@@ -2268,7 +2268,7 @@ function renderScheduleList() {
   });
 
   // Get all unique dates from full schedule for slider (not just filtered)
-  const allDates = [...new Set(sched.map(m => m.date))].sort((a,b) => b.localeCompare(a));
+  const allDates = [...new Set(sched.map(m => m.date))].sort((a,b) => a.localeCompare(b)); // CHRONOLOGICAL
   const today = new Date().toISOString().split('T')[0];
 
   // Build date slider with "All Dates" option
@@ -2286,11 +2286,12 @@ function renderScheduleList() {
           const isToday = date === today;
           const isSelected = date === scheduleDateFilter;
           const isPast = date < today;
+          const isFuture = date > today;
           const day = d.toLocaleDateString('en-US',{weekday:'short'});
           const monthDay = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
           const label = isToday ? 'Today' : day;
           const gamesOnDate = sched.filter(m => m.date === date).length;
-          return `<button class="date-chip ${isToday?'today':''} ${isPast?'past':''} ${isSelected?'active':''}"
+          return `<button class="date-chip ${isToday?'today':''} ${isPast?'past':''} ${isFuture?'future':''} ${isSelected?'active':''}"
                     onclick="scheduleDateFilter='${date}';renderScheduleList()">
             <div class="date-chip-day">${label}</div>
             <div class="date-chip-date">${monthDay}</div>
@@ -2303,7 +2304,7 @@ function renderScheduleList() {
 
   // Get dates to display (will be just one if filtered, or all if 'all')
   const datesToShow = scheduleDateFilter === 'all'
-    ? Object.keys(byDate).sort((a,b) => b.localeCompare(a))
+    ? Object.keys(byDate).sort((a,b) => a.localeCompare(b)) // Chronological
     : [scheduleDateFilter].filter(d => byDate[d]); // Only show if has games
 
   // Build match list grouped by date

@@ -1249,8 +1249,33 @@ const ACTUAL_RESULTS = {
     G: ['BEL','EGY','IRN'], H: ['ESP','CPV','URU'], I: ['FRA','NOR','SEN'],
     J: ['ARG','AUT','ALG'], K: ['COL','POR','COD'], L: ['ENG','CRO','GHA'],
   },
-  thirdPlace: ['ECU','SWE','ALG','COD','BIH','PAR','GHA','SCO'],
+  // 8 best third-place teams that advanced. Senegal (Group I) advanced over
+  // Scotland (Group C) per the actual knockout bracket (Belgium vs Senegal R32).
+  thirdPlace: ['ECU','SWE','ALG','COD','BIH','PAR','GHA','SEN'],
 };
+
+// Actual knockout Round of 32 bracket from the real tournament, ordered so that
+// sequential pairing (winners[i*2] vs winners[i*2+1]) reproduces the true bracket
+// tree through R16, QF, SF and the Final. `w` is the winner when the match has
+// been played (used to pre-fill results); null while still to be decided.
+const ACTUAL_R32 = [
+  { a:'CAN', b:'RSA', w:'CAN' },   // Canada 1-0 South Africa
+  { a:'MAR', b:'NED', w:'MAR' },   // Morocco 1-1 Netherlands (3-2 pens)
+  { a:'PAR', b:'GER', w:'PAR' },   // Paraguay 1-1 Germany (4-3 pens)
+  { a:'FRA', b:'SWE', w:'FRA' },   // France 3-0 Sweden
+  { a:'POR', b:'CRO', w:null  },   // Scheduled
+  { a:'ESP', b:'AUT', w:null  },   // Scheduled
+  { a:'USA', b:'BIH', w:null  },   // Scheduled
+  { a:'BEL', b:'SEN', w:null  },   // Scheduled
+  { a:'BRA', b:'JPN', w:'BRA' },   // Brazil 2-1 Japan
+  { a:'NOR', b:'CIV', w:'NOR' },   // Norway 2-1 Ivory Coast
+  { a:'MEX', b:'ECU', w:'MEX' },   // Mexico 2-0 Ecuador
+  { a:'ENG', b:'COD', w:'ENG' },   // England 2-1 DR Congo
+  { a:'ARG', b:'CPV', w:null  },   // Scheduled
+  { a:'AUS', b:'EGY', w:null  },   // Scheduled
+  { a:'SUI', b:'ALG', w:null  },   // Scheduled
+  { a:'COL', b:'GHA', w:null  },   // Scheduled
+];
 
 const VENUES = {
   ATL:'Atlanta', BOS:'Boston', DAL:'Dallas', GDL:'Guadalajara',
@@ -1515,6 +1540,13 @@ function seedActualResults() {
   }
   if (!state.results.thirdPlace || state.results.thirdPlace.length === 0) {
     state.results.thirdPlace = [...ACTUAL_RESULTS.thirdPlace];
+  }
+  // Seed decided Round-of-32 winners so the leaderboard reflects played knockout
+  // results immediately (admin/DB values take precedence when already present).
+  if (!state.results.r32 || Object.keys(state.results.r32).length === 0) {
+    const r32 = {};
+    ACTUAL_R32.forEach((m, i) => { if (m.w) r32[i] = m.w; });
+    state.results.r32 = r32;
   }
 }
 
@@ -2565,46 +2597,11 @@ async function cycleThirdPlaceResult(code) {
   try { await adminPost('/api/results', { results: state.results }); }
   catch (e) { showToast(e.message); }
 }
-// Actual Round of 32 matchups (real tournament bracket), mirroring the official
-// draw used by the picks bracket (getR32Matchups) but sourced from the real
-// results: group winners/runners-up from state.results.group and the 8 actual
-// third-place qualifiers assigned to their slots (avoiding same-group pairings).
+// Actual Round of 32 matchups (real tournament bracket). Ordered so the existing
+// sequential pairing downstream (winners[i*2] vs winners[i*2+1]) reproduces the
+// true R16/QF/SF/Final tree. Sourced from the definitive ACTUAL_R32 bracket.
 function getActualR32Matchups() {
-  const get=(L,i)=>(state.results.group[L]||[])[i]||null;
-  // R32 match index (0-based) -> group whose winner faces a 3rd-place team.
-  const thirdSlots=[
-    {idx:0,wg:'E'},{idx:1,wg:'I'},{idx:6,wg:'D'},{idx:7,wg:'G'},
-    {idx:10,wg:'A'},{idx:11,wg:'L'},{idx:14,wg:'B'},{idx:15,wg:'K'},
-  ];
-  const tp=(state.results.thirdPlace||[]).slice();
-  const codeToGroup={};
-  for (const [L,codes] of Object.entries(state.groups)) for (const c of codes) codeToGroup[c]=L;
-  const thirdByIdx={};
-  for (const {idx,wg} of thirdSlots) {
-    if (!tp.length) { thirdByIdx[idx]=null; continue; }
-    let k=tp.findIndex(c=>codeToGroup[c]!==wg);
-    if (k===-1) k=0;
-    thirdByIdx[idx]=tp.splice(k,1)[0];
-  }
-  const T=idx=>thirdByIdx[idx]||null;
-  return [
-    {a:get('E',0),b:T(0)},        // M1  E1 vs 3rd
-    {a:get('I',0),b:T(1)},        // M2  I1 vs 3rd
-    {a:get('A',1),b:get('B',1)},  // M3  A2 vs B2
-    {a:get('F',0),b:get('C',1)},  // M4  F1 vs C2
-    {a:get('K',1),b:get('L',1)},  // M5  K2 vs L2
-    {a:get('H',0),b:get('J',1)},  // M6  H1 vs J2
-    {a:get('D',0),b:T(6)},        // M7  D1 vs 3rd
-    {a:get('G',0),b:T(7)},        // M8  G1 vs 3rd
-    {a:get('C',0),b:get('F',1)},  // M9  C1 vs F2
-    {a:get('E',1),b:get('I',1)},  // M10 E2 vs I2
-    {a:get('A',0),b:T(10)},       // M11 A1 vs 3rd
-    {a:get('L',0),b:T(11)},       // M12 L1 vs 3rd
-    {a:get('J',0),b:get('H',1)},  // M13 J1 vs H2
-    {a:get('D',1),b:get('G',1)},  // M14 D2 vs G2
-    {a:get('B',0),b:T(14)},       // M15 B1 vs 3rd
-    {a:get('K',0),b:T(15)},       // M16 K1 vs 3rd
-  ];
+  return ACTUAL_R32.map(m => ({ a: m.a, b: m.b }));
 }
 function renderAdminBracket() {
   const wrap=document.getElementById('adminBracket');

@@ -1326,28 +1326,28 @@ function buildSchedule(/* groups */) {
 
   // Round of 32 fixtures (based on group standings - using likely matchups)
   const r32Fixtures = [
-    // June 28
-    ['2026-06-28','ARG','ALG','LA','3:00 PM ET'],
-    // June 29
-    ['2026-06-29','BRA','MAR','BOS','12:00 PM ET'],
-    ['2026-06-29','ESP','KSA','MTY','3:00 PM ET'],
-    ['2026-06-29','GER','CIV','HOU','6:00 PM ET'],
+    // June 28 (completed)
+    ['2026-06-28','RSA','CAN','TOR','12:00 PM ET'],
+    ['2026-06-28','BRA','JPN','LA','3:00 PM ET'],
+    ['2026-06-28','GER','PAR','DAL','6:00 PM ET'],
+    ['2026-06-28','NED','MAR','NY','9:00 PM ET'],
+    // June 29 (completed)
+    ['2026-06-29','CIV','NOR','HOU','3:00 PM ET'],
+    ['2026-06-29','FRA','SWE','ATL','7:00 PM ET'],
     // June 30
-    ['2026-06-30','FRA','SEN','NY','12:00 PM ET'],
-    ['2026-06-30','ENG','GHA','DAL','3:00 PM ET'],
-    ['2026-06-30','MEX','RSA','MEX','6:00 PM ET'],
+    ['2026-06-30','MEX','ECU','MEX','9:00 PM ET'],
     // July 1
-    ['2026-07-01','NED','JPN','ATL','12:00 PM ET'],
-    ['2026-07-01','POR','COD','SF','3:00 PM ET'],
-    ['2026-07-01','BEL','IRN','SEA','6:00 PM ET'],
+    ['2026-07-01','ESP','AUT','MIA','3:00 PM ET'],
+    ['2026-07-01','POR','CRO','BOS','7:00 PM ET'],
+    ['2026-07-01','SUI','ALG','VAN','11:00 PM ET'],
     // July 2
-    ['2026-07-02','USA','PAR','TOR','12:00 PM ET'],
-    ['2026-07-02','URU','CPV','LA','3:00 PM ET'],
-    ['2026-07-02','CAN','BIH','VAN','6:00 PM ET'],
+    ['2026-07-02','USA','BIH','PHI','3:00 PM ET'],
+    ['2026-07-02','BEL','COD','SEA','6:00 PM ET'],
+    ['2026-07-02','ENG','CZE','NY','9:00 PM ET'],
     // July 3
-    ['2026-07-03','CRO','PAN','MIA','12:00 PM ET'],
-    ['2026-07-03','SUI','QAT','KC','3:00 PM ET'],
-    ['2026-07-03','AUS','TUR','DAL','6:00 PM ET'],
+    ['2026-07-03','AUS','EGY','DAL','2:00 PM ET'],
+    ['2026-07-03','ARG','CPV','MIA','6:00 PM ET'],
+    ['2026-07-03','COL','GHA','ATL','9:30 PM ET'],
   ];
   r32Fixtures.forEach(([d,h,a,v,t]) => {
     sched.push({ id: id++, stage: 'Round of 32', date: d, time: t, home: h, away: a, venue: V(v) });
@@ -1387,22 +1387,104 @@ function applyMatchScoresToSchedule(matchScores) {
     if (match) {
       match.homeScore = score.homeScore;
       match.awayScore = score.awayScore;
+      if (score.homePens !== undefined) { match.homePens = score.homePens; match.awayPens = score.awayPens; }
     }
   });
 }
 
-// Add mock scores for past games (before today)
+// Apply real FIFA World Cup 2026 scores (updated through June 29, 2026)
 function addMockScoresForPastGames() {
   if (!state.schedule) return;
-  const today = new Date().toISOString().split('T')[0];
-
-  state.schedule.forEach(match => {
-    // Only add scores to past games that don't already have scores
-    if (match.date < today && match.homeScore === undefined && match.away && match.home) {
-      // Generate realistic random scores (0-4 goals, favor 1-2 goals)
-      const scores = [0,0,1,1,1,2,2,2,3,4];
-      match.homeScore = scores[Math.floor(Math.random() * scores.length)];
-      match.awayScore = scores[Math.floor(Math.random() * scores.length)];
+  const realScores = [
+    // Group stage — Week 1
+    { date:'2026-06-11', home:'MEX', away:'RSA', homeScore:2, awayScore:0 },
+    { date:'2026-06-11', home:'KOR', away:'CZE', homeScore:2, awayScore:1 },
+    { date:'2026-06-12', home:'CAN', away:'BIH', homeScore:1, awayScore:1 },
+    { date:'2026-06-12', home:'USA', away:'PAR', homeScore:4, awayScore:1 },
+    { date:'2026-06-13', home:'HAI', away:'SCO', homeScore:0, awayScore:1 },
+    { date:'2026-06-13', home:'AUS', away:'TUR', homeScore:2, awayScore:0 },
+    { date:'2026-06-13', home:'BRA', away:'MAR', homeScore:1, awayScore:1 },
+    { date:'2026-06-13', home:'QAT', away:'SUI', homeScore:1, awayScore:1 },
+    { date:'2026-06-14', home:'CIV', away:'ECU', homeScore:1, awayScore:0 },
+    { date:'2026-06-14', home:'GER', away:'CUW', homeScore:7, awayScore:1 },
+    { date:'2026-06-14', home:'NED', away:'JPN', homeScore:2, awayScore:2 },
+    { date:'2026-06-14', home:'SWE', away:'TUN', homeScore:5, awayScore:1 },
+    { date:'2026-06-15', home:'KSA', away:'URU', homeScore:1, awayScore:1 },
+    { date:'2026-06-15', home:'ESP', away:'CPV', homeScore:0, awayScore:0 },
+    { date:'2026-06-15', home:'IRN', away:'NZL', homeScore:2, awayScore:2 },
+    { date:'2026-06-15', home:'BEL', away:'EGY', homeScore:1, awayScore:1 },
+    { date:'2026-06-16', home:'FRA', away:'SEN', homeScore:3, awayScore:1 },
+    { date:'2026-06-16', home:'IRQ', away:'NOR', homeScore:1, awayScore:4 },
+    { date:'2026-06-16', home:'ARG', away:'ALG', homeScore:3, awayScore:0 },
+    { date:'2026-06-16', home:'AUT', away:'JOR', homeScore:3, awayScore:1 },
+    { date:'2026-06-17', home:'GHA', away:'PAN', homeScore:1, awayScore:0 },
+    { date:'2026-06-17', home:'ENG', away:'CRO', homeScore:4, awayScore:2 },
+    { date:'2026-06-17', home:'POR', away:'COD', homeScore:1, awayScore:1 },
+    { date:'2026-06-17', home:'UZB', away:'COL', homeScore:1, awayScore:3 },
+    // Group stage — Week 2
+    { date:'2026-06-18', home:'CZE', away:'RSA', homeScore:1, awayScore:1 },
+    { date:'2026-06-18', home:'SUI', away:'BIH', homeScore:4, awayScore:1 },
+    { date:'2026-06-18', home:'CAN', away:'QAT', homeScore:6, awayScore:0 },
+    { date:'2026-06-18', home:'MEX', away:'KOR', homeScore:1, awayScore:0 },
+    { date:'2026-06-19', home:'BRA', away:'HAI', homeScore:3, awayScore:0 },
+    { date:'2026-06-19', home:'SCO', away:'MAR', homeScore:0, awayScore:1 },
+    { date:'2026-06-19', home:'TUR', away:'PAR', homeScore:0, awayScore:1 },
+    { date:'2026-06-19', home:'USA', away:'AUS', homeScore:2, awayScore:0 },
+    { date:'2026-06-20', home:'GER', away:'CIV', homeScore:2, awayScore:1 },
+    { date:'2026-06-20', home:'ECU', away:'CUW', homeScore:0, awayScore:0 },
+    { date:'2026-06-20', home:'NED', away:'SWE', homeScore:5, awayScore:1 },
+    { date:'2026-06-20', home:'TUN', away:'JPN', homeScore:0, awayScore:4 },
+    { date:'2026-06-21', home:'URU', away:'CPV', homeScore:2, awayScore:2 },
+    { date:'2026-06-21', home:'ESP', away:'KSA', homeScore:4, awayScore:0 },
+    { date:'2026-06-21', home:'BEL', away:'IRN', homeScore:0, awayScore:0 },
+    { date:'2026-06-21', home:'NZL', away:'EGY', homeScore:1, awayScore:3 },
+    { date:'2026-06-22', home:'NOR', away:'SEN', homeScore:3, awayScore:2 },
+    { date:'2026-06-22', home:'FRA', away:'IRQ', homeScore:3, awayScore:0 },
+    { date:'2026-06-22', home:'ARG', away:'AUT', homeScore:2, awayScore:0 },
+    { date:'2026-06-22', home:'JOR', away:'ALG', homeScore:1, awayScore:2 },
+    { date:'2026-06-23', home:'ENG', away:'GHA', homeScore:0, awayScore:0 },
+    { date:'2026-06-23', home:'PAN', away:'CRO', homeScore:0, awayScore:1 },
+    { date:'2026-06-23', home:'POR', away:'UZB', homeScore:5, awayScore:0 },
+    { date:'2026-06-23', home:'COL', away:'COD', homeScore:1, awayScore:0 },
+    // Group stage — Week 3
+    { date:'2026-06-24', home:'SCO', away:'BRA', homeScore:0, awayScore:3 },
+    { date:'2026-06-24', home:'MAR', away:'HAI', homeScore:4, awayScore:2 },
+    { date:'2026-06-24', home:'SUI', away:'CAN', homeScore:2, awayScore:1 },
+    { date:'2026-06-24', home:'BIH', away:'QAT', homeScore:3, awayScore:1 },
+    { date:'2026-06-24', home:'CZE', away:'MEX', homeScore:0, awayScore:3 },
+    { date:'2026-06-24', home:'RSA', away:'KOR', homeScore:1, awayScore:0 },
+    { date:'2026-06-25', home:'CUW', away:'CIV', homeScore:0, awayScore:2 },
+    { date:'2026-06-25', home:'ECU', away:'GER', homeScore:2, awayScore:1 },
+    { date:'2026-06-25', home:'JPN', away:'SWE', homeScore:1, awayScore:1 },
+    { date:'2026-06-25', home:'TUN', away:'NED', homeScore:1, awayScore:3 },
+    { date:'2026-06-25', home:'TUR', away:'USA', homeScore:3, awayScore:2 },
+    { date:'2026-06-25', home:'PAR', away:'AUS', homeScore:0, awayScore:0 },
+    { date:'2026-06-26', home:'NOR', away:'FRA', homeScore:1, awayScore:4 },
+    { date:'2026-06-26', home:'SEN', away:'IRQ', homeScore:5, awayScore:0 },
+    { date:'2026-06-26', home:'EGY', away:'IRN', homeScore:1, awayScore:1 },
+    { date:'2026-06-26', home:'NZL', away:'BEL', homeScore:1, awayScore:5 },
+    { date:'2026-06-26', home:'CPV', away:'KSA', homeScore:0, awayScore:0 },
+    { date:'2026-06-26', home:'URU', away:'ESP', homeScore:0, awayScore:1 },
+    { date:'2026-06-27', home:'PAN', away:'ENG', homeScore:0, awayScore:2 },
+    { date:'2026-06-27', home:'CRO', away:'GHA', homeScore:2, awayScore:1 },
+    { date:'2026-06-27', home:'ALG', away:'AUT', homeScore:3, awayScore:3 },
+    { date:'2026-06-27', home:'JOR', away:'ARG', homeScore:1, awayScore:3 },
+    { date:'2026-06-27', home:'COL', away:'POR', homeScore:0, awayScore:0 },
+    { date:'2026-06-27', home:'COD', away:'UZB', homeScore:3, awayScore:1 },
+    // Round of 32
+    { date:'2026-06-28', home:'RSA', away:'CAN', homeScore:0, awayScore:1 },
+    { date:'2026-06-28', home:'BRA', away:'JPN', homeScore:2, awayScore:1 },
+    { date:'2026-06-28', home:'GER', away:'PAR', homeScore:1, awayScore:1, homePens:3, awayPens:4 },
+    { date:'2026-06-28', home:'NED', away:'MAR', homeScore:1, awayScore:1, homePens:2, awayPens:3 },
+    { date:'2026-06-29', home:'CIV', away:'NOR', homeScore:1, awayScore:2 },
+    { date:'2026-06-29', home:'FRA', away:'SWE', homeScore:3, awayScore:0 },
+  ];
+  realScores.forEach(({ date, home, away, homeScore, awayScore, homePens, awayPens }) => {
+    const match = state.schedule.find(m => m.date === date && m.home === home && m.away === away);
+    if (match) {
+      match.homeScore = homeScore;
+      match.awayScore = awayScore;
+      if (homePens !== undefined) { match.homePens = homePens; match.awayPens = awayPens; }
     }
   });
 }
@@ -2351,8 +2433,12 @@ function renderScheduleList() {
         <div class="date-matches">
           ${byDate[date].map(m => {
             const hasResult = m.homeScore !== undefined && m.awayScore !== undefined;
+            const hasPens = m.homePens !== undefined;
+            const scoreTxt = hasPens
+              ? `${m.homeScore}(${m.homePens})-${m.awayScore}(${m.awayPens})`
+              : `${m.homeScore} - ${m.awayScore}`;
             const scoreDisplay = hasResult
-              ? `<div class="match-score">${m.homeScore} - ${m.awayScore}</div>`
+              ? `<div class="match-score">${scoreTxt}</div>`
               : '<div class="vs">vs</div>';
             const rowClass = hasResult ? 'match-row match-finished' : 'match-row';
             return `<div class="${rowClass}">

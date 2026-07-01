@@ -1328,22 +1328,22 @@ function buildSchedule(/* groups */) {
   const r32Fixtures = [
     // June 28 (completed)
     ['2026-06-28','RSA','CAN','TOR','12:00 PM ET'],
-    ['2026-06-28','BRA','JPN','LA','3:00 PM ET'],
-    ['2026-06-28','GER','PAR','DAL','6:00 PM ET'],
-    ['2026-06-28','NED','MAR','NY','9:00 PM ET'],
     // June 29 (completed)
-    ['2026-06-29','CIV','NOR','HOU','3:00 PM ET'],
-    ['2026-06-29','FRA','SWE','ATL','7:00 PM ET'],
-    // June 30
+    ['2026-06-29','BRA','JPN','LA','12:00 PM ET'],
+    ['2026-06-29','GER','PAR','DAL','4:00 PM ET'],
+    ['2026-06-29','NED','MAR','NY','8:00 PM ET'],
+    // June 30 (in progress)
+    ['2026-06-30','CIV','NOR','HOU','12:00 PM ET'],
+    ['2026-06-30','FRA','SWE','ATL','4:00 PM ET'],
     ['2026-06-30','MEX','ECU','MEX','9:00 PM ET'],
     // July 1
-    ['2026-07-01','ESP','AUT','MIA','3:00 PM ET'],
-    ['2026-07-01','POR','CRO','BOS','7:00 PM ET'],
-    ['2026-07-01','SUI','ALG','VAN','11:00 PM ET'],
+    ['2026-07-01','ENG','COD','NY','12:00 PM ET'],
+    ['2026-07-01','BEL','SEN','SEA','4:00 PM ET'],
+    ['2026-07-01','USA','BIH','PHI','8:00 PM ET'],
     // July 2
-    ['2026-07-02','USA','BIH','PHI','3:00 PM ET'],
-    ['2026-07-02','BEL','COD','SEA','6:00 PM ET'],
-    ['2026-07-02','ENG','CZE','NY','9:00 PM ET'],
+    ['2026-07-02','ESP','AUT','MIA','12:00 PM ET'],
+    ['2026-07-02','POR','CRO','BOS','4:00 PM ET'],
+    ['2026-07-02','SUI','ALG','VAN','8:00 PM ET'],
     // July 3
     ['2026-07-03','AUS','EGY','DAL','2:00 PM ET'],
     ['2026-07-03','ARG','CPV','MIA','6:00 PM ET'],
@@ -1473,11 +1473,11 @@ function addMockScoresForPastGames() {
     { date:'2026-06-27', home:'COD', away:'UZB', homeScore:3, awayScore:1 },
     // Round of 32
     { date:'2026-06-28', home:'RSA', away:'CAN', homeScore:0, awayScore:1 },
-    { date:'2026-06-28', home:'BRA', away:'JPN', homeScore:2, awayScore:1 },
-    { date:'2026-06-28', home:'GER', away:'PAR', homeScore:1, awayScore:1, homePens:3, awayPens:4 },
-    { date:'2026-06-28', home:'NED', away:'MAR', homeScore:1, awayScore:1, homePens:2, awayPens:3 },
-    { date:'2026-06-29', home:'CIV', away:'NOR', homeScore:1, awayScore:2 },
-    { date:'2026-06-29', home:'FRA', away:'SWE', homeScore:3, awayScore:0 },
+    { date:'2026-06-29', home:'BRA', away:'JPN', homeScore:2, awayScore:1 },
+    { date:'2026-06-29', home:'GER', away:'PAR', homeScore:1, awayScore:1, homePens:3, awayPens:4 },
+    { date:'2026-06-29', home:'NED', away:'MAR', homeScore:1, awayScore:1, homePens:2, awayPens:3 },
+    { date:'2026-06-30', home:'CIV', away:'NOR', homeScore:1, awayScore:2 },
+    { date:'2026-06-30', home:'FRA', away:'SWE', homeScore:3, awayScore:0 },
   ];
   realScores.forEach(({ date, home, away, homeScore, awayScore, homePens, awayPens }) => {
     const match = state.schedule.find(m => m.date === date && m.home === home && m.away === away);

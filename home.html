@@ -1538,9 +1538,11 @@ function load() {
   if (!state.results.thirdPlace) state.results.thirdPlace = [];
   if (!state.players) state.players = [];
 
-  // Add mock scores for past games if no real scores exist yet
-  if (!state.results.matchScores || state.results.matchScores.length === 0) {
-    addMockScoresForPastGames();
+  // Always apply hardcoded real scores as baseline
+  addMockScoresForPastGames();
+  // Also overlay any API-synced scores from localStorage
+  if (state.results.matchScores && state.results.matchScores.length > 0) {
+    applyMatchScoresToSchedule(state.results.matchScores);
   }
 
   refreshLeaderboard();
@@ -1566,6 +1568,8 @@ async function refreshLeaderboard() {
       if (r2.matchScores && Array.isArray(r2.matchScores)) {
         applyMatchScoresToSchedule(r2.matchScores);
       }
+      // Re-render schedule if it's currently visible so scores appear immediately
+      if (document.querySelector('.panel.active')?.id === 'schedule') renderScheduleList();
     }
     if (state.user) {
       const mine = state.players.find(p => playerAlias(p).toLowerCase() === state.user.toLowerCase());
@@ -2351,14 +2355,6 @@ function renderScheduleList() {
     return true;
   });
 
-  if (!matches.length) {
-    const noMatchMsg = scheduleDateFilter !== 'all'
-      ? `<div class="empty">No matches on this date. Select another date from the slider above.</div>`
-      : `<div class="empty">No matches found.</div>`;
-    list.innerHTML = noMatchMsg;
-    return;
-  }
-
   // Group by date (will usually be one date now)
   const byDate = {};
   matches.forEach(m => {
@@ -2367,10 +2363,10 @@ function renderScheduleList() {
   });
 
   // Get all unique dates from full schedule for slider (not just filtered)
-  const allDates = [...new Set(sched.map(m => m.date))].sort((a,b) => a.localeCompare(b)); // CHRONOLOGICAL
+  const allDates = [...new Set(sched.map(m => m.date))].sort((a,b) => a.localeCompare(b));
   const today = new Intl.DateTimeFormat('en-CA', {timeZone: 'America/New_York'}).format(new Date());
 
-  // Build date slider — 7-day rolling window centered on today
+  // Build date slider — always render so user can navigate even when no matches on selected date
   const dateSlider = `
     <div class="date-slider-wrapper">
       <div class="date-slider" id="dateSlider">
@@ -2394,6 +2390,15 @@ function renderScheduleList() {
       </div>
     </div>
   `;
+
+  if (!matches.length) {
+    list.innerHTML = dateSlider + `<div class="empty" style="margin-top:1rem">No matches on this date. Pick another day above.</div>`;
+    setTimeout(() => {
+      const sel = document.querySelector('.date-chip.active');
+      if (sel) sel.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    }, 100);
+    return;
+  }
 
   // Get dates to display (only the selected date)
   const datesToShow = scheduleDateFilter && scheduleDateFilter !== 'all'

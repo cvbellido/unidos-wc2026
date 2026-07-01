@@ -1239,6 +1239,19 @@ let DEFAULT_GROUPS = {
   L: ['GHA','PAN','ENG','CRO'],
 };
 
+// Authoritative real-tournament results from standings.rtfd.
+// Group standings use standard 3/1/0 points; only the resulting order matters here.
+// group[L] = [1st, 2nd, 3rd]; thirdPlace = the 8 best 3rd-place teams that advanced.
+const ACTUAL_RESULTS = {
+  group: {
+    A: ['MEX','RSA','KOR'], B: ['SUI','CAN','BIH'], C: ['BRA','MAR','SCO'],
+    D: ['USA','AUS','PAR'], E: ['GER','CIV','ECU'], F: ['NED','JPN','SWE'],
+    G: ['BEL','EGY','IRN'], H: ['ESP','CPV','URU'], I: ['FRA','NOR','SEN'],
+    J: ['ARG','AUT','ALG'], K: ['COL','POR','COD'], L: ['ENG','CRO','GHA'],
+  },
+  thirdPlace: ['ECU','SWE','ALG','COD','BIH','PAR','GHA','SCO'],
+};
+
 const VENUES = {
   ATL:'Atlanta', BOS:'Boston', DAL:'Dallas', GDL:'Guadalajara',
   HOU:'Houston', KC:'Kansas City', LA:'Los Angeles', MIA:'Miami',
@@ -1491,79 +1504,18 @@ function addMockScoresForPastGames() {
   });
 }
 
-// Stage buckets by date, matching api/sync-results.js stageFor().
-function stageForDate(d) {
-  if (!d) return null;
-  if (d <= '2026-06-27') return 'group';
-  if (d <= '2026-07-03') return 'r32';
-  if (d <= '2026-07-07') return 'r16';
-  if (d <= '2026-07-11') return 'qf';
-  if (d <= '2026-07-15') return 'sf';
-  if (d === '2026-07-18') return 'third';
-  return 'final';
-}
-
-// Derive leaderboard results (group standings, best-8 third-place qualifiers,
-// and knockout winner sets) from the actual match scores on the schedule, so the
-// leaderboard reflects real points from the played results. Mirrors the scoring
-// logic in api/sync-results.js but is driven by the scores baked into the app.
-function deriveResultsFromScores() {
-  if (!state.groups || !Array.isArray(state.schedule)) return;
-  const played = m => m.homeScore != null && m.awayScore != null;
-  const codeToGroup = {};
-  for (const [L, codes] of Object.entries(state.groups)) for (const c of codes) codeToGroup[c] = L;
-
-  // Group standings (only for groups whose 3 matches per team are all recorded).
-  const table = {};
-  for (const L of Object.keys(state.groups)) {
-    table[L] = {};
-    for (const c of state.groups[L]) table[L][c] = { code: c, pts: 0, gd: 0, gf: 0, played: 0 };
+// Seed the authoritative real-tournament group standings and third-place
+// qualifiers from ACTUAL_RESULTS (standings.rtfd) when the server/admin hasn't
+// supplied them. Knockout winners are left to the admin bracket / DB sync.
+function seedActualResults() {
+  if (!state.results) return;
+  const hasGroups = state.results.group && Object.keys(state.results.group).length > 0;
+  if (!hasGroups) {
+    state.results.group = JSON.parse(JSON.stringify(ACTUAL_RESULTS.group));
   }
-  for (const m of state.schedule) {
-    if (stageForDate(m.date) !== 'group' || !played(m)) continue;
-    const L = codeToGroup[m.home];
-    if (!L || codeToGroup[m.away] !== L) continue;
-    const th = table[L][m.home], ta = table[L][m.away];
-    if (!th || !ta) continue;
-    th.played++; ta.played++;
-    th.gf += m.homeScore; ta.gf += m.awayScore;
-    th.gd += (m.homeScore - m.awayScore); ta.gd += (m.awayScore - m.homeScore);
-    if (m.homeScore > m.awayScore) th.pts += 3;
-    else if (m.awayScore > m.homeScore) ta.pts += 3;
-    else { th.pts += 1; ta.pts += 1; }
+  if (!state.results.thirdPlace || state.results.thirdPlace.length === 0) {
+    state.results.thirdPlace = [...ACTUAL_RESULTS.thirdPlace];
   }
-  const group = {}, thirdRows = [];
-  for (const [L, byCode] of Object.entries(table)) {
-    const rows = Object.values(byCode);
-    if (!rows.every(r => r.played === 3)) continue;
-    rows.sort((x, y) => y.pts - x.pts || y.gd - x.gd || y.gf - x.gf);
-    group[L] = [rows[0].code, rows[1].code, rows[2].code];
-    thirdRows.push(rows[2]);
-  }
-  // Best 8 of the 12 third-place teams advance.
-  thirdRows.sort((x, y) => y.pts - x.pts || y.gd - x.gd || y.gf - x.gf);
-  const thirdPlace = thirdRows.slice(0, 8).map(r => r.code);
-
-  // Knockout winner sets per round (set-based, like the sync endpoint).
-  const ko = { r32: [], r16: [], qf: [], sf: [], final: [] };
-  for (const m of state.schedule) {
-    const st = stageForDate(m.date);
-    if (!ko[st] || !played(m)) continue;
-    let w = null;
-    if (m.homeScore > m.awayScore) w = m.home;
-    else if (m.awayScore > m.homeScore) w = m.away;
-    else if (m.homePens != null && m.awayPens != null) w = m.homePens > m.awayPens ? m.home : m.away;
-    if (w) ko[st].push(w);
-  }
-  const toObj = arr => { const o = {}; arr.forEach((w, i) => { o[i] = w; }); return o; };
-
-  state.results.group = group;
-  state.results.thirdPlace = thirdPlace;
-  state.results.r32 = toObj(ko.r32);
-  state.results.r16 = toObj(ko.r16);
-  state.results.qf = toObj(ko.qf);
-  state.results.sf = toObj(ko.sf);
-  state.results.final = ko.final.length ? ko.final[0] : null;
 }
 
 /* =====================================================
@@ -1613,9 +1565,9 @@ function load() {
   if (state.results.matchScores && state.results.matchScores.length > 0) {
     applyMatchScoresToSchedule(state.results.matchScores);
   }
-  // Derive standings & knockout winners from the actual scores so the leaderboard
-  // reflects real points from the played results.
-  deriveResultsFromScores();
+  // Seed authoritative group standings & third-place qualifiers from the real
+  // tournament results (admin/DB values take precedence when present).
+  seedActualResults();
 
   refreshLeaderboard();
 }
@@ -1640,9 +1592,9 @@ async function refreshLeaderboard() {
       if (r2.matchScores && Array.isArray(r2.matchScores)) {
         applyMatchScoresToSchedule(r2.matchScores);
       }
-      // Recompute standings & knockout winners from the actual scores so the
-      // leaderboard reflects real points regardless of what the server stored.
-      deriveResultsFromScores();
+      // Fill in authoritative group standings & third-place qualifiers if the
+      // server didn't supply them, so the leaderboard reflects real results.
+      seedActualResults();
       // Re-render schedule if it's currently visible so scores appear immediately
       if (document.querySelector('.panel.active')?.id === 'schedule') renderScheduleList();
     }
@@ -2613,15 +2565,50 @@ async function cycleThirdPlaceResult(code) {
   try { await adminPost('/api/results', { results: state.results }); }
   catch (e) { showToast(e.message); }
 }
+// Actual Round of 32 matchups (real tournament bracket), mirroring the official
+// draw used by the picks bracket (getR32Matchups) but sourced from the real
+// results: group winners/runners-up from state.results.group and the 8 actual
+// third-place qualifiers assigned to their slots (avoiding same-group pairings).
+function getActualR32Matchups() {
+  const get=(L,i)=>(state.results.group[L]||[])[i]||null;
+  // R32 match index (0-based) -> group whose winner faces a 3rd-place team.
+  const thirdSlots=[
+    {idx:0,wg:'E'},{idx:1,wg:'I'},{idx:6,wg:'D'},{idx:7,wg:'G'},
+    {idx:10,wg:'A'},{idx:11,wg:'L'},{idx:14,wg:'B'},{idx:15,wg:'K'},
+  ];
+  const tp=(state.results.thirdPlace||[]).slice();
+  const codeToGroup={};
+  for (const [L,codes] of Object.entries(state.groups)) for (const c of codes) codeToGroup[c]=L;
+  const thirdByIdx={};
+  for (const {idx,wg} of thirdSlots) {
+    if (!tp.length) { thirdByIdx[idx]=null; continue; }
+    let k=tp.findIndex(c=>codeToGroup[c]!==wg);
+    if (k===-1) k=0;
+    thirdByIdx[idx]=tp.splice(k,1)[0];
+  }
+  const T=idx=>thirdByIdx[idx]||null;
+  return [
+    {a:get('E',0),b:T(0)},        // M1  E1 vs 3rd
+    {a:get('I',0),b:T(1)},        // M2  I1 vs 3rd
+    {a:get('A',1),b:get('B',1)},  // M3  A2 vs B2
+    {a:get('F',0),b:get('C',1)},  // M4  F1 vs C2
+    {a:get('K',1),b:get('L',1)},  // M5  K2 vs L2
+    {a:get('H',0),b:get('J',1)},  // M6  H1 vs J2
+    {a:get('D',0),b:T(6)},        // M7  D1 vs 3rd
+    {a:get('G',0),b:T(7)},        // M8  G1 vs 3rd
+    {a:get('C',0),b:get('F',1)},  // M9  C1 vs F2
+    {a:get('E',1),b:get('I',1)},  // M10 E2 vs I2
+    {a:get('A',0),b:T(10)},       // M11 A1 vs 3rd
+    {a:get('L',0),b:T(11)},       // M12 L1 vs 3rd
+    {a:get('J',0),b:get('H',1)},  // M13 J1 vs H2
+    {a:get('D',1),b:get('G',1)},  // M14 D2 vs G2
+    {a:get('B',0),b:T(14)},       // M15 B1 vs 3rd
+    {a:get('K',0),b:T(15)},       // M16 K1 vs 3rd
+  ];
+}
 function renderAdminBracket() {
   const wrap=document.getElementById('adminBracket');
-  const letters=Object.keys(state.groups).sort();
-  const adv=[];
-  for (const L of letters){const p=state.results.group[L];adv.push(p&&p[0]?p[0]:null);}
-  for (const L of letters){const p=state.results.group[L];adv.push(p&&p[1]?p[1]:null);}
-  const rtp=state.results.thirdPlace||[];
-  const slots=[...adv,...Array.from({length:8},(_,i)=>rtp[i]||null)];
-  const r32=[];for(let i=0;i<16;i++)r32.push({a:slots[i*2],b:slots[i*2+1]});
+  const r32=getActualR32Matchups();
   const r32w=r32.map((_,i)=>state.results.r32[i]||null);
   const r16=[];for(let i=0;i<8;i++)r16.push({a:r32w[i*2],b:r32w[i*2+1]});
   const r16w=r16.map((_,i)=>state.results.r16[i]||null);
@@ -2641,12 +2628,14 @@ function renderAdminBracket() {
     html+=`<div class="bracket-round"><div class="round-label">${r.label}</div>`;
     r.matches.forEach((m,idx)=>{
       const winner=r.key==='f'?state.results.final:state.results[r.key]?.[idx];
-      html+=`<div class="match">${adminSlot(m.a,winner,r.key,idx)}${adminSlot(m.b,winner,r.key,idx)}</div>`;
+      const num=r.key==='r32'?`<div style="font-size:0.58rem;font-weight:700;color:rgba(199,185,255,0.4);text-align:center;margin-bottom:2px;letter-spacing:0.05em">M${idx+1}</div>`:'';
+      html+=`<div class="match">${num}${adminSlot(m.a,winner,r.key,idx)}${adminSlot(m.b,winner,r.key,idx)}</div>`;
     });
     html+='</div>';
   }
   wrap.innerHTML=html+'</div></div>';
 }
+
 function adminSlot(code,winnerCode,roundKey,matchIdx) {
   const disabled=!code, picked=code&&winnerCode===code;
   const onclick=disabled?'':`onclick="setResult('${roundKey}',${matchIdx},'${code}')"`;

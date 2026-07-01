@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/home.js": {
-      "includeFiles": "app.html"
+      "includeFiles": "home.html"
     }
   },
   "rewrites": [

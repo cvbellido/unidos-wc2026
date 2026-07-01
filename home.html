@@ -1478,6 +1478,7 @@ function addMockScoresForPastGames() {
     { date:'2026-06-30', home:'CIV', away:'NOR', homeScore:1, awayScore:2 },
     { date:'2026-06-30', home:'FRA', away:'SWE', homeScore:3, awayScore:0 },
     { date:'2026-06-30', home:'MEX', away:'ECU', homeScore:2, awayScore:0 },
+    { date:'2026-07-01', home:'ENG', away:'COD', homeScore:2, awayScore:1 },
   ];
   realScores.forEach(({ date, home, away, homeScore, awayScore, homePens, awayPens }) => {
     let match = state.schedule.find(m => m.date === date && m.home === home && m.away === away);
@@ -1488,6 +1489,81 @@ function addMockScoresForPastGames() {
       if (homePens !== undefined) { match.homePens = homePens; match.awayPens = awayPens; }
     }
   });
+}
+
+// Stage buckets by date, matching api/sync-results.js stageFor().
+function stageForDate(d) {
+  if (!d) return null;
+  if (d <= '2026-06-27') return 'group';
+  if (d <= '2026-07-03') return 'r32';
+  if (d <= '2026-07-07') return 'r16';
+  if (d <= '2026-07-11') return 'qf';
+  if (d <= '2026-07-15') return 'sf';
+  if (d === '2026-07-18') return 'third';
+  return 'final';
+}
+
+// Derive leaderboard results (group standings, best-8 third-place qualifiers,
+// and knockout winner sets) from the actual match scores on the schedule, so the
+// leaderboard reflects real points from the played results. Mirrors the scoring
+// logic in api/sync-results.js but is driven by the scores baked into the app.
+function deriveResultsFromScores() {
+  if (!state.groups || !Array.isArray(state.schedule)) return;
+  const played = m => m.homeScore != null && m.awayScore != null;
+  const codeToGroup = {};
+  for (const [L, codes] of Object.entries(state.groups)) for (const c of codes) codeToGroup[c] = L;
+
+  // Group standings (only for groups whose 3 matches per team are all recorded).
+  const table = {};
+  for (const L of Object.keys(state.groups)) {
+    table[L] = {};
+    for (const c of state.groups[L]) table[L][c] = { code: c, pts: 0, gd: 0, gf: 0, played: 0 };
+  }
+  for (const m of state.schedule) {
+    if (stageForDate(m.date) !== 'group' || !played(m)) continue;
+    const L = codeToGroup[m.home];
+    if (!L || codeToGroup[m.away] !== L) continue;
+    const th = table[L][m.home], ta = table[L][m.away];
+    if (!th || !ta) continue;
+    th.played++; ta.played++;
+    th.gf += m.homeScore; ta.gf += m.awayScore;
+    th.gd += (m.homeScore - m.awayScore); ta.gd += (m.awayScore - m.homeScore);
+    if (m.homeScore > m.awayScore) th.pts += 3;
+    else if (m.awayScore > m.homeScore) ta.pts += 3;
+    else { th.pts += 1; ta.pts += 1; }
+  }
+  const group = {}, thirdRows = [];
+  for (const [L, byCode] of Object.entries(table)) {
+    const rows = Object.values(byCode);
+    if (!rows.every(r => r.played === 3)) continue;
+    rows.sort((x, y) => y.pts - x.pts || y.gd - x.gd || y.gf - x.gf);
+    group[L] = [rows[0].code, rows[1].code, rows[2].code];
+    thirdRows.push(rows[2]);
+  }
+  // Best 8 of the 12 third-place teams advance.
+  thirdRows.sort((x, y) => y.pts - x.pts || y.gd - x.gd || y.gf - x.gf);
+  const thirdPlace = thirdRows.slice(0, 8).map(r => r.code);
+
+  // Knockout winner sets per round (set-based, like the sync endpoint).
+  const ko = { r32: [], r16: [], qf: [], sf: [], final: [] };
+  for (const m of state.schedule) {
+    const st = stageForDate(m.date);
+    if (!ko[st] || !played(m)) continue;
+    let w = null;
+    if (m.homeScore > m.awayScore) w = m.home;
+    else if (m.awayScore > m.homeScore) w = m.away;
+    else if (m.homePens != null && m.awayPens != null) w = m.homePens > m.awayPens ? m.home : m.away;
+    if (w) ko[st].push(w);
+  }
+  const toObj = arr => { const o = {}; arr.forEach((w, i) => { o[i] = w; }); return o; };
+
+  state.results.group = group;
+  state.results.thirdPlace = thirdPlace;
+  state.results.r32 = toObj(ko.r32);
+  state.results.r16 = toObj(ko.r16);
+  state.results.qf = toObj(ko.qf);
+  state.results.sf = toObj(ko.sf);
+  state.results.final = ko.final.length ? ko.final[0] : null;
 }
 
 /* =====================================================
@@ -1537,6 +1613,9 @@ function load() {
   if (state.results.matchScores && state.results.matchScores.length > 0) {
     applyMatchScoresToSchedule(state.results.matchScores);
   }
+  // Derive standings & knockout winners from the actual scores so the leaderboard
+  // reflects real points from the played results.
+  deriveResultsFromScores();
 
   refreshLeaderboard();
 }
@@ -1561,6 +1640,9 @@ async function refreshLeaderboard() {
       if (r2.matchScores && Array.isArray(r2.matchScores)) {
         applyMatchScoresToSchedule(r2.matchScores);
       }
+      // Recompute standings & knockout winners from the actual scores so the
+      // leaderboard reflects real points regardless of what the server stored.
+      deriveResultsFromScores();
       // Re-render schedule if it's currently visible so scores appear immediately
       if (document.querySelector('.panel.active')?.id === 'schedule') renderScheduleList();
     }

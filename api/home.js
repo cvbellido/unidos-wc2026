@@ -7,7 +7,7 @@ import { getSessionUser } from './_db.js';
 let cachedHtml = null;
 function loadHtml() {
   if (cachedHtml) return cachedHtml;
-  const filePath = path.join(process.cwd(), 'app.html');
+  const filePath = path.join(process.cwd(), 'home.html');
   cachedHtml = fs.readFileSync(filePath, 'utf8');
   return cachedHtml;
 }

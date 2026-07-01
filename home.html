@@ -449,7 +449,7 @@
   .date-slider::-webkit-scrollbar-track { background: transparent; }
   .date-slider::-webkit-scrollbar-thumb { background: var(--lavender); border-radius: 2px; }
   .date-chip {
-    flex-shrink: 0;
+    flex: 0 0 calc((100% - 6 * 0.5rem) / 7);
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 8px;
@@ -536,11 +536,17 @@
     border-radius: 10px;
     padding: 0.75rem 1rem;
     display: grid;
-    grid-template-columns: 70px 1fr 90px 1fr 130px;
+    grid-template-columns: 70px 1fr 130px;
     gap: 0.5rem;
     align-items: center;
     margin-bottom: 0.5rem;
     width: 100%;
+  }
+  .match-teams {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
   .match-row .match-time {
     font-size: 0.85rem;
@@ -550,9 +556,9 @@
   }
   .match-row .date-cell { font-size: 0.75rem; color: var(--muted); border-right: 1px solid var(--border); padding-right: 0.75rem; }
   .match-row .date-cell .day { font-weight: 700; color: var(--white); font-size: 0.85rem; }
-  .match-row .home-team, .match-row .away-team { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
-  .match-row .home-team { justify-content: flex-end; }
-  .match-row .away-team { justify-content: flex-start; }
+  .match-row .home-team, .match-row .away-team { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; flex-shrink: 0; }
+  .match-row .home-team { flex-direction: row-reverse; }
+  .match-row .away-team { flex-direction: row; }
   .match-row .score { font-weight: 800; font-size: 1rem; color: var(--lime); text-align: center; min-width: 40px; }
   .match-row .match-score { font-weight: 800; font-size: 1.1rem; color: var(--lime); text-align: center; width: 90px; letter-spacing: 0.05em; }
   .match-row .vs { color: var(--muted); font-size: 0.75rem; text-align: center; width: 90px; }
@@ -570,8 +576,10 @@
     margin-bottom: 3px;
   }
   @media (max-width: 700px) {
-    .match-row { grid-template-columns: 1fr; gap: 0.35rem; }
-    .match-row .date-cell, .match-row .venue { border: none; padding: 0; text-align: left; }
+    .match-row { grid-template-columns: 60px 1fr; gap: 0.35rem; }
+    .match-row .match-venue { grid-column: 1 / 3; border-top: 1px solid var(--border); padding-top: 0.4rem; margin-top: 0.2rem; }
+    .match-row .date-cell { border: none; padding: 0; text-align: left; }
+    .date-chip { flex: 0 0 calc((100% - 2 * 0.5rem) / 3); }
   }
 
   /* ── Section list containers ──────────────────────────────── */
@@ -2281,7 +2289,7 @@ const SCHED_FILTERS=[
 ];
 let scheduleFilter='all';
 let scheduleTeamSearch='';
-let scheduleDateFilter = new Date().toISOString().split('T')[0]; // Default to today
+let scheduleDateFilter = new Intl.DateTimeFormat('en-CA', {timeZone: 'America/New_York'}).format(new Date()); // Default to today in ET
 let scheduleVenueFilter='all';
 
 function renderSchedule() {
@@ -2291,28 +2299,11 @@ function renderSchedule() {
 function renderScheduleControls() {
   const sched=state.schedule||[];
   const uniqueDates=[...new Set(sched.map(m=>m.date))].sort();
-  const uniqueVenues=[...new Set(sched.map(m=>m.venue).filter(Boolean))].sort();
-  const hasSecondary=scheduleTeamSearch||scheduleDateFilter!=='all'||scheduleVenueFilter!=='all';
-  document.getElementById('scheduleFilters').innerHTML=SCHED_FILTERS.map(f=>
-    `<button class="filter-chip ${scheduleFilter===f.id?'active':''}" onclick="setSchedFilter('${f.id}')">${f.label}</button>`
-  ).join('');
+  document.getElementById('scheduleFilters').innerHTML='';
   document.getElementById('scheduleSearch').innerHTML=`
     <input id="schedTeamInput" type="text" class="sched-search-input" placeholder="🔍 Search team…"
       value="${escapeHtml(scheduleTeamSearch)}"
       oninput="scheduleTeamSearch=this.value;renderScheduleList()">
-    <select class="sched-search-select" onchange="setSchedDate(this.value)">
-      <option value="all">📅 All dates</option>
-      ${uniqueDates.map(d=>{
-        const dt=new Date(d+'T12:00:00');
-        const label=dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-        return `<option value="${d}" ${scheduleDateFilter===d?'selected':''}>${label}</option>`;
-      }).join('')}
-    </select>
-    <select class="sched-search-select" onchange="setSchedVenue(this.value)">
-      <option value="all">📍 All locations</option>
-      ${uniqueVenues.map(v=>`<option value="${v}" ${scheduleVenueFilter===v?'selected':''}>${v}</option>`).join('')}
-    </select>
-    ${hasSecondary?`<button class="filter-chip" onclick="resetSchedSearch()" style="border-color:rgba(255,120,130,0.4);color:rgba(255,160,170,0.9)">✕ Clear</button>`:''}
   `;
 }
 function renderScheduleList() {
@@ -2377,18 +2368,12 @@ function renderScheduleList() {
 
   // Get all unique dates from full schedule for slider (not just filtered)
   const allDates = [...new Set(sched.map(m => m.date))].sort((a,b) => a.localeCompare(b)); // CHRONOLOGICAL
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Intl.DateTimeFormat('en-CA', {timeZone: 'America/New_York'}).format(new Date());
 
-  // Build date slider with "All Dates" option
+  // Build date slider — 7-day rolling window centered on today
   const dateSlider = `
     <div class="date-slider-wrapper">
       <div class="date-slider" id="dateSlider">
-        <button class="date-chip ${scheduleDateFilter==='all'?'active':''}"
-                onclick="scheduleDateFilter='all';renderScheduleList()">
-          <div class="date-chip-day">All</div>
-          <div class="date-chip-date">Dates</div>
-          <div class="date-chip-count">${sched.length} games</div>
-        </button>
         ${allDates.map(date => {
           const d = new Date(date+'T12:00:00');
           const isToday = date === today;
@@ -2410,10 +2395,10 @@ function renderScheduleList() {
     </div>
   `;
 
-  // Get dates to display (will be just one if filtered, or all if 'all')
-  const datesToShow = scheduleDateFilter === 'all'
-    ? Object.keys(byDate).sort((a,b) => a.localeCompare(b)) // Chronological
-    : [scheduleDateFilter].filter(d => byDate[d]); // Only show if has games
+  // Get dates to display (only the selected date)
+  const datesToShow = scheduleDateFilter && scheduleDateFilter !== 'all'
+    ? [scheduleDateFilter].filter(d => byDate[d])
+    : Object.keys(byDate).sort((a,b) => a.localeCompare(b));
 
   // Build match list grouped by date
   const matchList = datesToShow.map(date => {
@@ -2443,9 +2428,11 @@ function renderScheduleList() {
             const rowClass = hasResult ? 'match-row match-finished' : 'match-row';
             return `<div class="${rowClass}">
               <div class="match-time">${m.time}</div>
-              <div class="home-team">${teamTag(m.home)}</div>
-              ${scoreDisplay}
-              <div class="away-team">${teamTag(m.away)}</div>
+              <div class="match-teams">
+                <div class="home-team">${teamTag(m.home)}</div>
+                ${scoreDisplay}
+                <div class="away-team">${teamTag(m.away)}</div>
+              </div>
               <div class="match-venue"><div class="stage-tag">${m.stage}</div>${m.venue}</div>
             </div>`;
           }).join('')}

@@ -1265,8 +1265,8 @@ const ACTUAL_R32 = [
   { a:'FRA', b:'SWE', w:'FRA' },   // France 3-0 Sweden
   { a:'POR', b:'CRO', w:null  },   // Scheduled
   { a:'ESP', b:'AUT', w:null  },   // Scheduled
-  { a:'USA', b:'BIH', w:null  },   // Scheduled
-  { a:'BEL', b:'SCO', w:null  },   // In progress (HT Belgium 0-1 Scotland)
+  { a:'USA', b:'BIH', w:'USA' },   // USA 2-0 Bosnia & Herzegovina
+  { a:'BEL', b:'SCO', w:'BEL' },   // Belgium 3-2 Scotland
   { a:'BRA', b:'JPN', w:'BRA' },   // Brazil 2-1 Japan
   { a:'NOR', b:'CIV', w:'NOR' },   // Norway 2-1 Ivory Coast
   { a:'MEX', b:'ECU', w:'MEX' },   // Mexico 2-0 Ecuador
@@ -1384,7 +1384,7 @@ function buildSchedule(/* groups */) {
     ['2026-06-30','MEX','ECU','MEX','9:00 PM ET'],
     // July 1
     ['2026-07-01','ENG','COD','NY','12:00 PM ET'],
-    ['2026-07-01','BEL','SEN','SEA','4:00 PM ET'],
+    ['2026-07-01','BEL','SCO','SEA','4:00 PM ET'],
     ['2026-07-01','USA','BIH','PHI','8:00 PM ET'],
     // July 2
     ['2026-07-02','ESP','AUT','MIA','12:00 PM ET'],
@@ -1517,6 +1517,8 @@ function addMockScoresForPastGames() {
     { date:'2026-06-30', home:'FRA', away:'SWE', homeScore:3, awayScore:0 },
     { date:'2026-06-30', home:'MEX', away:'ECU', homeScore:2, awayScore:0 },
     { date:'2026-07-01', home:'ENG', away:'COD', homeScore:2, awayScore:1 },
+    { date:'2026-07-01', home:'BEL', away:'SCO', homeScore:3, awayScore:2 },
+    { date:'2026-07-01', home:'USA', away:'BIH', homeScore:2, awayScore:0 },
   ];
   realScores.forEach(({ date, home, away, homeScore, awayScore, homePens, awayPens }) => {
     let match = state.schedule.find(m => m.date === date && m.home === home && m.away === away);
